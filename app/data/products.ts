@@ -7,10 +7,11 @@ export const products: Product[] = [
     price: 97.49,
     originalPrice: 129.99,
     discount: 25,
-    image: '/auradroplet-hero.jpg',
+    image: '/DiffProductShot.png',
     category: 'Diffusers',
     badge: 'bestseller',
-    description: 'Timeless design meets aromatherapy. The Stone Diffuser features a sleek ceramic finish and ultrasonic technology for whisper-quiet misting.'
+    description: 'Timeless design meets aromatherapy. The Stone Diffuser features a sleek ceramic finish and ultrasonic technology for whisper-quiet misting.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_1'
   },
   {
     id: 'cloud-humidifier',
@@ -18,28 +19,31 @@ export const products: Product[] = [
     price: 208.99,
     originalPrice: 244.99,
     discount: 15,
-    image: '/auradroplet-hero.jpg',
+    image: '/DiffProductShot.png',
     category: 'Humidifiers',
     badge: 'bestseller',
-    description: 'Transform your space with the Cloud Humidifier. Dual functionality combines essential oil diffusion with powerful humidification for ultimate comfort.'
+    description: 'Transform your space with the Cloud Humidifier. Dual functionality combines essential oil diffusion with powerful humidification for ultimate comfort.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_2'
   },
   {
     id: 'air-cordless-diffuser',
     name: 'Air Cordless Diffuser',
     price: 164.99,
-    image: '/auradroplet-hero.jpg',
+    image: '/DiffProductShot.png',
     category: 'Diffusers',
     badge: 'new',
-    description: 'Freedom redefined. The Air Cordless Diffuser offers portable aromatherapy with up to 8 hours of battery life and USB-C charging.'
+    description: 'Freedom redefined. The Air Cordless Diffuser offers portable aromatherapy with up to 8 hours of battery life and USB-C charging.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_3'
   },
   {
     id: 'air-waterless-diffuser',
     name: 'Air Waterless Diffuser',
     price: 149.99,
-    image: '/auradroplet-hero.jpg',
+    image: '/DiffProductShot.png',
     category: 'Diffusers',
     badge: 'bestseller',
-    description: 'Pure essential oils, no water needed. Our waterless nebulizing technology delivers the most potent aromatherapy experience.'
+    description: 'Pure essential oils, no water needed. Our waterless nebulizing technology delivers the most potent aromatherapy experience.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_4'
   },
   {
     id: 'rose-petal-oil',
@@ -47,7 +51,8 @@ export const products: Product[] = [
     price: 24.99,
     image: '/RoseProduct.jpg',
     category: 'Essential Oils',
-    description: 'Luxurious rose essence with geranium and musk notes. 15ml of pure botanical bliss.'
+    description: 'Luxurious rose essence with geranium and musk notes. 15ml of pure botanical bliss.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_5'
   },
   {
     id: 'lavender-oil',
@@ -56,7 +61,8 @@ export const products: Product[] = [
     image: '/Lavender.jpg',
     category: 'Essential Oils',
     badge: 'bestseller',
-    description: 'Calming lavender with bergamot and chamomile. Perfect for relaxation and restful sleep. 15ml.'
+    description: 'Calming lavender with bergamot and chamomile. Perfect for relaxation and restful sleep. 15ml.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_6'
   },
   {
     id: 'jasmine-oil',
@@ -64,7 +70,8 @@ export const products: Product[] = [
     price: 26.99,
     image: '/Jasmine.jpg',
     category: 'Essential Oils',
-    description: 'Exotic white florals with bright citrus peel. Intoxicating and uplifting. 15ml.'
+    description: 'Exotic white florals with bright citrus peel. Intoxicating and uplifting. 15ml.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_7'
   },
   {
     id: 'mint-oil',
@@ -72,7 +79,8 @@ export const products: Product[] = [
     price: 21.99,
     image: '/Mint.jpg',
     category: 'Essential Oils',
-    description: 'Crisp peppermint with basil and green tea. Refreshing and invigorating. 15ml.'
+    description: 'Crisp peppermint with basil and green tea. Refreshing and invigorating. 15ml.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_8'
   },
   {
     id: 'vanilla-oil',
@@ -81,7 +89,8 @@ export const products: Product[] = [
     image: '/vanilla.jpg',
     category: 'Essential Oils',
     badge: 'new',
-    description: 'Rich vanilla bean with warm amber and sandalwood. Comforting and grounding. 15ml.'
+    description: 'Rich vanilla bean with warm amber and sandalwood. Comforting and grounding. 15ml.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_9'
   },
   {
     id: 'ocean-mist-oil',
@@ -89,6 +98,7 @@ export const products: Product[] = [
     price: 23.99,
     image: '/Ocean.jpg',
     category: 'Essential Oils',
-    description: 'Coastal breeze captured in a bottle. Sea salt, driftwood, and marine notes. 15ml.'
+    description: 'Coastal breeze captured in a bottle. Sea salt, driftwood, and marine notes. 15ml.',
+    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_10'
   },
 ];

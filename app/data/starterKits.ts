@@ -17,7 +17,7 @@ export const starterKits: StarterKit[] = [
     price: "$98",
     originalPrice: "$115",
     savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     badge: "BEST SELLER"
   },
   {
@@ -27,7 +27,7 @@ export const starterKits: StarterKit[] = [
     price: "$98",
     originalPrice: "$115",
     savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     badge: "NEW"
   },
   {
@@ -37,7 +37,7 @@ export const starterKits: StarterKit[] = [
     price: "$98",
     originalPrice: "$115",
     savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     badge: "POPULAR"
   },
   {
@@ -47,7 +47,7 @@ export const starterKits: StarterKit[] = [
     price: "$98",
     originalPrice: "$115",
     savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     badge: ""
   }
 ];

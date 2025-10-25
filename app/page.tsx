@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
 const baseCheckoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(variantId)}`;
@@ -14,38 +14,95 @@ const brands = [
     name: "Heritage Florals",
     description: "Timeless botanical essences",
     color: "#C4A27F",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Rose • Jasmine • Tuberose",
+    spaces: "Living room, dressing table",
+    pair: "Rose Petal",
+    handle: "heritage"
   },
   {
     name: "Modern Woods",
     description: "Contemporary forest notes",
     color: "#6B8E7F",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Cedar • Sandalwood • Pine",
+    spaces: "Library, study",
+    pair: "Mint Leaf",
+    handle: "modern"
   },
   {
     name: "Citrus Luxe",
     description: "Bright Mediterranean spirits",
     color: "#E8B85D",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Bergamot • Neroli • Verbena",
+    spaces: "Kitchen, entry",
+    pair: "Lavender Veil",
+    handle: "citrus"
   },
   {
     name: "Ocean Mist",
     description: "Coastal serenity captured",
     color: "#7BA3B0",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Marine • Driftwood • Salt",
+    spaces: "Bath, bedroom",
+    pair: "Ocean Mist",
+    handle: "ocean"
   },
   {
     name: "Spice & Earth",
     description: "Warm exotic undertones",
     color: "#A67B5B",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Cardamom • Amber • Vetiver",
+    spaces: "Dining, lounge",
+    pair: "Vanilla Ember",
+    handle: "spice"
   },
   {
     name: "Zen Garden",
     description: "Pure meditative calm",
     color: "#9CAF88",
-    image: "/auradroplet-hero.jpg"
+    image: "/DiffProductShot.png",
+    notes: "Green tea • Bamboo • Rain",
+    spaces: "Yoga nook, bedside",
+    pair: "Lavender Veil",
+    handle: "zen"
   },
+];
+
+const quizQuestions = [
+  {
+    id: 'mood',
+    title: 'What mood are you setting?',
+    options: [
+      { label: 'Blooming & romantic', value: 'heritage', helper: 'Think fresh florals and candlelit dinners.' },
+      { label: 'Modern & grounded', value: 'modern', helper: 'Structured woods for studies and libraries.' },
+      { label: 'Sunlit & bright', value: 'citrus', helper: 'Spark citrus oils for kitchens and entries.' },
+      { label: 'Coastal & airy', value: 'ocean', helper: 'Mineral sea notes for open windows.' }
+    ]
+  },
+  {
+    id: 'space',
+    title: 'Where will it live?',
+    options: [
+      { label: 'Bedroom / bath retreat', value: 'zen', helper: 'Soft greens and tea leaves calm evenings.' },
+      { label: 'Dining or lounge', value: 'spice', helper: 'Cardamom and amber elevate gatherings.' },
+      { label: 'Creative studio', value: 'modern', helper: 'Sharp woods keep focus steady.' },
+      { label: 'Living room centerpiece', value: 'heritage', helper: 'Classic florals fill larger spaces.' }
+    ]
+  },
+  {
+    id: 'energy',
+    title: 'Pick an energy level',
+    options: [
+      { label: 'Slow mornings', value: 'zen', helper: 'Meditative, quiet diffusion.' },
+      { label: 'Entertaining at night', value: 'spice', helper: 'Warm, sensual layers.' },
+      { label: 'Everyday uplift', value: 'citrus', helper: 'Bright, approachable notes.' },
+      { label: 'Seasonal shift', value: 'ocean', helper: 'Freshened air and salted breeze.' }
+    ]
+  }
 ];
 
 const reviewEntries = [
@@ -221,7 +278,23 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
+  const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
+  const quizComplete = quizQuestions.every((question) => quizResponses[question.id]);
+  const recommendedHandle = useMemo(() => {
+    const scores: Record<string, number> = {};
+    Object.values(quizResponses).forEach((value) => {
+      scores[value] = (scores[value] || 0) + 1;
+    });
+    const [topHandle] = Object.entries(scores).sort((a, b) => b[1] - a[1])[0] ?? [];
+    return topHandle ?? 'heritage';
+  }, [quizResponses]);
+  const recommendedBrand = brands.find((brand) => brand.handle === recommendedHandle) ?? brands[0];
+  const answeredCount = Object.values(quizResponses).filter(Boolean).length;
+
+  const handleQuizSelect = (questionId: string, value: string) => {
+    setQuizResponses((prev) => ({ ...prev, [questionId]: value }));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -716,41 +789,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Brand Showcase */}
+      {/* Brand Quiz */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">Explore Brands</h2>
-            <p className="text-lg text-[#6B6762] font-light">Each with its own palette, philosophy, and presence</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-3">Two-minute quiz</p>
+            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">We&apos;ll match you to a palette</h2>
+            <p className="text-lg text-[#6B6762] font-light">Answer three quick prompts to see the brand that fits your space.</p>
+            <p className="text-sm text-[#9B9792] mt-3">{answeredCount}/{quizQuestions.length} answered</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {brands.map((brand, index) => (
-              <div
-                key={index}
-                className="group cursor-pointer relative overflow-hidden rounded-lg aspect-square"
-                style={{
-                  animationDelay: `${index * 0.1}s`
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/40" style={{ backgroundColor: `${brand.color}20` }} />
-                <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                  <div className="transform group-hover:-translate-y-2 transition-transform duration-300">
-                    <h3 className="text-2xl font-medium mb-2 text-[#3A3834]">{brand.name}</h3>
-                    <p className="text-sm text-[#6B6762] font-light mb-4">{brand.description}</p>
-                    <div className="inline-flex items-center gap-2 text-sm font-medium" style={{ color: brand.color }}>
-                      Discover
-                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
+          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
+            <div className="space-y-6">
+              {quizQuestions.map((question, questionIndex) => (
+                <div key={question.id} className="bg-[#F8F3ED] border border-[#E8E2D8] rounded-3xl p-6">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-2">Step {questionIndex + 1}</p>
+                  <h3 className="text-2xl font-light text-[#2F2B26] mb-4">{question.title}</h3>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {question.options.map((option) => {
+                      const isSelected = quizResponses[question.id] === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleQuizSelect(question.id, option.value)}
+                          className={`text-left border rounded-2xl px-4 py-3 transition-all ${
+                            isSelected ? 'border-[#3A3834] bg-white shadow-lg' : 'border-transparent bg-white/60'
+                          }`}
+                        >
+                          <p className="font-medium text-[#2F2B26]">{option.label}</p>
+                          <p className="text-sm text-[#6B6762]">{option.helper}</p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute inset-0" style={{ backgroundColor: brand.color, opacity: 0.1 }} />
+              ))}
+            </div>
+
+            <div className="bg-[#1F1914] text-white rounded-3xl p-8 flex flex-col justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Recommendation</p>
+                <h3 className="text-4xl font-light mb-2">{recommendedBrand.name}</h3>
+                <p className="text-sm text-white/70 mb-6">{recommendedBrand.description}</p>
+                <div className="space-y-4 text-sm text-white/80">
+                  <div>
+                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Notes</p>
+                    <p>{recommendedBrand.notes}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Best for</p>
+                    <p>{recommendedBrand.spaces}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Pairs with</p>
+                    <p>{recommendedBrand.pair}</p>
+                  </div>
                 </div>
               </div>
-            ))}
+              <div className="mt-8 flex flex-col gap-3">
+                <Link
+                  href="/starter-kits"
+                  className={`w-full text-center py-3 rounded-full uppercase tracking-[0.3em] text-xs ${quizComplete ? 'bg-white text-[#1F1914]' : 'bg-white/20 text-white/60 pointer-events-none'}`}
+                >
+                  {quizComplete ? 'Shop this palette' : 'Answer all steps'}
+                </Link>
+                <a href="#conversion-shop" className="text-center text-sm text-white/70 underline underline-offset-4">
+                  Browse all collections
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

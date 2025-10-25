@@ -8,7 +8,7 @@ const scents = [
     id: "rose-petal",
     name: "Rose Petal",
     notes: "Rose · Geranium · Musk",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.8,
     reviews: 243,
     description: "Timeless florals with warm undertones"
@@ -17,7 +17,7 @@ const scents = [
     id: "lavender",
     name: "Lavender",
     notes: "Lavender · Bergamot · Chamomile",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.8,
     reviews: 312,
     description: "Calming fields with citrus lift"
@@ -26,7 +26,7 @@ const scents = [
     id: "jasmine",
     name: "Jasmine",
     notes: "White Florals · Citrus Peel",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.8,
     reviews: 189,
     description: "Intoxicating blooms, bright finish"
@@ -35,7 +35,7 @@ const scents = [
     id: "mint-leaf",
     name: "Mint Leaf",
     notes: "Peppermint · Basil · Green Tea",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.3,
     reviews: 156,
     description: "Crisp herbal awakening"
@@ -44,7 +44,7 @@ const scents = [
     id: "sandalwood",
     name: "Sandalwood",
     notes: "Amber · Cedar · Vanilla",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.8,
     reviews: 287,
     description: "Warm woods with creamy depth"
@@ -53,7 +53,7 @@ const scents = [
     id: "ocean-mist",
     name: "Ocean Mist",
     notes: "Sea Salt · Driftwood · Marine",
-    image: "/auradroplet-hero.jpg",
+    image: "/DiffProductShot.png",
     rating: 5.6,
     reviews: 201,
     description: "Coastal breeze captured"
