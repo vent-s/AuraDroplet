@@ -253,7 +253,7 @@ export default function FreeScentPage() {
           {/* Social Proof */}
           <div className="mt-16 text-center">
             <p className="text-sm text-[#6B6762] font-light italic">
-              "Best diffuser set I've owned." — Maya L.
+              &ldquo;Best diffuser set I&apos;ve owned.&rdquo; — Maya L.
             </p>
             <div className="flex justify-center gap-1 text-[#C4A27F] mt-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -292,7 +292,7 @@ export default function FreeScentPage() {
           <div className="bg-white max-w-md w-full p-8 rounded-sm" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-2xl font-light mb-4 text-[#3A3834]">Add a diffuser to claim this Free Scent</h3>
             <p className="text-sm text-[#6B6762] mb-8 font-light leading-relaxed">
-              Choose any Aura Diffuser and we'll include your selected scent at no charge.
+              Choose any Aura Diffuser and we&apos;ll include your selected scent at no charge.
             </p>
             <div className="flex flex-col gap-3">
               <button

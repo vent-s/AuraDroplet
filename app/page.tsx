@@ -1,10 +1,12 @@
 'use client';
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
-const checkoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(variantId)}&qty=1`;
+const baseCheckoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(variantId)}`;
+const quickCheckoutUrl = (quantity = 1) => `${baseCheckoutUrl}&qty=${quantity}`;
 const needsVariantUpdate = variantId.includes("REPLACE_ME");
 
 const brands = [
@@ -46,47 +48,107 @@ const brands = [
   },
 ];
 
-const starterKits = [
+const reviewEntries = [
   {
-    name: "The Essential Ritual",
-    brand: "Heritage Florals",
-    essences: "Lavender Dreams • Rose Garden • Jasmine Night",
-    price: "$98",
-    originalPrice: "$115",
-    savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
-    badge: "BEST SELLER"
+    name: "Lena A.",
+    location: "Hudson Valley, NY",
+    scent: "Rose Petal",
+    title: "Like a florist just left",
+    body: "The complimentary vial felt curated, not like a throwaway sample. Soft rose, zero powder."
   },
   {
-    name: "Modern Sanctuary",
-    brand: "Modern Woods",
-    essences: "Cedar Calm • Sandalwood Serenity • Pine Forest",
-    price: "$98",
-    originalPrice: "$115",
-    savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
-    badge: "NEW"
+    name: "Priya M.",
+    location: "San Francisco, CA",
+    scent: "Lavender Veil",
+    title: "Spa-level calm",
+    body: "Diffuser running nightly. Lavender Veil is herbaceous with a citrus lift—no synthetic edge."
   },
   {
-    name: "Coastal Escape",
-    brand: "Ocean Mist",
-    essences: "Sea Breeze • Marine Notes • Driftwood",
-    price: "$98",
-    originalPrice: "$115",
-    savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
-    badge: "POPULAR"
+    name: "Noah G.",
+    location: "Austin, TX",
+    scent: "Mint Leaf",
+    title: "Crisp and clean",
+    body: "Mint Leaf reads modern apothecary. Guests ask what hotel we stayed at—cred earned."
   },
   {
-    name: "Citrus Awakening",
-    brand: "Citrus Luxe",
-    essences: "Bergamot • Lemon Verbena • Orange Blossom",
-    price: "$98",
-    originalPrice: "$115",
-    savings: "Save 15%",
-    image: "/auradroplet-hero.jpg",
-    badge: ""
+    name: "Harper V.",
+    location: "Chicago, IL",
+    scent: "Vanilla Ember",
+    title: "Warm, not sugary",
+    body: "Vanilla Ember layers beautifully with incense cones. Complimentary vial convinced me to subscribe."
   },
+  {
+    name: "Mila R.",
+    location: "Brooklyn, NY",
+    scent: "Ocean Mist",
+    title: "Glasshouse on the coast",
+    body: "Ocean Mist keeps our loft air light. Notes are saline and mineral, never perfumey."
+  },
+  {
+    name: "Theo K.",
+    location: "Portland, OR",
+    scent: "Jasmine No. 02",
+    title: "Evening ritual upgraded",
+    body: "Started with Jasmine No. 02. Complex, luminous, and somehow smoky. Free vial? Unreal."
+  },
+  {
+    name: "Marin D.",
+    location: "Savannah, GA",
+    scent: "Lavender Veil",
+    title: "Verified diffuser owner",
+    body: "Shipping was fast. Lavender Veil calms the whole house. Already eyeing Rose Petal next."
+  },
+  {
+    name: "Callum P.",
+    location: "Seattle, WA",
+    scent: "Mint Leaf",
+    title: "Fresh office air",
+    body: "Mint Leaf clears stale air in my studio. Complimentary vial came with authenticity card."
+  },
+  {
+    name: "Isla F.",
+    location: "Los Angeles, CA",
+    scent: "Ocean Mist",
+    title: "Scent concierge is real",
+    body: "They followed up to see if Ocean Mist resonated. Swaps honored within a week."
+  },
+  {
+    name: "Julien C.",
+    location: "Boston, MA",
+    scent: "Rose Petal",
+    title: "Magazine-worthy",
+    body: "Between the amber glass bottle and the aroma, the free vial sold me on the full ritual set."
+  }
+];
+
+const ritualShop = [
+  {
+    name: "Aura Diffuser",
+    subtitle: "Matte Sandstone",
+    price: "$189",
+    value: "Ships with free scent",
+    image: "/auradroplet-hero.jpg",
+    badge: "Ready to ship",
+    qty: 1
+  },
+  {
+    name: "Starter Pairing",
+    subtitle: "Diffuser + 2 additional vials",
+    price: "$229",
+    value: "Save $27 as a bundle",
+    image: "/bedshot.jpg",
+    badge: "Most selected",
+    qty: 1
+  },
+  {
+    name: "Seasonal Reserve",
+    subtitle: "Diffuser + 4 essences",
+    price: "$289",
+    value: "Includes concierge swap",
+    image: "/AutumnOffer.jpg",
+    badge: "Limited October run",
+    qty: 1
+  }
 ];
 
 type FreeScentOption = {
@@ -185,7 +247,7 @@ export default function Home() {
             <div className="hidden lg:flex items-center space-x-1">
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Diffusers</a>
               <span className="text-[#C4C0BA]">·</span>
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Starter Kits</a>
+              <a href="/starter-kits" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Starter Kits</a>
               <span className="text-[#C4C0BA]">·</span>
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Brands</a>
               <span className="text-[#C4C0BA]">·</span>
@@ -264,12 +326,24 @@ export default function Home() {
               Transform your space into a sanctuary. Choose your finish, discover your brand, curate your ritual.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-              <button className="luxury-btn-primary px-10 py-4 bg-white text-[#3A3834] hover:bg-[#F5F3F0] transition-all duration-300 font-medium tracking-wide">
+              <a
+                href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
+                className={`luxury-btn-primary px-10 py-4 text-center bg-white text-[#3A3834] transition-all duration-300 font-medium tracking-wide ${needsVariantUpdate ? 'opacity-60 pointer-events-none' : 'hover:bg-[#F5F3F0]'}`}
+              >
                 Build Your Ritual
-              </button>
-              <button className="luxury-btn-secondary px-10 py-4 bg-transparent text-white border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300 font-medium tracking-wide">
+              </a>
+              <a
+                href="#conversion-shop"
+                className="luxury-btn-secondary px-10 py-4 text-center bg-transparent text-white border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300 font-medium tracking-wide"
+              >
                 Shop Diffuser
-              </button>
+              </a>
+            </div>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-4 text-[11px] uppercase tracking-[0.35em] text-white/70">
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white" /> Ships in 48h</span>
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white/70" /> Shop Pay + Apple Pay</span>
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white/50" /> 14-day scent swap</span>
             </div>
 
             {/* Trust bar */}
@@ -446,6 +520,151 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Client Reviews */}
+      <section className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0">
+          <div className="mb-12 text-center">
+            <p className="text-xs uppercase tracking-[0.35em] text-[#B77950] mb-3">Verified Ritualists</p>
+            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">What our autumn clientele is saying</h2>
+            <p className="text-sm text-[#6B6762] mt-4">
+              4.9 average across 1,200+ Aura diffuser owners. Exchanges honored within 14 days.
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-y-6 left-10 right-10 border border-[#E2D5C4]/80 rounded-[32px] pointer-events-none" />
+            <div className="relative overflow-x-auto pb-6 pl-4 snap-x snap-mandatory flex gap-6">
+              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F9F4ED] to-transparent" />
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F9F4ED] to-transparent" />
+              {reviewEntries.map((review, index) => (
+                <article
+                  key={`${review.name}-${index}`}
+                  className="relative shrink-0 w-[320px] h-[360px] bg-white/95 border border-[#E9DFD2] rounded-[28px] p-6 shadow-[0_25px_60px_rgba(42,37,32,0.08)] snap-center flex flex-col justify-between"
+                  style={{ transform: `translateX(-${index * 40}px)` }}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4 gap-3">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[#8B7355]">Aura Diffuser Owner</p>
+                        <p className="text-lg text-[#2F2B26] font-light">{review.name} · {review.location}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#2F2B26]">
+                        <div className="flex text-[#C47A3B]">
+                          {Array.from({ length: 5 }).map((_, starIndex) => (
+                            <svg key={starIndex} className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-[#5A544E]">5.0</span>
+                      </div>
+                    </div>
+                    <div className="mb-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#7B776F]">
+                      <span>Complimentary scent</span>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#D28755' }} />
+                      <span>{review.scent}</span>
+                    </div>
+                    <h3 className="text-xl font-light text-[#2F2B26] mb-3 leading-tight">{review.title}</h3>
+                    <p className="text-sm text-[#4C4842] leading-relaxed">{review.body}</p>
+                  </div>
+                  <div className="text-[11px] uppercase tracking-[0.35em] text-[#A59E95]">
+                    Verified purchase · {index + 1}/10
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Conversion Shop Strip */}
+      <section className="py-24 bg-[#201C18] text-white border-t border-[#362F27]">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Secure your ritual</p>
+              <h2 className="text-4xl lg:text-5xl font-light leading-tight">High-converting sets, ready for checkout</h2>
+              <p className="text-base text-white/70 mt-4 max-w-2xl">
+                Every option below includes the complimentary autumn scent plus 2-day processing, 14-day scent exchanges, and our concierge follow-up. Tap to lock your choice and jump straight to checkout.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70">
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#ED9F72]" />Ships in 24h</span>
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#D28755]" />Free exchanges</span>
+              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#B07454]" />Pay in 4</span>
+            </div>
+          </div>
+
+          <div id="conversion-shop" className="grid md:grid-cols-3 gap-6">
+            {ritualShop.map((item, index) => (
+              <article
+                key={item.name}
+                className="group relative bg-[#281F1A] border border-white/10 rounded-[28px] overflow-hidden flex flex-col"
+              >
+                <div className="relative">
+                  <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={800}
+                    height={600}
+                    className="h-64 w-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">
+                    {item.badge}
+                  </span>
+                </div>
+                <div className="flex-1 p-6 flex flex-col">
+                  <div className="mb-6">
+                    <p className="text-xs uppercase tracking-[0.35em] text-white/60">{index === 0 ? 'Diffuser' : 'Bundle'}</p>
+                    <h3 className="text-2xl font-light mt-3">{item.name}</h3>
+                    <p className="text-sm text-white/70 mt-1">{item.subtitle}</p>
+                  </div>
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-3xl font-light">{item.price}</p>
+                        <p className="text-xs uppercase tracking-[0.3em] text-[#ED9F72]">{item.value}</p>
+                      </div>
+                      <div className="text-right text-xs text-white/60">
+                        <p>Complimentary scent</p>
+                        <p>2-year warranty</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <a
+                        href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(item.qty ?? 1)}
+                        className={`flex-1 py-3 rounded-full text-center font-medium tracking-wide ${needsVariantUpdate ? 'bg-white/40 text-[#201C18]/60 pointer-events-none' : 'bg-white text-[#201C18] hover:bg-[#F7E9DE] transition-colors'}`}
+                      >
+                        Quick add
+                      </a>
+                      <button className="px-6 py-3 rounded-full border border-white/30 text-white text-sm tracking-wide hover:bg-white/10">
+                        Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-12 flex flex-col lg:flex-row items-center gap-4 text-sm text-white/70">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Secure checkout via Shop Pay, Apple Pay, and major cards.
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Concierge texts you within 24 hours to confirm your complimentary scent.
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-24 bg-[#FAF9F7]">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
@@ -536,71 +755,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Starter Kits Carousel */}
+      {/* Starter Kits Teaser */}
       <section className="py-24 bg-[#FAF9F7]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">Best-Selling Starter Kits</h2>
-            <p className="text-lg text-[#6B6762] font-light">Complete rituals, curated for you. Save 15% as a kit.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {starterKits.map((kit, index) => (
-              <div
-                key={index}
-                className="group cursor-pointer bg-white rounded-lg overflow-hidden hover:shadow-2xl transition-all duration-500"
-                style={{
-                  transform: `translateY(${scrollY * 0.02 * (index % 2 === 0 ? 1 : -1)}px)`
-                }}
-              >
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden">
-                  <Image
-                    src={kit.image}
-                    alt={kit.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  {kit.badge && (
-                    <div className="absolute top-4 right-4 bg-[#8B7355] text-white text-xs font-medium px-3 py-1 rounded-full">
-                      {kit.badge}
-                    </div>
-                  )}
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#3A3834] text-xs font-medium px-3 py-1.5 rounded-full">
-                    {kit.savings}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <p className="text-xs tracking-wider text-[#8B7355] mb-2 uppercase font-medium">{kit.brand}</p>
-                  <h3 className="text-xl font-medium mb-3 text-[#3A3834] group-hover:text-[#8B7355] transition-colors">{kit.name}</h3>
-                  <p className="text-sm text-[#6B6762] mb-4 leading-relaxed font-light">{kit.essences}</p>
-
-                  {/* Pricing */}
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-2xl font-medium text-[#3A3834]">{kit.price}</span>
-                    <span className="text-sm text-[#9B9792] line-through">{kit.originalPrice}</span>
-                  </div>
-
-                  {/* CTA */}
-                  <button className="w-full py-3 bg-[#3A3834] text-white font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300 group-hover:shadow-lg">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* View All CTA */}
-          <div className="text-center mt-12">
-            <button className="inline-flex items-center gap-2 px-8 py-4 border-2 border-[#3A3834] text-[#3A3834] hover:bg-[#3A3834] hover:text-white font-medium tracking-wide transition-all duration-300">
-              View All Starter Kits
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </div>
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
+          <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-4">Starter Kits</p>
+          <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">Complete rituals, curated for you</h2>
+          <p className="text-lg text-[#6B6762] font-light mb-8">Save 15% when you bundle the diffuser with your first trio of essences.</p>
+          <Link
+            href="/starter-kits"
+            className="inline-flex items-center gap-2 px-10 py-4 border-2 border-[#3A3834] text-[#3A3834] hover:bg-[#3A3834] hover:text-white font-medium tracking-wide transition-all duration-300"
+          >
+            Explore starter kits
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
         </div>
       </section>
 
@@ -660,6 +829,22 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Sticky mobile checkout CTA */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
+        <div className="mx-4 mb-4 rounded-2xl border border-black/10 bg-white/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.2)] px-4 py-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-[#2F2B26]">Claim diffuser + free scent</p>
+            <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
+          </div>
+          <a
+            href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
+            className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
+          >
+            Checkout
+          </a>
+        </div>
+      </div>
     </main>
   );
 }

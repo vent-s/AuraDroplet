@@ -34,12 +34,36 @@ Note your store domain: your-shop.myshopify.com.
 
 3) Environment variables
 
-Create a .env in your web server (Vercel/Netlify/etc.):
+Drop the provided `.env.example` into `.env.local` and fill in real values (or set them directly in Vercel / your host):
 
+```
 SHOPIFY_STORE_DOMAIN=your-shop.myshopify.com
 SHOPIFY_STOREFRONT_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SHOPIFY_ADMIN_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxx      # only if you use Admin API
 SHOPIFY_WEBHOOK_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxx    # “Webhook signing secret”
+NEXT_PUBLIC_SHOPIFY_VARIANT_ID=gid://shopify/ProductVariant/1234567890
+```
+
+These are mirrored in `env.d.ts`, so TypeScript will yell if you forget one.
+
+### Deploying to Vercel
+
+1. Install the CLI and link the project: `npm i -g vercel && vercel link`.
+2. Push your repo to GitHub (already done) and import it in the Vercel dashboard – framework will auto-detect as Next.js.
+3. Add the environment variables above for each environment (`Production`, `Preview`, `Development`). CLI shortcut:
+
+   ```bash
+   vercel env add SHOPIFY_STORE_DOMAIN production
+   vercel env add SHOPIFY_STOREFRONT_TOKEN production
+   vercel env add NEXT_PUBLIC_SHOPIFY_VARIANT_ID production
+   vercel env add SHOPIFY_WEBHOOK_SECRET production
+   # repeat for preview if needed
+   ```
+
+4. Pull them locally so `next dev` matches Vercel: `vercel env pull .env.local`.
+5. Deploy straight from the terminal whenever you’re ready: `vercel --prod` (or rely on GitHub pushes to main).
+
+The API routes inside `app/api/**` automatically become Vercel Serverless Functions. They already call the Shopify Storefront API via `lib/shopify.ts`, so as long as your tokens exist the quick checkout + webhook flow will work with zero extra config.
 
 4) Fastest checkout from a bare link (no code)
 
