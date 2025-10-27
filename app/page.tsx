@@ -508,14 +508,14 @@ export default function Home() {
             <div className="flex flex-col justify-center">
               <p className="text-xs tracking-[0.35em] uppercase text-[#D28755] mb-4 font-medium">Autumn ritual incentive</p>
               <h3 className="text-4xl lg:text-5xl font-light text-[#2F2B26] tracking-tight mb-6">
-                We'd like to help you discover a scent for autumn.
+                We&apos;d like to help you discover a scent for autumn.
               </h3>
               <p className="text-lg text-[#4A4540] font-light leading-relaxed mb-6">
                 Select one essence to experience, <span className="font-medium text-[#C47A3B]">complimentary</span>. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through October 31st.
               </p>
               <p className="text-base text-[#5F5B56] font-light mb-4">Take your time choosing below.</p>
               <p className="text-sm text-[#6B6762] font-light">
-                If it's not quite right, exchange it within 14 days—we're here to help you find your perfect match.
+                If it&apos;s not quite right, exchange it within 14 days—we&apos;re here to help you find your perfect match.
               </p>
             </div>
           </div>
@@ -608,7 +608,7 @@ export default function Home() {
                     <p className="text-[#5F5B56] text-sm font-light mb-4">{selectedScentDetails.notes}</p>
                   </div>
                   <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-xl p-4 text-sm text-[#4A4540]">
-                    <p className="font-medium text-[#2F2B26] text-xs uppercase tracking-wider mb-1">What's included</p>
+                    <p className="font-medium text-[#2F2B26] text-xs uppercase tracking-wider mb-1">What&apos;s included</p>
                     <p>✓ 15ml premium essential oil</p>
                     <p>✓ Complimentary with any diffuser</p>
                     <p>✓ 14-day exchange guarantee</p>
@@ -732,7 +732,7 @@ export default function Home() {
           </p>
           <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
             <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
-            <p>Try Aura risk-free. If it doesn't transform your space, return it free—no forms, no restocking fees.</p>
+            <p>Try Aura risk-free. If it doesn&apos;t transform your space, return it free—no forms, no restocking fees.</p>
           </div>
           <div className="flex items-center gap-3 text-sm text-[#3A3834] justify-center">
             <div className="flex text-[#C47A3B] gap-0.5">
