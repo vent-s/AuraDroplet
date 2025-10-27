@@ -470,38 +470,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mission & Social Proof */}
-      <section className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-6 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Our mission</p>
-          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">
-            Make every home feel like a sanctuary—quiet, hydrated, and beautifully scented.
-          </h3>
-          <p className="text-[#5A5550] text-base">
-            Join 15,000+ homes nationwide. Sculpted ceramic design, 12-hour runtime, whisper-quiet performance.
-          </p>
-          <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
-            <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
-            <p>Try Aura risk-free. If it doesn’t transform your space, return it free—no forms, no restocking fees.</p>
-          </div>
-          <div className="flex items-center gap-3 text-sm text-[#3A3834] justify-center">
-            <div className="flex text-[#C47A3B] gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-            <span>4.9/5 · 15,000+ reviews</span>
-          </div>
-          <button
-            onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex items-center gap-2 text-[#3A3834] border border-[#3A3834] px-6 py-2 rounded-full text-sm hover:bg-[#3A3834] hover:text-white transition-colors"
-          >
-            View autumn deals ↓
-          </button>
-          <p className="text-xs text-[#6B6762]">Free returns · 2-year warranty · Free shipping</p>
-        </div>
-      </section>
-
       {/* Free Scent Picker */}
       <section className="relative py-24 bg-gradient-to-br from-[#F8F3ED] via-[#FAF9F7] to-[#F1E7DA] overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -697,6 +665,38 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Mission & Social Proof */}
+      <section className="bg-white py-16">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-6 text-center">
+          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Our mission</p>
+          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">
+            Make every home feel like a sanctuary—quiet, hydrated, and beautifully scented.
+          </h3>
+          <p className="text-[#5A5550] text-base">
+            Join 15,000+ homes nationwide. Sculpted ceramic design, 12-hour runtime, whisper-quiet performance.
+          </p>
+          <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
+            <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
+            <p>Try Aura risk-free. If it doesn't transform your space, return it free—no forms, no restocking fees.</p>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-[#3A3834] justify-center">
+            <div className="flex text-[#C47A3B] gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i}>★</span>
+              ))}
+            </div>
+            <span>4.9/5 · 15,000+ reviews</span>
+          </div>
+          <button
+            onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex items-center gap-2 text-[#3A3834] border border-[#3A3834] px-6 py-2 rounded-full text-sm hover:bg-[#3A3834] hover:text-white transition-colors"
+          >
+            View autumn deals ↓
+          </button>
+          <p className="text-xs text-[#6B6762]">Free returns · 2-year warranty · Free shipping</p>
         </div>
       </section>
 
