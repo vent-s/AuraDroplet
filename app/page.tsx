@@ -840,57 +840,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-24 bg-[#FAF9F7]">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">How It Works</h2>
-            <p className="text-lg text-[#6B6762] font-light">Three simple steps to your perfect ritual</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-12">
-            {/* Step 1 */}
-            <div className="text-center group">
-              <div className="mb-6 relative">
-                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
-                  1
-                </div>
-              </div>
-              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Choose Your Diffuser</h3>
-              <p className="text-[#6B6762] leading-relaxed font-light">
-                Select from our curated finishes. Sleek ceramic, warm wood, or modern matte—designed to elevate any space.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center group">
-              <div className="mb-6 relative">
-                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
-                  2
-                </div>
-              </div>
-              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Pick Your Brand</h3>
-              <p className="text-[#6B6762] leading-relaxed font-light">
-                Discover heritage florals, modern woods, or coastal mist. Each brand tells a story through scent.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="text-center group">
-              <div className="mb-6 relative">
-                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
-                  3
-                </div>
-              </div>
-              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Add Your Essences</h3>
-              <p className="text-[#6B6762] leading-relaxed font-light">
-                Curate 2-3 signature scents. Save 15% when you build a complete starter kit.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Brand Quiz */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -960,6 +909,57 @@ export default function Home() {
                   Browse all collections
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 bg-[#FAF9F7]">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">How It Works</h2>
+            <p className="text-lg text-[#6B6762] font-light">Three simple steps to your perfect ritual</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-12">
+            {/* Step 1 */}
+            <div className="text-center group">
+              <div className="mb-6 relative">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
+                  1
+                </div>
+              </div>
+              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Choose Your Diffuser</h3>
+              <p className="text-[#6B6762] leading-relaxed font-light">
+                Select from our curated finishes. Sleek ceramic, warm wood, or modern matte—designed to elevate any space.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center group">
+              <div className="mb-6 relative">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
+                  2
+                </div>
+              </div>
+              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Pick Your Brand</h3>
+              <p className="text-[#6B6762] leading-relaxed font-light">
+                Discover heritage florals, modern woods, or coastal mist. Each brand tells a story through scent.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center group">
+              <div className="mb-6 relative">
+                <div className="w-16 h-16 mx-auto rounded-full bg-[#8B7355]/10 flex items-center justify-center text-[#8B7355] font-light text-2xl group-hover:bg-[#8B7355] group-hover:text-white transition-all duration-300">
+                  3
+                </div>
+              </div>
+              <h3 className="text-xl font-medium mb-3 text-[#3A3834]">Add Your Essences</h3>
+              <p className="text-[#6B6762] leading-relaxed font-light">
+                Curate 2-3 signature scents. Save 15% when you build a complete starter kit.
+              </p>
             </div>
           </div>
         </div>
