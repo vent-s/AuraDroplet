@@ -315,15 +315,31 @@ export default function Home() {
       {/* Navigation */}
       <header className="fixed top-0 w-full bg-[#FAF9F7]/98 backdrop-blur-md z-50 border-b border-[#E8E6E3]">
         <nav className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Left Menu */}
-            <div className="hidden lg:flex items-center space-x-1">
+          <div className="flex items-center justify-between h-20 relative">
+            {/* Mobile Shop Button */}
+            <a
+              href="/shop"
+              className="lg:hidden px-4 py-2 bg-[#C4A27F] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300 rounded-sm"
+            >
+              SHOP
+            </a>
+
+            {/* Left Menu - Desktop */}
+            <div className="hidden lg:flex items-center space-x-1 flex-1">
+              <a href="/shop" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors font-medium">Shop</a>
+              <span className="text-[#C4C0BA]">·</span>
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Diffusers</a>
               <span className="text-[#C4C0BA]">·</span>
               <a href="/starter-kits" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Starter Kits</a>
               <span className="text-[#C4C0BA]">·</span>
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Brands</a>
-              <span className="text-[#C4C0BA]">·</span>
+            </div>
+
+            {/* Logo - Centered */}
+            <h1 className="text-xl lg:text-2xl font-light tracking-[0.15em] text-[#3A3834] lg:px-8">AURADROPLET</h1>
+
+            {/* Right Menu + Icons */}
+            <div className="hidden lg:flex items-center space-x-1 flex-1 justify-end">
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Essences</a>
               <span className="text-[#C4C0BA]">·</span>
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Refills</a>
@@ -331,11 +347,8 @@ export default function Home() {
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Gifts</a>
             </div>
 
-            {/* Logo */}
-            <h1 className="text-2xl lg:absolute lg:left-1/2 lg:-translate-x-1/2 font-light tracking-[0.15em] text-[#3A3834]">AURADROPLET</h1>
-
-            {/* Right Icons */}
-            <div className="flex items-center space-x-6">
+            {/* Right Icons - Mobile Always Visible */}
+            <div className="flex items-center space-x-6 lg:ml-6">
               <button className="text-[#3A3834] hover:text-[#8B7355] transition-colors" aria-label="Account">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -357,7 +370,7 @@ export default function Home() {
       </header>
 
       {/* Video Hero */}
-      <section className="relative h-screen mt-20 overflow-hidden bg-[#2A2520]">
+      <section className="relative min-h-screen overflow-hidden bg-[#1B1611]">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video
@@ -376,69 +389,72 @@ export default function Home() {
             <source src="/AuraDroplet.mp4" type="video/mp4" />
           </video>
           {/* Elegant overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/70" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative h-full flex items-center justify-center px-6 lg:px-8">
+        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-24 pb-12">
           <div
-            className="max-w-4xl text-center z-10"
+            className={`max-w-3xl text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
               transform: `translateY(${scrollY * 0.3}px)`,
               opacity: Math.max(0, 1 - scrollY * 0.002)
             }}
           >
-            <span className="inline-block text-xs font-medium tracking-[0.3em] mb-6 text-white/70 uppercase animate-fade-in">
-              Fragrance, Considered
+            <span className="inline-flex items-center justify-center gap-2 text-xs font-semibold tracking-[0.4em] mb-6 text-white/80 uppercase">
+              12-HOUR MIST &nbsp;•&nbsp; WHISPER-QUIET &nbsp;•&nbsp; AUTO SHUTOFF
             </span>
-            <h1 className="text-5xl lg:text-7xl xl:text-8xl font-light mb-8 leading-[1.05] tracking-tight text-white animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              Start with the<br />Aura Diffuser
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 leading-tight text-white">
+              Whole-home scenting without the noise.
             </h1>
-            <p className="text-lg lg:text-xl mb-12 text-white/90 max-w-2xl mx-auto leading-relaxed font-light animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              Transform your space into a sanctuary. Choose your finish, discover your brand, curate your ritual.
+            <p className="text-base sm:text-lg text-white/85 max-w-2xl mx-auto leading-relaxed font-light">
+              Choose continuous mist or timed intervals. Whisper-quiet technology covers 700 sq ft and runs for 12 hours.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
               <a
                 href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
                 className={`luxury-btn-primary px-10 py-4 text-center bg-white text-[#3A3834] transition-all duration-300 font-medium tracking-wide ${needsVariantUpdate ? 'opacity-60 pointer-events-none' : 'hover:bg-[#F5F3F0]'}`}
               >
-                Build Your Ritual
+                Shop Aura
               </a>
               <a
-                href="#conversion-shop"
+                href="#scent-selector"
                 className="luxury-btn-secondary px-10 py-4 text-center bg-transparent text-white border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300 font-medium tracking-wide"
               >
-                Shop Diffuser
+                Explore Scents
               </a>
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-center gap-4 text-[11px] uppercase tracking-[0.35em] text-white/70">
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white" /> Ships in 48h</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white/70" /> Shop Pay + Apple Pay</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white/50" /> 14-day scent swap</span>
-            </div>
-
-            {/* Trust bar */}
-            <div className="mt-16 flex flex-wrap justify-center gap-8 text-sm text-white/60 font-light">
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                30-night trial
-              </span>
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
-                </svg>
-                Free returns
-              </span>
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                </svg>
-                2-year warranty
-              </span>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/85 text-sm">
+              {[
+                { label: '2 scenting modes', detail: 'Continuous or timed', icon: 'waves' },
+                { label: 'Whisper-quiet', detail: '34 dB motor', icon: 'sound' },
+                { label: 'Auto shutoff', detail: '2-year warranty', icon: 'shield' }
+              ].map((card) => (
+                <div key={card.label} className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    {card.icon === 'waves' && (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4 2.5 4 5 4" />
+                      </svg>
+                    )}
+                    {card.icon === 'sound' && (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M5 9v6h3l4 4V5L8 9H5z" />
+                      </svg>
+                    )}
+                    {card.icon === 'shield' && (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l8 4v5c0 5.25-3.438 9.876-8 11-4.562-1.124-8-5.75-8-11V7l8-4z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-[0.35em] text-xs text-white/60">{card.label}</p>
+                    <p className="text-base font-semibold">{card.detail}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -451,6 +467,38 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
             </svg>
           </div>
+        </div>
+      </section>
+
+      {/* Mission & Social Proof */}
+      <section className="bg-white py-16">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-6 text-center">
+          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Our mission</p>
+          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">
+            Make every home feel like a sanctuary—quiet, hydrated, and beautifully scented.
+          </h3>
+          <p className="text-[#5A5550] text-base">
+            Join 15,000+ homes nationwide. Sculpted ceramic design, 12-hour runtime, whisper-quiet performance.
+          </p>
+          <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
+            <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
+            <p>Try Aura risk-free. If it doesn’t transform your space, return it free—no forms, no restocking fees.</p>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-[#3A3834] justify-center">
+            <div className="flex text-[#C47A3B] gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i}>★</span>
+              ))}
+            </div>
+            <span>4.9/5 · 15,000+ reviews</span>
+          </div>
+          <button
+            onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex items-center gap-2 text-[#3A3834] border border-[#3A3834] px-6 py-2 rounded-full text-sm hover:bg-[#3A3834] hover:text-white transition-colors"
+          >
+            View autumn deals ↓
+          </button>
+          <p className="text-xs text-[#6B6762]">Free returns · 2-year warranty · Free shipping</p>
         </div>
       </section>
 
@@ -472,8 +520,9 @@ export default function Home() {
                     src="/AutumnOffer.jpg"
                     alt="Autumn Atelier Offer"
                     fill
-                    className="object-cover"
                     priority
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/30 to-transparent" />
                   <div className="absolute inset-0 p-10 flex flex-col justify-between text-white">
@@ -563,6 +612,7 @@ export default function Home() {
                         src={scent.image}
                         alt={scent.name}
                         fill
+                        sizes="(min-width: 1024px) 25vw, 60vw"
                         className={`transition-transform duration-500 group-hover:scale-105 ${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
                       />
                       <div className="absolute inset-0 ring-1 ring-black/5" />
@@ -658,7 +708,7 @@ export default function Home() {
               <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Secure your ritual</p>
               <h2 className="text-4xl lg:text-5xl font-light leading-tight">High-converting sets, ready for checkout</h2>
               <p className="text-base text-white/70 mt-4 max-w-2xl">
-                Every option below includes the complimentary autumn scent plus 2-day processing, 14-day scent exchanges, and our concierge follow-up. Tap to lock your choice and jump straight to checkout.
+                Join 15,000+ customers who&apos;ve upgraded their home fragrance. Elegant ceramic. All-day performance.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70">
@@ -739,7 +789,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-[#FAF9F7]">
+      <section id="how-it-works" className="py-24 bg-[#FAF9F7]">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">How It Works</h2>
@@ -938,21 +988,23 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Sticky mobile checkout CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
-        <div className="mx-4 mb-4 rounded-2xl border border-black/10 bg-white/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.2)] px-4 py-3 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-[#2F2B26]">Claim diffuser + free scent</p>
-            <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
+      {/* Sticky mobile checkout CTA - only display once a complimentary scent is selected */}
+      {selectedScent && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
+          <div className="mx-4 mb-4 rounded-2xl border border-black/10 bg-white/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.2)] px-4 py-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium text-[#2F2B26]">Claim diffuser + free scent</p>
+              <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
+            </div>
+            <a
+              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
+            >
+              Checkout
+            </a>
           </div>
-          <a
-            href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
-          >
-            Checkout
-          </a>
         </div>
-      </div>
+      )}
     </main>
   );
 }

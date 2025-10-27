@@ -11,39 +11,7 @@ export const products: Product[] = [
     category: 'Diffusers',
     badge: 'bestseller',
     description: 'Timeless design meets aromatherapy. The Stone Diffuser features a sleek ceramic finish and ultrasonic technology for whisper-quiet misting.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_1'
-  },
-  {
-    id: 'cloud-humidifier',
-    name: 'Cloud Humidifier',
-    price: 208.99,
-    originalPrice: 244.99,
-    discount: 15,
-    image: '/DiffProductShot.png',
-    category: 'Humidifiers',
-    badge: 'bestseller',
-    description: 'Transform your space with the Cloud Humidifier. Dual functionality combines essential oil diffusion with powerful humidification for ultimate comfort.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_2'
-  },
-  {
-    id: 'air-cordless-diffuser',
-    name: 'Air Cordless Diffuser',
-    price: 164.99,
-    image: '/DiffProductShot.png',
-    category: 'Diffusers',
-    badge: 'new',
-    description: 'Freedom redefined. The Air Cordless Diffuser offers portable aromatherapy with up to 8 hours of battery life and USB-C charging.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_3'
-  },
-  {
-    id: 'air-waterless-diffuser',
-    name: 'Air Waterless Diffuser',
-    price: 149.99,
-    image: '/DiffProductShot.png',
-    category: 'Diffusers',
-    badge: 'bestseller',
-    description: 'Pure essential oils, no water needed. Our waterless nebulizing technology delivers the most potent aromatherapy experience.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_4'
+    variantId: 'gid://shopify/ProductVariant/50647405822230'
   },
   {
     id: 'rose-petal-oil',
@@ -52,7 +20,7 @@ export const products: Product[] = [
     image: '/RoseProduct.jpg',
     category: 'Essential Oils',
     description: 'Luxurious rose essence with geranium and musk notes. 15ml of pure botanical bliss.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_5'
+    variantId: 'gid://shopify/ProductVariant/50647404806422'
   },
   {
     id: 'lavender-oil',
@@ -62,7 +30,7 @@ export const products: Product[] = [
     category: 'Essential Oils',
     badge: 'bestseller',
     description: 'Calming lavender with bergamot and chamomile. Perfect for relaxation and restful sleep. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_6'
+    variantId: 'gid://shopify/ProductVariant/50647396581654'
   },
   {
     id: 'jasmine-oil',
@@ -71,7 +39,7 @@ export const products: Product[] = [
     image: '/Jasmine.jpg',
     category: 'Essential Oils',
     description: 'Exotic white florals with bright citrus peel. Intoxicating and uplifting. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_7'
+    variantId: 'gid://shopify/ProductVariant/50647401922838'
   },
   {
     id: 'mint-oil',
@@ -80,7 +48,7 @@ export const products: Product[] = [
     image: '/Mint.jpg',
     category: 'Essential Oils',
     description: 'Crisp peppermint with basil and green tea. Refreshing and invigorating. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_8'
+    variantId: 'gid://shopify/ProductVariant/50647402479894'
   },
   {
     id: 'vanilla-oil',
@@ -90,7 +58,7 @@ export const products: Product[] = [
     category: 'Essential Oils',
     badge: 'new',
     description: 'Rich vanilla bean with warm amber and sandalwood. Comforting and grounding. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_9'
+    variantId: 'gid://shopify/ProductVariant/50647401234710'
   },
   {
     id: 'ocean-mist-oil',
@@ -99,6 +67,6 @@ export const products: Product[] = [
     image: '/Ocean.jpg',
     category: 'Essential Oils',
     description: 'Coastal breeze captured in a bottle. Sea salt, driftwood, and marine notes. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/REPLACE_WITH_YOUR_VARIANT_ID_10'
+    variantId: 'gid://shopify/ProductVariant/50647404413206'
   },
 ];

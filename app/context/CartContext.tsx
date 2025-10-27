@@ -111,10 +111,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     try {
       // Build cart lines for Shopify
-      const lines = cartItems.map(item => ({
-        merchandiseId: item.variantId || `gid://shopify/ProductVariant/${item.id}`,
-        quantity: item.quantity,
-      }));
+      const lines = cartItems.map(item => {
+        if (!item.variantId) {
+          throw new Error(`Missing variantId for ${item.name}`);
+        }
+        return {
+          merchandiseId: item.variantId,
+          quantity: item.quantity,
+        };
+      });
 
       // Call our API to create a Shopify cart
       const response = await fetch('/api/cart/create', {
@@ -123,11 +128,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ lines }),
       });
 
+      const payload = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout');
+        throw new Error(payload?.error || 'Failed to create checkout');
       }
 
-      const { checkoutUrl } = await response.json();
+      const { checkoutUrl } = payload;
 
       // Redirect to Shopify checkout
       if (checkoutUrl) {

@@ -7,6 +7,15 @@ const endpoint = storeDomain
   ? `https://${storeDomain}/api/${SHOPIFY_API_VERSION}/graphql.json`
   : undefined;
 
+// Log configuration for debugging (remove in production)
+if (process.env.NODE_ENV === 'development') {
+  console.log('Shopify Config:', {
+    domain: storeDomain,
+    endpoint,
+    hasToken: !!storefrontToken,
+  });
+}
+
 type Variables = Record<string, unknown> | undefined;
 
 type ShopifyResponse<T> = {
@@ -19,11 +28,14 @@ export async function shopifyFetch<T>(query: string, variables?: Variables): Pro
     throw new Error("Missing Shopify configuration. Ensure STORE_DOMAIN and STOREFRONT_TOKEN are set.");
   }
 
+  console.log('Making Shopify request to:', endpoint);
+  console.log('With variables:', JSON.stringify(variables, null, 2));
+
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Shopify-Storefront-Private-Token": storefrontToken,
+      "X-Shopify-Storefront-Access-Token": storefrontToken,
     },
     body: JSON.stringify({ query, variables }),
     next: { revalidate: 60 },
@@ -31,10 +43,14 @@ export async function shopifyFetch<T>(query: string, variables?: Variables): Pro
 
   if (!res.ok) {
     const text = await res.text();
+    console.error('Shopify API Error:', res.status, text);
     throw new Error(`Shopify error ${res.status}: ${text}`);
   }
 
-  return res.json();
+  const jsonResponse = await res.json();
+  console.log('Shopify response:', JSON.stringify(jsonResponse, null, 2));
+
+  return jsonResponse;
 }
 
 export const GQL = {

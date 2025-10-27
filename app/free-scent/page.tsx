@@ -3,67 +3,82 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-const scents = [
+type ScentOption = {
+  id: string;
+  name: string;
+  notes: string;
+  image: string;
+  rating: number;
+  reviews: number;
+  description: string;
+  variantId: string;
+};
+
+const scents: ScentOption[] = [
   {
     id: "rose-petal",
     name: "Rose Petal",
     notes: "Rose · Geranium · Musk",
-    image: "/DiffProductShot.png",
+    image: "/RoseProduct.jpg",
     rating: 5.8,
     reviews: 243,
-    description: "Timeless florals with warm undertones"
+    description: "Timeless florals with warm undertones",
+    variantId: "gid://shopify/ProductVariant/10263572152598"
   },
   {
     id: "lavender",
     name: "Lavender",
     notes: "Lavender · Bergamot · Chamomile",
-    image: "/DiffProductShot.png",
+    image: "/Lavender.jpg",
     rating: 5.8,
     reviews: 312,
-    description: "Calming fields with citrus lift"
+    description: "Calming fields with citrus lift",
+    variantId: "gid://shopify/ProductVariant/10263569137942"
   },
   {
     id: "jasmine",
     name: "Jasmine",
     notes: "White Florals · Citrus Peel",
-    image: "/DiffProductShot.png",
+    image: "/Jasmine.jpg",
     rating: 5.8,
     reviews: 189,
-    description: "Intoxicating blooms, bright finish"
+    description: "Intoxicating blooms, bright finish",
+    variantId: "gid://shopify/ProductVariant/10263570153750"
   },
   {
     id: "mint-leaf",
     name: "Mint Leaf",
     notes: "Peppermint · Basil · Green Tea",
-    image: "/DiffProductShot.png",
+    image: "/Mint.jpg",
     rating: 5.3,
     reviews: 156,
-    description: "Crisp herbal awakening"
+    description: "Crisp herbal awakening",
+    variantId: "gid://shopify/ProductVariant/10263570448662"
   },
   {
-    id: "sandalwood",
-    name: "Sandalwood",
-    notes: "Amber · Cedar · Vanilla",
-    image: "/DiffProductShot.png",
+    id: "vanilla",
+    name: "Vanilla Ember",
+    notes: "Vanilla · Amber · Sandalwood",
+    image: "/vanilla.jpg",
     rating: 5.8,
     reviews: 287,
-    description: "Warm woods with creamy depth"
+    description: "Warm woods with creamy depth",
+    variantId: "gid://shopify/ProductVariant/10263569924374"
   },
   {
     id: "ocean-mist",
     name: "Ocean Mist",
     notes: "Sea Salt · Driftwood · Marine",
-    image: "/DiffProductShot.png",
+    image: "/Ocean.jpg",
     rating: 5.6,
     reviews: 201,
-    description: "Coastal breeze captured"
+    description: "Coastal breeze captured",
+    variantId: "gid://shopify/ProductVariant/10263571890454"
   },
 ];
 
 export default function FreeScentPage() {
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
-  const [hasDiffuser, setHasDiffuser] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -73,13 +88,14 @@ export default function FreeScentPage() {
   }, []);
 
   const handleScentSelect = (scentId: string) => {
-    if (!hasDiffuser) {
-      setShowModal(true);
-      // Store selection for later
-      sessionStorage.setItem('pendingFreeScent', scentId);
-    } else {
-      setSelectedScent(scentId);
+    const scent = scents.find((option) => option.id === scentId);
+    if (!scent?.variantId) {
+      alert('This scent is unavailable right now.');
+      return;
     }
+    setSelectedScent(scentId);
+    const checkoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(scent.variantId)}&qty=1`;
+    window.location.href = checkoutUrl;
   };
 
   const selectedCount = selectedScent ? 1 : 0;
@@ -178,14 +194,11 @@ export default function FreeScentPage() {
             {scents.map((scent, index) => (
               <div
                 key={scent.id}
-                className={`group cursor-pointer bg-white/80 backdrop-blur-sm rounded-sm overflow-hidden hover:shadow-2xl transition-all duration-500 border ${
-                  selectedScent === scent.id ? 'border-[#C4A27F] ring-2 ring-[#C4A27F]/30' : 'border-[#E8E6E3]'
-                }`}
+                className="group bg-white/80 backdrop-blur-sm rounded-sm overflow-hidden hover:shadow-2xl transition-all duration-500 border border-[#E8E6E3]"
                 style={{
                   animationDelay: `${index * 0.1}s`,
                   transform: `translateY(${scrollY * 0.02 * (index % 2 === 0 ? 1 : -1)}px)`
                 }}
-                onClick={() => handleScentSelect(scent.id)}
               >
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden">
@@ -193,19 +206,14 @@ export default function FreeScentPage() {
                     src={scent.image}
                     alt={scent.name}
                     fill
+                    priority={index === 1}
+                    sizes="(min-width: 1024px) 25vw, 50vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   {/* Ribbon */}
                   <div className="absolute top-4 left-4 bg-[#C4A27F] text-white text-xs font-medium px-4 py-1.5 tracking-wider">
                     $0 with diffuser
                   </div>
-                  {selectedScent === scent.id && (
-                    <div className="absolute top-4 right-4 w-8 h-8 bg-[#C4A27F] rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
                 </div>
 
                 {/* Content */}
@@ -228,12 +236,11 @@ export default function FreeScentPage() {
                     </p>
                   </div>
 
-                  <button className={`w-full py-3 font-medium tracking-wide transition-all duration-300 ${
-                    selectedScent === scent.id
-                      ? 'bg-[#C4A27F] text-white'
-                      : 'bg-[#3A3834] text-white hover:bg-[#8B7355]'
-                  }`}>
-                    {selectedScent === scent.id ? 'Selected as Free Scent' : 'Select as Free Scent'}
+                  <button
+                    onClick={() => handleScentSelect(scent.id)}
+                    className="w-full py-3 font-medium tracking-wide transition-all duration-300 bg-[#3A3834] text-white hover:bg-[#8B7355]"
+                  >
+                    Checkout scent
                   </button>
                 </div>
               </div>
@@ -263,54 +270,6 @@ export default function FreeScentPage() {
           </div>
         </div>
       </section>
-
-      {/* Mobile Sticky Footer */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E6E3] p-4 shadow-2xl z-40">
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-sm">
-            <p className="font-medium text-[#3A3834]">Free Scent: {selectedCount}/1</p>
-            <p className="text-xs text-[#6B6762] font-light">Save $18 today</p>
-          </div>
-          {!selectedScent ? (
-            <button
-              onClick={() => document.getElementById('scent-selector')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-6 py-3 bg-[#3A3834] text-white font-medium tracking-wide whitespace-nowrap"
-            >
-              Select One
-            </button>
-          ) : (
-            <button className="px-6 py-3 bg-[#C4A27F] text-white font-medium tracking-wide whitespace-nowrap">
-              Checkout
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6" onClick={() => setShowModal(false)}>
-          <div className="bg-white max-w-md w-full p-8 rounded-sm" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-2xl font-light mb-4 text-[#3A3834]">Add a diffuser to claim this Free Scent</h3>
-            <p className="text-sm text-[#6B6762] mb-8 font-light leading-relaxed">
-              Choose any Aura Diffuser and we&apos;ll include your selected scent at no charge.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => window.location.href = '/'}
-                className="w-full px-6 py-3 bg-[#3A3834] text-white font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300"
-              >
-                Choose Diffuser
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-full px-6 py-3 border border-[#3A3834] text-[#3A3834] font-medium tracking-wide hover:bg-[#3A3834] hover:text-white transition-all duration-300"
-              >
-                Keep browsing
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="bg-[#3A3834] text-[#E8E6E3] py-16 mt-24">

@@ -43,7 +43,13 @@ export default function StarterKitsPage() {
           {starterKits.map((kit) => (
             <article key={kit.name} className="bg-white rounded-3xl overflow-hidden border border-[#E8E6E3] flex flex-col">
               <div className="relative aspect-square">
-                <Image src={kit.image} alt={kit.name} fill className="object-cover" />
+                <Image
+                  src={kit.image}
+                  alt={kit.name}
+                  fill
+                  sizes="(min-width: 1024px) 20vw, 80vw"
+                  className="object-cover"
+                />
                 {kit.badge && (
                   <span className="absolute top-4 right-4 bg-[#3A3834] text-white text-[10px] tracking-[0.3em] px-3 py-1 uppercase">{kit.badge}</span>
                 )}

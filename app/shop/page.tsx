@@ -115,6 +115,7 @@ export default function Shop() {
                   src={product.image}
                   alt={product.name}
                   fill
+                  sizes="(min-width: 1024px) 20vw, 45vw"
                   className="object-contain group-hover:scale-105 transition-transform duration-700"
                 />
 
