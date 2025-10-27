@@ -478,135 +478,187 @@ export default function Home() {
         </div>
 
         <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 mb-14">
-            <div className="space-y-10">
-              <div className="relative">
-                <div className="absolute -inset-5 border border-[#D78752]/50 rounded-[42px]" />
-                <div className="absolute inset-5 border border-[#E6B078]/40 rounded-[38px]" />
-                <div className="relative h-[430px] rounded-[36px] overflow-hidden shadow-[0_35px_70px_rgba(33,24,17,0.22)]">
-                  <Image
-                    src="/AutumnOffer.jpg"
-                    alt="Autumn Atelier Offer"
-                    fill
-                    priority
-                    sizes="(min-width: 1024px) 50vw, 100vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/30 to-transparent" />
-                  <div className="absolute inset-0 p-10 flex flex-col justify-between text-white">
-                    <div className="flex items-center justify-between text-[10px] tracking-[0.55em] uppercase text-white/70">
-                      <span>Autumn Offer</span>
-                      <span>Issue No. 04</span>
-                    </div>
-                    <div className="text-sm font-light tracking-[0.4em] uppercase text-white/70">
-                      <span>The Golden Hour Edit</span>
-                    </div>
+          {/* Promotional Hero - Full Width */}
+          <div className="grid lg:grid-cols-2 gap-12 mb-14">
+            <div className="relative">
+              <div className="absolute -inset-5 border border-[#D78752]/50 rounded-[42px]" />
+              <div className="absolute inset-5 border border-[#E6B078]/40 rounded-[38px]" />
+              <div className="relative h-[430px] rounded-[36px] overflow-hidden shadow-[0_35px_70px_rgba(33,24,17,0.22)]">
+                <Image
+                  src="/AutumnOffer.jpg"
+                  alt="Autumn Atelier Offer"
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/30 to-transparent" />
+                <div className="absolute inset-0 p-10 flex flex-col justify-between text-white">
+                  <div className="flex items-center justify-between text-[10px] tracking-[0.55em] uppercase text-white/70">
+                    <span>Autumn Offer</span>
+                    <span>Issue No. 04</span>
+                  </div>
+                  <div className="text-sm font-light tracking-[0.4em] uppercase text-white/70">
+                    <span>The Golden Hour Edit</span>
                   </div>
                 </div>
               </div>
-
-              <div>
-                <p className="text-xs tracking-[0.35em] uppercase text-[#D28755] mb-4 font-medium">Autumn ritual incentive</p>
-                <h3 className="text-4xl lg:text-5xl font-light text-[#2F2B26] tracking-tight mb-6">
-                  We’d like to help you discover a scent for autumn.
-                </h3>
-                <p className="text-lg text-[#4A4540] font-light leading-relaxed mb-6">
-                  Select one essence to experience, complimentary. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through October 31st.
-                </p>
-                <p className="text-base text-[#5F5B56] font-light mb-4">Take your time choosing below.</p>
-                <p className="text-sm text-[#6B6762] font-light">
-                  If it’s not quite right, exchange it within 14 days—we’re here to help you find your perfect match.
-                </p>
-              </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-lg border border-[#E5E1DB] p-6 rounded-2xl shadow-[0_20px_60px_rgba(58,56,52,0.07)]">
-              <p className="text-sm text-[#8B7355] uppercase tracking-[0.3em] mb-4">Your selection</p>
+            <div className="flex flex-col justify-center">
+              <p className="text-xs tracking-[0.35em] uppercase text-[#D28755] mb-4 font-medium">Autumn ritual incentive</p>
+              <h3 className="text-4xl lg:text-5xl font-light text-[#2F2B26] tracking-tight mb-6">
+                We'd like to help you discover a scent for autumn.
+              </h3>
+              <p className="text-lg text-[#4A4540] font-light leading-relaxed mb-6">
+                Select one essence to experience, <span className="font-medium text-[#C47A3B]">complimentary</span>. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through October 31st.
+              </p>
+              <p className="text-base text-[#5F5B56] font-light mb-4">Take your time choosing below.</p>
+              <p className="text-sm text-[#6B6762] font-light">
+                If it's not quite right, exchange it within 14 days—we're here to help you find your perfect match.
+              </p>
+            </div>
+          </div>
+
+          {/* Scent Grid + Sticky Selection Card */}
+          <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+            {/* Scent Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {freeScentOptions.map((scent) => {
+                const isSelected = selectedScent === scent.id;
+                return (
+                  <button
+                    type="button"
+                    key={scent.id}
+                    onClick={() => setSelectedScent(scent.id)}
+                    className={`group relative text-left bg-white/80 backdrop-blur-sm border-2 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(42,37,32,0.12)] ${
+                      isSelected ? 'border-[#C4A27F] ring-2 ring-[#C4A27F]/30' : 'border-transparent'
+                    }`}
+                  >
+                    {/* FREE Badge */}
+                    <div className="absolute -top-3 -right-3 z-10">
+                      <div className="bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wider shadow-lg">
+                        FREE
+                      </div>
+                    </div>
+
+                    {/* Selected Checkmark */}
+                    {isSelected && (
+                      <div className="absolute top-4 left-4 z-10 w-8 h-8 bg-[#C4A27F] rounded-full flex items-center justify-center shadow-md animate-in fade-in zoom-in duration-300">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+
+                    <div
+                      className="absolute inset-x-6 top-0 h-[2px]"
+                      style={{ background: `linear-gradient(90deg, transparent, ${scent.accent}, transparent)` }}
+                    />
+                    <div className="flex flex-col gap-4">
+                      <div className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden ${scent.fit === 'contain' ? 'bg-[#F7F3ED]' : ''}`}>
+                        <Image
+                          src={scent.image}
+                          alt={scent.name}
+                          fill
+                          sizes="(min-width: 1024px) 25vw, 50vw"
+                          className={`transition-transform duration-500 group-hover:scale-105 ${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+                        />
+                        <div className="absolute inset-0 ring-1 ring-black/5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs uppercase tracking-[0.25em] text-[#8B7355]">15 ml</p>
+                          <span className="text-xs font-bold tracking-wider text-[#C47A3B]">$0.00</span>
+                        </div>
+                        <h3 className="text-xl font-light text-[#2F2B26] mb-1">{scent.name}</h3>
+                        <p className="text-sm text-[#6B6762] mb-3 font-light italic">{scent.mood}</p>
+                        <p className="text-sm text-[#4A4743] font-medium tracking-wide mb-4">{scent.notes}</p>
+                        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em]">
+                          <span className="inline-flex items-center gap-2 text-[#5F5B56]">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: scent.accent }} />
+                            Botanical grade
+                          </span>
+                          <span className={`font-bold ${isSelected ? 'text-[#C4A27F]' : 'text-[#8B7355]'}`}>
+                            {isSelected ? '✓ Selected' : 'Select'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sticky Selection Card */}
+            <div className="lg:sticky lg:top-24 bg-white/90 backdrop-blur-lg border-2 border-[#E5E1DB] p-8 rounded-2xl shadow-[0_20px_60px_rgba(58,56,52,0.12)] h-fit">
+              <p className="text-sm text-[#8B7355] uppercase tracking-[0.3em] mb-6">Your selection</p>
               {selectedScentDetails ? (
-                <div>
-                  <h3 className="text-2xl font-light text-[#2F2B26] mb-2">{selectedScentDetails.name}</h3>
-                  <p className="text-[#5F5B56] text-sm font-light mb-6">{selectedScentDetails.notes}</p>
-                  <div className="flex items-center gap-3 text-xs text-[#6B6762]">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1ECE4] text-[#8B7355]">
-                      <span className="block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: selectedScentDetails.accent }} />
-                      complimentary
-                    </span>
-                    <span>Added to cart at checkout</span>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-bold text-[#C47A3B] uppercase tracking-wider">Free with diffuser</span>
+                    </div>
+                    <h3 className="text-2xl font-light text-[#2F2B26] mb-2">{selectedScentDetails.name}</h3>
+                    <p className="text-[#5F5B56] text-sm font-light mb-4">{selectedScentDetails.notes}</p>
+                  </div>
+                  <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-xl p-4 text-sm text-[#4A4540]">
+                    <p className="font-medium text-[#2F2B26] text-xs uppercase tracking-wider mb-1">What's included</p>
+                    <p>✓ 15ml premium essential oil</p>
+                    <p>✓ Complimentary with any diffuser</p>
+                    <p>✓ 14-day exchange guarantee</p>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-2xl font-light text-[#2F2B26] mb-2">Choose one aroma</h3>
-                  <p className="text-[#5F5B56] text-sm font-light mb-6">
-                    Tap a scent below to reserve it. You can always swap before checking out.
-                  </p>
-                  <div className="flex items-center gap-3 text-xs text-[#6B6762]">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-dashed border-[#C4A27F]/50 text-[#8B7355]">
-                      <span className="block w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
-                      1/1 available
-                    </span>
-                    <span>Complimentary with diffuser</span>
+                  <div className="mb-6 p-6 bg-gradient-to-br from-[#FFF9F0] to-[#F8F4EE] rounded-xl border-2 border-dashed border-[#C4A27F]/50">
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] rounded-full flex items-center justify-center">
+                        <span className="text-3xl text-white font-bold">1</span>
+                      </div>
+                      <p className="text-lg font-medium text-[#2F2B26] mb-2">Select Your Free Scent</p>
+                      <p className="text-sm text-[#6B6762]">Choose from 6 botanical blends</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-xs text-[#6B6762]">
+                    <p className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
+                      <span>$28 value — yours free</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
+                      <span>Complimentary with diffuser purchase</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
+                      <span>Free exchanges within 14 days</span>
+                    </p>
                   </div>
                 </div>
               )}
 
               <button
-                className="mt-8 w-full py-4 bg-[#2F2B26] text-white tracking-[0.2em] text-xs font-semibold uppercase hover:bg-[#8B7355] transition-colors"
+                onClick={() => {
+                  if (selectedScent) {
+                    localStorage.setItem('selectedFreeScent', selectedScent);
+                  }
+                  window.location.href = '/shop';
+                }}
+                disabled={!selectedScent}
+                className={`mt-8 w-full py-4 text-white tracking-[0.2em] text-xs font-semibold uppercase transition-all duration-300 ${
+                  selectedScent
+                    ? 'bg-[#2F2B26] hover:bg-[#8B7355] cursor-pointer'
+                    : 'bg-gray-300 cursor-not-allowed opacity-60'
+                }`}
               >
-                Build my ritual
+                {selectedScent ? 'Build my ritual →' : 'Select a scent first'}
               </button>
             </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {freeScentOptions.map((scent) => {
-              const isSelected = selectedScent === scent.id;
-              return (
-                <button
-                  type="button"
-                  key={scent.id}
-                  onClick={() => setSelectedScent(scent.id)}
-                  className={`group relative text-left bg-white/80 backdrop-blur-sm border rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(42,37,32,0.12)] ${
-                    isSelected ? 'border-[#2F2B26]' : 'border-transparent'
-                  }`}
-                >
-                  <div
-                    className="absolute inset-x-6 top-0 h-[2px]"
-                    style={{ background: `linear-gradient(90deg, transparent, ${scent.accent}, transparent)` }}
-                  />
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    <div className={`relative w-full lg:w-40 aspect-[2/3] rounded-xl overflow-hidden ${scent.fit === 'contain' ? 'bg-[#F7F3ED]' : ''}`}>
-                      <Image
-                        src={scent.image}
-                        alt={scent.name}
-                        fill
-                        sizes="(min-width: 1024px) 25vw, 60vw"
-                        className={`transition-transform duration-500 group-hover:scale-105 ${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
-                      />
-                      <div className="absolute inset-0 ring-1 ring-black/5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[#8B7355]">15 ml</p>
-                        <span className="text-[11px] font-medium tracking-[0.25em] text-[#7A756F]">Complimentary</span>
-                      </div>
-                      <h3 className="text-xl font-light text-[#2F2B26] mb-1">{scent.name}</h3>
-                      <p className="text-sm text-[#6B6762] mb-4 font-light">{scent.mood}</p>
-                      <p className="text-sm text-[#4A4743] font-medium tracking-wide mb-6">{scent.notes}</p>
-                      <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em]">
-                        <span className="inline-flex items-center gap-2 text-[#5F5B56]">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: scent.accent }} />
-                          Botanical grade
-                        </span>
-                        <span className={isSelected ? 'text-[#2F2B26]' : 'text-[#8B7355]'}>
-                          {isSelected ? 'Selected' : 'Select scent'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
           </div>
         </div>
       </section>
