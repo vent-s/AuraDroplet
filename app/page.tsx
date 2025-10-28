@@ -712,9 +712,9 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Secure your ritual</p>
-              <h2 className="text-4xl lg:text-5xl font-light leading-tight">High-converting sets, ready for checkout</h2>
+              <h2 className="text-4xl lg:text-5xl font-light leading-tight">Our Best-Selling Sets</h2>
               <p className="text-base text-white/70 mt-4 max-w-2xl">
-                Join 15,000+ customers who&apos;ve upgraded their home fragrance. Elegant ceramic. All-day performance.
+                Transform your space with elegantly crafted ceramic diffusers that perform beautifully all day long. Join 15,000+ customers who&apos;ve elevated their home fragrance.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70">
