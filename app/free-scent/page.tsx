@@ -77,9 +77,12 @@ const scents: ScentOption[] = [
   },
 ];
 
+const diffuserVariantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? 'gid://shopify/ProductVariant/REPLACE_ME';
+
 export default function FreeScentPage() {
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -87,15 +90,44 @@ export default function FreeScentPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleScentSelect = (scentId: string) => {
+  const handleScentSelect = async (scentId: string) => {
     const scent = scents.find((option) => option.id === scentId);
     if (!scent?.variantId) {
       alert('This scent is unavailable right now.');
       return;
     }
+    if (!diffuserVariantId || diffuserVariantId.includes('REPLACE_ME')) {
+      alert('Please configure the diffuser variant ID before checking out.');
+      return;
+    }
+
     setSelectedScent(scentId);
-    const checkoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(scent.variantId)}&qty=1`;
-    window.location.href = checkoutUrl;
+    setIsCheckingOut(true);
+
+    try {
+      const response = await fetch('/api/cart/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lines: [
+            { merchandiseId: diffuserVariantId, quantity: 1 },
+            { merchandiseId: scent.variantId, quantity: 1 },
+          ]
+        })
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok || !payload.checkoutUrl) {
+        throw new Error(payload?.error || 'Unable to start checkout');
+      }
+
+      window.location.href = payload.checkoutUrl;
+    } catch (error) {
+      console.error('Free scent checkout failed:', error);
+      alert('We couldn\'t start checkout. Please try again or contact support.');
+      setIsCheckingOut(false);
+    }
   };
 
   const selectedCount = selectedScent ? 1 : 0;
@@ -238,9 +270,10 @@ export default function FreeScentPage() {
 
                   <button
                     onClick={() => handleScentSelect(scent.id)}
-                    className="w-full py-3 font-medium tracking-wide transition-all duration-300 bg-[#3A3834] text-white hover:bg-[#8B7355]"
+                    className="w-full py-3 font-medium tracking-wide transition-all duration-300 bg-[#3A3834] text-white hover:bg-[#8B7355] disabled:opacity-60"
+                    disabled={isCheckingOut}
                   >
-                    Checkout scent
+                    {isCheckingOut && selectedScent === scent.id ? 'Preparing checkout…' : 'Checkout scent'}
                   </button>
                 </div>
               </div>

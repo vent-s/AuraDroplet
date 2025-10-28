@@ -277,6 +277,7 @@ export default function Home() {
   const [scrollY, setScrollY] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [showNav, setShowNav] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
@@ -299,6 +300,7 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
+      setShowNav(window.scrollY > 80);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -313,7 +315,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#FAF9F7]">
       {/* Navigation */}
-      <header className="fixed top-0 w-full bg-[#FAF9F7]/98 backdrop-blur-md z-50 border-b border-[#E8E6E3]">
+      <header
+        className="fixed top-0 w-full bg-[#FAF9F7]/98 backdrop-blur-md z-50 border-b border-[#E8E6E3] transition-opacity duration-500"
+        style={{ opacity: showNav ? 1 : 0, pointerEvents: showNav ? 'auto' : 'none' }}
+      >
         <nav className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 relative">
             {/* Mobile Shop Button */}
@@ -401,61 +406,10 @@ export default function Home() {
               opacity: Math.max(0, 1 - scrollY * 0.002)
             }}
           >
-            <span className="inline-flex items-center justify-center gap-2 text-xs font-semibold tracking-[0.4em] mb-6 text-white/80 uppercase">
-              12-HOUR MIST &nbsp;•&nbsp; WHISPER-QUIET &nbsp;•&nbsp; AUTO SHUTOFF
-            </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold mb-6 leading-tight text-white">
-              Whole-home scenting without the noise.
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white mb-6">
+              Aura Diffuser. Whisper-quiet sanctuary.
             </h1>
-            <p className="text-base sm:text-lg text-white/85 max-w-2xl mx-auto leading-relaxed font-light">
-              Choose continuous mist or timed intervals. Whisper-quiet technology covers 700 sq ft and runs for 12 hours.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
-              <a
-                href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
-                className={`luxury-btn-primary px-10 py-4 text-center bg-white text-[#3A3834] transition-all duration-300 font-medium tracking-wide ${needsVariantUpdate ? 'opacity-60 pointer-events-none' : 'hover:bg-[#F5F3F0]'}`}
-              >
-                Shop Aura
-              </a>
-              <a
-                href="#scent-selector"
-                className="luxury-btn-secondary px-10 py-4 text-center bg-transparent text-white border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300 font-medium tracking-wide"
-              >
-                Explore Scents
-              </a>
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-white/85 text-sm">
-              {[
-                { label: '2 scenting modes', detail: 'Continuous or timed', icon: 'waves' },
-                { label: 'Whisper-quiet', detail: '34 dB motor', icon: 'sound' },
-                { label: 'Auto shutoff', detail: '2-year warranty', icon: 'shield' }
-              ].map((card) => (
-                <div key={card.label} className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    {card.icon === 'waves' && (
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4 2.5 4 5 4" />
-                      </svg>
-                    )}
-                    {card.icon === 'sound' && (
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M5 9v6h3l4 4V5L8 9H5z" />
-                      </svg>
-                    )}
-                    {card.icon === 'shield' && (
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l8 4v5c0 5.25-3.438 9.876-8 11-4.562-1.124-8-5.75-8-11V7l8-4z" />
-                      </svg>
-                    )}
-                  </div>
-                  <div>
-                    <p className="uppercase tracking-[0.35em] text-xs text-white/60">{card.label}</p>
-                    <p className="text-base font-semibold">{card.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-white/70 text-sm uppercase tracking-[0.3em]">Scroll to see autumn offers</p>
           </div>
         </div>
 
