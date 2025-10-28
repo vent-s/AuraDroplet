@@ -121,8 +121,8 @@ const reviewEntries = [
     body: "Diffuser running nightly. Lavender Veil is herbaceous with a citrus lift—no synthetic edge."
   },
   {
-    name: "Noah G.",
-    location: "Austin, TX",
+    name: "Jack Davis",
+    location: "Fayetteville, AR",
     scent: "Mint Leaf",
     title: "Crisp and clean",
     body: "Mint Leaf reads modern apothecary. Guests ask what hotel we stayed at—cred earned."
