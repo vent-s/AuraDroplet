@@ -674,16 +674,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Mission & Social Proof */}
+      {/* Meet the Founder */}
       <section className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-6 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Our mission</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Meet the Founder</p>
           <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">
             Make every home feel like a sanctuary—quiet, hydrated, and beautifully scented.
           </h3>
-          <p className="text-[#5A5550] text-base">
-            Join 15,000+ homes nationwide. Sculpted ceramic design, 12-hour runtime, whisper-quiet performance.
-          </p>
+          <div className="text-left max-w-2xl mx-auto space-y-4">
+            <p className="text-[#5A5550] text-base leading-relaxed">
+              Hi, I&apos;m Asher, the founder of AuraDroplet. Our mission when making this brand is to give you luxury diffusers that transform your space into the sanctuary you deserve.
+            </p>
+            <p className="text-[#5A5550] text-base leading-relaxed">
+              We&apos;ve helped over 15,000 homes nationwide create peaceful, beautifully scented spaces with our sculpted ceramic design, 12-hour runtime, and whisper-quiet performance.
+            </p>
+            <p className="text-[#5A5550] text-base leading-relaxed">
+              If you ever want to contact me personally, my email is{' '}
+              <a href="mailto:ashervaughn43@gmail.com" className="text-[#C47A3B] hover:underline font-medium">
+                ashervaughn43@gmail.com
+              </a>
+              {' '}or reach out to our business email at{' '}
+              <a href="mailto:auradroplet@gmail.com" className="text-[#C47A3B] hover:underline font-medium">
+                auradroplet@gmail.com
+              </a>
+            </p>
+          </div>
           <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
             <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
             <p>Try Aura risk-free. If it doesn&apos;t transform your space, return it free—no forms, no restocking fees.</p>
