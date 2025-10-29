@@ -182,7 +182,7 @@ const ritualShop = [
   {
     name: "Aura Diffuser",
     subtitle: "Matte Sandstone",
-    price: "$189",
+    price: "$40",
     value: "Ships with free scent",
     image: "/auradroplet-hero.jpg",
     badge: "Ready to ship",
@@ -191,8 +191,8 @@ const ritualShop = [
   {
     name: "Starter Pairing",
     subtitle: "Diffuser + 2 additional vials",
-    price: "$229",
-    value: "Save $27 as a bundle",
+    price: "$49.99",
+    value: "Best value bundle",
     image: "/bedshot.jpg",
     badge: "Most selected",
     qty: 1
@@ -200,7 +200,7 @@ const ritualShop = [
   {
     name: "Seasonal Reserve",
     subtitle: "Diffuser + 4 essences",
-    price: "$289",
+    price: "$60.00",
     value: "Includes concierge swap",
     image: "/AutumnOffer.jpg",
     badge: "Limited October run",
