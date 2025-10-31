@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
   const variant = req.nextUrl.searchParams.get("variant");
   const qtyParam = req.nextUrl.searchParams.get("qty") ?? "1";
   const scentVariant = req.nextUrl.searchParams.get("scent");
+  const addonVariants = req.nextUrl.searchParams.getAll("addon").filter(Boolean);
   const quantity = Number.parseInt(qtyParam, 10);
 
   if (!variant) {
@@ -40,6 +41,13 @@ export async function GET(req: NextRequest) {
         quantity: 1,
       });
     }
+
+    addonVariants.forEach((addon) => {
+      lines.push({
+        merchandiseId: addon,
+        quantity: 1,
+      });
+    });
 
     const { data, errors } = await shopifyFetch<CartCreateResult>(GQL.cartCreate, {
       lines,

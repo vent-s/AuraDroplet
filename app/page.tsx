@@ -6,7 +6,14 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { products } from "./data/products";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
-const quickCheckoutUrl = (quantity = 1, scentVariant?: string) => {
+
+type QuickCheckoutOptions = {
+  quantity?: number;
+  scentVariant?: string;
+  addonVariants?: string[];
+};
+
+const quickCheckoutUrl = ({ quantity = 1, scentVariant, addonVariants = [] }: QuickCheckoutOptions = {}) => {
   const params = new URLSearchParams({
     variant: variantId,
     qty: quantity.toString(),
@@ -14,6 +21,9 @@ const quickCheckoutUrl = (quantity = 1, scentVariant?: string) => {
   if (scentVariant) {
     params.append("scent", scentVariant);
   }
+  addonVariants.forEach((addon) => {
+    params.append("addon", addon);
+  });
   return `/api/quick-checkout?${params.toString()}`;
 };
 const needsVariantUpdate = variantId.includes("REPLACE_ME");
@@ -187,8 +197,21 @@ const reviewEntries = [
   }
 ];
 
-const ritualShop = [
+type RitualShopItem = {
+  id: string;
+  name: string;
+  subtitle: string;
+  price: string;
+  value: string;
+  image: string;
+  badge: string;
+  qty?: number;
+  requiredSelections?: number;
+};
+
+const ritualShop: RitualShopItem[] = [
   {
+    id: "diffuser-only",
     name: "Aura Diffuser",
     subtitle: "Matte Sandstone",
     price: "$40",
@@ -198,26 +221,30 @@ const ritualShop = [
     qty: 1
   },
   {
+    id: "starter-pairing",
     name: "Starter Pairing",
     subtitle: "Diffuser + 2 additional vials",
     price: "$49.99",
     value: "Best value bundle",
     image: "/2For1.jpg",
     badge: "Most selected",
-    qty: 1
+    qty: 1,
+    requiredSelections: 2,
   },
   {
+    id: "seasonal-reserve",
     name: "Seasonal Reserve",
     subtitle: "Diffuser + 4 essences",
     price: "$60.00",
     value: "Includes concierge swap",
     image: "/4For1.jpg",
     badge: "Limited October run",
-    qty: 1
+    qty: 1,
+    requiredSelections: 4,
   }
 ];
 
-type FreeScentOption = {
+type FreeScentOptionBase = {
   id: string;
   name: string;
   mood: string;
@@ -228,6 +255,10 @@ type FreeScentOption = {
   productId: string;
 };
 
+type FreeScentOption = FreeScentOptionBase & {
+  variantId?: string;
+};
+
 const productVariantMap = products.reduce<Record<string, string>>((acc, product) => {
   if (product.variantId) {
     acc[product.id] = product.variantId;
@@ -235,7 +266,7 @@ const productVariantMap = products.reduce<Record<string, string>>((acc, product)
   return acc;
 }, {});
 
-const freeScentOptions: FreeScentOption[] = [
+const baseFreeScentOptions: FreeScentOptionBase[] = [
   {
     id: "rose",
     name: "Rose Petal",
@@ -295,6 +326,24 @@ const freeScentOptions: FreeScentOption[] = [
   }
 ];
 
+const freeScentOptions: FreeScentOption[] = baseFreeScentOptions.map((option) => {
+  const variantId = productVariantMap[option.productId];
+  if (!variantId) {
+    console.warn(`Missing Shopify variant ID for scent option "${option.name}" (product id: ${option.productId})`);
+  }
+  return {
+    ...option,
+    variantId,
+  };
+});
+
+const scentVariantLookup = freeScentOptions.reduce<Record<string, string>>((acc, scent) => {
+  if (scent.variantId) {
+    acc[scent.id] = scent.variantId;
+  }
+  return acc;
+}, {});
+
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
@@ -303,8 +352,10 @@ export default function Home() {
   const [showNav, setShowNav] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
+  const [bundleSelections, setBundleSelections] = useState<Record<string, string[]>>({});
+  const [activeBundle, setActiveBundle] = useState<string | null>(null);
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
-  const selectedScentVariantId = selectedScentDetails ? productVariantMap[selectedScentDetails.productId] : undefined;
+  const selectedScentVariantId = selectedScent ? scentVariantLookup[selectedScent] : undefined;
   const quizComplete = quizQuestions.every((question) => quizResponses[question.id]);
   const recommendedHandle = useMemo(() => {
     const scores: Record<string, number> = {};
@@ -319,6 +370,58 @@ export default function Home() {
 
   const handleQuizSelect = (questionId: string, value: string) => {
     setQuizResponses((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const getBundleSelections = (bundleId: string) => bundleSelections[bundleId] ?? [];
+
+  const handleBundleScentToggle = (bundleId: string, scentId: string, limit: number) => {
+    setBundleSelections((prev) => {
+      if (limit <= 0) {
+        return prev;
+      }
+      const current = prev[bundleId] ?? [];
+      if (current.includes(scentId)) {
+        const next = current.filter((id) => id !== scentId);
+        return { ...prev, [bundleId]: next };
+      }
+      if (current.length >= limit) {
+        return prev;
+      }
+      return { ...prev, [bundleId]: [...current, scentId] };
+    });
+  };
+
+  const handleQuickAdd = (item: RitualShopItem) => {
+    if (needsVariantUpdate) {
+      alert('Please configure the diffuser variant ID before checking out.');
+      return;
+    }
+
+    const requiredSelections = item.requiredSelections ?? 0;
+    const selections = getBundleSelections(item.id);
+
+    if (requiredSelections > 0 && selections.length < requiredSelections) {
+      setActiveBundle(item.id);
+      return;
+    }
+
+    const addonVariants = selections
+      .map((scentId) => scentVariantLookup[scentId])
+      .filter((id): id is string => Boolean(id));
+
+    if (requiredSelections > 0 && addonVariants.length < requiredSelections) {
+      alert('One or more selected scents are unavailable right now.');
+      return;
+    }
+
+    const url = quickCheckoutUrl({
+      quantity: item.qty ?? 1,
+      scentVariant: selectedScentVariantId,
+      addonVariants: Array.from(new Set(addonVariants)),
+    });
+
+    setActiveBundle(null);
+    window.location.href = url;
   };
 
   useEffect(() => {
@@ -770,56 +873,161 @@ export default function Home() {
           </div>
 
           <div id="conversion-shop" className="grid md:grid-cols-3 gap-6">
-            {ritualShop.map((item, index) => (
-              <article
-                key={item.name}
-                className="group relative bg-[#281F1A] border border-white/10 rounded-[28px] overflow-hidden flex flex-col"
-              >
-                <div className="relative bg-gradient-to-br from-[#3A3430] to-[#281F1A]">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={800}
-                    height={600}
-                    className={`h-64 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">
-                    {item.badge}
-                  </span>
-                </div>
-                <div className="flex-1 p-6 flex flex-col">
-                  <div className="mb-6">
-                    <p className="text-xs uppercase tracking-[0.35em] text-white/60">{index === 0 ? 'Diffuser' : 'Bundle'}</p>
-                    <h3 className="text-2xl font-light mt-3">{item.name}</h3>
-                    <p className="text-sm text-white/70 mt-1">{item.subtitle}</p>
+            {ritualShop.map((item, index) => {
+              const selections = getBundleSelections(item.id);
+              const selectedCount = selections.length;
+              const requiredSelections = item.requiredSelections ?? 0;
+              const needsSelection = requiredSelections > 0;
+
+              return (
+                <article
+                  key={item.id}
+                  className="group relative bg-[#281F1A] border border-white/10 rounded-[28px] overflow-hidden flex flex-col"
+                  style={{ overflow: activeBundle === item.id && needsSelection ? 'visible' : undefined }}
+                >
+                  <div className="relative bg-gradient-to-br from-[#3A3430] to-[#281F1A]">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={800}
+                      height={600}
+                      className={`h-64 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">
+                      {item.badge}
+                    </span>
                   </div>
-                  <div className="mt-auto">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-3xl font-light">{item.price}</p>
-                        <p className="text-xs uppercase tracking-[0.3em] text-[#ED9F72]">{item.value}</p>
+                  <div className="flex-1 p-6 flex flex-col">
+                    <div className="mb-6">
+                      <p className="text-xs uppercase tracking-[0.35em] text-white/60">{index === 0 ? 'Diffuser' : 'Bundle'}</p>
+                      <h3 className="text-2xl font-light mt-3">{item.name}</h3>
+                      <p className="text-sm text-white/70 mt-1">{item.subtitle}</p>
+                    </div>
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-3xl font-light">{item.price}</p>
+                          <p className="text-xs uppercase tracking-[0.3em] text-[#ED9F72]">{item.value}</p>
+                        </div>
+                        <div className="text-right text-xs text-white/60">
+                          <p>Complimentary scent</p>
+                          <p>2-year warranty</p>
+                        </div>
                       </div>
-                      <div className="text-right text-xs text-white/60">
-                        <p>Complimentary scent</p>
-                        <p>2-year warranty</p>
+                      <div className="flex gap-3">
+                        <div className="relative flex-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (needsVariantUpdate) {
+                                return;
+                              }
+                              if (needsSelection) {
+                                setActiveBundle((prev) =>
+                                  prev === item.id ? null : item.id
+                                );
+                                return;
+                              }
+                              handleQuickAdd(item);
+                            }}
+                            aria-expanded={needsSelection ? activeBundle === item.id : undefined}
+                            className={`w-full py-3 rounded-full font-medium tracking-wide transition-colors flex items-center justify-center gap-2 ${
+                              needsVariantUpdate
+                                ? 'bg-white/40 text-[#201C18]/60 cursor-not-allowed'
+                                : 'bg-white text-[#201C18] hover:bg-[#F7E9DE]'
+                            }`}
+                            disabled={needsVariantUpdate}
+                          >
+                            {needsSelection
+                              ? `Select scents (${selectedCount}/${requiredSelections})`
+                              : 'Quick add'}
+                            {needsSelection && (
+                              <svg
+                                className={`w-4 h-4 transition-transform ${
+                                  activeBundle === item.id ? 'rotate-180' : ''
+                                }`}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+                              </svg>
+                            )}
+                          </button>
+                          {needsSelection && activeBundle === item.id && (
+                            <div className="absolute left-0 right-0 top-full z-20 mt-3 bg-white text-[#2F2B26] border border-white/20 rounded-2xl shadow-[0_18px_40px_rgba(0,0,0,0.35)] p-5">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-[11px] uppercase tracking-[0.35em] text-[#8B7355]">
+                                    Customize your kit
+                                  </p>
+                                  <p className="text-sm text-[#6B6762] mt-1">
+                                    Pick {requiredSelections} color-coded essences to complete this bundle.
+                                  </p>
+                                </div>
+                                <span className="text-xs font-semibold text-[#2F2B26] bg-[#F8F4EE] px-2 py-1 rounded-full">
+                                  {selectedCount}/{requiredSelections} selected
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 mt-4">
+                                {freeScentOptions.map((scent) => {
+                                  const isSelected = selections.includes(scent.id);
+                                  const limitReached = selectedCount >= requiredSelections;
+                                  const disableSelect = !isSelected && (limitReached || !scent.variantId);
+
+                                  return (
+                                    <button
+                                      key={scent.id}
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.preventDefault();
+                                        handleBundleScentToggle(item.id, scent.id, requiredSelections);
+                                      }}
+                                      disabled={disableSelect}
+                                      className={`text-left p-3 rounded-xl border transition-all ${
+                                        isSelected
+                                          ? 'bg-[#2F2B26] text-white border-[#2F2B26]'
+                                          : 'bg-[#F8F4EE] text-[#2F2B26] border-transparent hover:border-[#C4A27F]'
+                                      } ${disableSelect ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                      <span className="block text-sm font-medium">{scent.name}</span>
+                                      <span className="block text-[11px] uppercase tracking-[0.25em] text-[#6B6762] mt-1">
+                                        {scent.notes}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <p className="mt-4 text-xs text-[#6B6762]">
+                                {selectedCount < requiredSelections
+                                  ? `Choose ${requiredSelections - selectedCount} more ${requiredSelections - selectedCount === 1 ? 'scent' : 'scents'} to unlock checkout.`
+                                  : 'All set — lock in your bundle below.'}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  handleQuickAdd(item);
+                                }}
+                                className="mt-4 w-full py-2.5 rounded-full bg-[#2F2B26] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={selectedCount < requiredSelections || needsVariantUpdate}
+                              >
+                                Confirm & checkout
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <button className="px-6 py-3 rounded-full border border-white/30 text-white text-sm tracking-wide hover:bg-white/10">
+                          Details
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-3">
-                      <a
-                        href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(item.qty ?? 1, selectedScentVariantId)}
-                        className={`flex-1 py-3 rounded-full text-center font-medium tracking-wide ${needsVariantUpdate ? 'bg-white/40 text-[#201C18]/60 pointer-events-none' : 'bg-white text-[#201C18] hover:bg-[#F7E9DE] transition-colors'}`}
-                      >
-                        Quick add
-                      </a>
-                      <button className="px-6 py-3 rounded-full border border-white/30 text-white text-sm tracking-wide hover:bg-white/10">
-                        Details
-                      </button>
-                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
           <div className="mt-12 flex flex-col lg:flex-row items-center gap-4 text-sm text-white/70">
@@ -979,7 +1187,7 @@ export default function Home() {
               <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
             </div>
             <a
-              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1, selectedScentVariantId)}
+              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId })}
               className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
             >
               Checkout
