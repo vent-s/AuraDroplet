@@ -184,7 +184,7 @@ const ritualShop = [
     subtitle: "Matte Sandstone",
     price: "$40",
     value: "Ships with free scent",
-    image: "/auradroplet-hero.jpg",
+    image: "/AuraProduct.jpg",
     badge: "Ready to ship",
     qty: 1
   },
@@ -193,7 +193,7 @@ const ritualShop = [
     subtitle: "Diffuser + 2 additional vials",
     price: "$49.99",
     value: "Best value bundle",
-    image: "/bedshot.jpg",
+    image: "/2For1.jpg",
     badge: "Most selected",
     qty: 1
   },
@@ -202,7 +202,7 @@ const ritualShop = [
     subtitle: "Diffuser + 4 essences",
     price: "$60.00",
     value: "Includes concierge swap",
-    image: "/AutumnOffer.jpg",
+    image: "/4For1.jpg",
     badge: "Limited October run",
     qty: 1
   }
@@ -745,13 +745,13 @@ export default function Home() {
                 key={item.name}
                 className="group relative bg-[#281F1A] border border-white/10 rounded-[28px] overflow-hidden flex flex-col"
               >
-                <div className="relative">
+                <div className="relative bg-gradient-to-br from-[#3A3430] to-[#281F1A]">
                   <Image
                     src={item.image}
                     alt={item.name}
                     width={800}
                     height={600}
-                    className="h-64 w-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className={`h-64 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">

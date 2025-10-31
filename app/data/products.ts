@@ -4,7 +4,7 @@ export const products: Product[] = [
   {
     id: 'stone-diffuser',
     name: 'Stone Diffuser',
-    price: 97.49,
+    price: 40.00,
     originalPrice: 129.99,
     discount: 25,
     image: '/DiffProductShot.png',
