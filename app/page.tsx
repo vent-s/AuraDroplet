@@ -3,10 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { products } from "./data/products";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
-const baseCheckoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(variantId)}`;
-const quickCheckoutUrl = (quantity = 1) => `${baseCheckoutUrl}&qty=${quantity}`;
+const quickCheckoutUrl = (quantity = 1, scentVariant?: string) => {
+  const params = new URLSearchParams({
+    variant: variantId,
+    qty: quantity.toString(),
+  });
+  if (scentVariant) {
+    params.append("scent", scentVariant);
+  }
+  return `/api/quick-checkout?${params.toString()}`;
+};
 const needsVariantUpdate = variantId.includes("REPLACE_ME");
 
 const brands = [
@@ -216,7 +225,15 @@ type FreeScentOption = {
   image: string;
   accent: string;
   fit?: 'cover' | 'contain';
+  productId: string;
 };
+
+const productVariantMap = products.reduce<Record<string, string>>((acc, product) => {
+  if (product.variantId) {
+    acc[product.id] = product.variantId;
+  }
+  return acc;
+}, {});
 
 const freeScentOptions: FreeScentOption[] = [
   {
@@ -225,7 +242,8 @@ const freeScentOptions: FreeScentOption[] = [
     mood: "Velvet florals",
     notes: "Rose · Geranium · Musk",
     image: "/RoseProduct.jpg",
-    accent: "#C4A27F"
+    accent: "#C4A27F",
+    productId: "rose-petal-oil",
   },
   {
     id: "lavender",
@@ -234,7 +252,8 @@ const freeScentOptions: FreeScentOption[] = [
     notes: "Lavender · Bergamot · Chamomile",
     image: "/Lavender.jpg",
     accent: "#B8A4C5",
-    fit: 'contain'
+    fit: 'contain',
+    productId: "lavender-oil",
   },
   {
     id: "jasmine",
@@ -242,7 +261,8 @@ const freeScentOptions: FreeScentOption[] = [
     mood: "Evening bloom",
     notes: "White Florals · Citrus Peel",
     image: "/Jasmine.jpg",
-    accent: "#E6C8A0"
+    accent: "#E6C8A0",
+    productId: "jasmine-oil",
   },
   {
     id: "mint",
@@ -251,7 +271,8 @@ const freeScentOptions: FreeScentOption[] = [
     notes: "Peppermint · Basil · Green Tea",
     image: "/Mint.jpg",
     accent: "#95C1AF",
-    fit: 'contain'
+    fit: 'contain',
+    productId: "mint-oil",
   },
   {
     id: "vanilla",
@@ -260,7 +281,8 @@ const freeScentOptions: FreeScentOption[] = [
     notes: "Vanilla · Amber · Sandalwood",
     image: "/vanilla.jpg",
     accent: "#D1A88E",
-    fit: 'contain'
+    fit: 'contain',
+    productId: "vanilla-oil",
   },
   {
     id: "ocean",
@@ -268,7 +290,8 @@ const freeScentOptions: FreeScentOption[] = [
     mood: "Coastal calm",
     notes: "Sea Salt · Driftwood · Marine",
     image: "/Ocean.jpg",
-    accent: "#8FB7C6"
+    accent: "#8FB7C6",
+    productId: "ocean-mist-oil",
   }
 ];
 
@@ -281,6 +304,7 @@ export default function Home() {
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
+  const selectedScentVariantId = selectedScentDetails ? productVariantMap[selectedScentDetails.productId] : undefined;
   const quizComplete = quizQuestions.every((question) => quizResponses[question.id]);
   const recommendedHandle = useMemo(() => {
     const scores: Record<string, number> = {};
@@ -311,6 +335,12 @@ export default function Home() {
       videoRef.current.play().catch(e => console.log('Auto-play prevented:', e));
     }
   }, []);
+
+  useEffect(() => {
+    if (selectedScent && !selectedScentVariantId) {
+      console.warn(`Missing Shopify variant ID for selected scent: ${selectedScent}`);
+    }
+  }, [selectedScent, selectedScentVariantId]);
 
   return (
     <main className="min-h-screen bg-[#FAF9F7]">
@@ -777,7 +807,7 @@ export default function Home() {
                     </div>
                     <div className="flex gap-3">
                       <a
-                        href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(item.qty ?? 1)}
+                        href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(item.qty ?? 1, selectedScentVariantId)}
                         className={`flex-1 py-3 rounded-full text-center font-medium tracking-wide ${needsVariantUpdate ? 'bg-white/40 text-[#201C18]/60 pointer-events-none' : 'bg-white text-[#201C18] hover:bg-[#F7E9DE] transition-colors'}`}
                       >
                         Quick add
@@ -949,7 +979,7 @@ export default function Home() {
               <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
             </div>
             <a
-              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1)}
+              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl(1, selectedScentVariantId)}
               className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
             >
               Checkout

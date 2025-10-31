@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { products } from "@/app/data/products";
 
 type ScentOption = {
   id: string;
@@ -11,8 +12,16 @@ type ScentOption = {
   rating: number;
   reviews: number;
   description: string;
-  variantId: string;
+  productId: string;
+  variantId?: string;
 };
+
+const scentVariantMap = products.reduce<Record<string, string>>((acc, product) => {
+  if (product.variantId) {
+    acc[product.id] = product.variantId;
+  }
+  return acc;
+}, {});
 
 const scents: ScentOption[] = [
   {
@@ -23,7 +32,7 @@ const scents: ScentOption[] = [
     rating: 5.8,
     reviews: 243,
     description: "Timeless florals with warm undertones",
-    variantId: "gid://shopify/ProductVariant/10263572152598"
+    productId: "rose-petal-oil",
   },
   {
     id: "lavender",
@@ -33,7 +42,7 @@ const scents: ScentOption[] = [
     rating: 5.8,
     reviews: 312,
     description: "Calming fields with citrus lift",
-    variantId: "gid://shopify/ProductVariant/10263569137942"
+    productId: "lavender-oil",
   },
   {
     id: "jasmine",
@@ -43,7 +52,7 @@ const scents: ScentOption[] = [
     rating: 5.8,
     reviews: 189,
     description: "Intoxicating blooms, bright finish",
-    variantId: "gid://shopify/ProductVariant/10263570153750"
+    productId: "jasmine-oil",
   },
   {
     id: "mint-leaf",
@@ -53,7 +62,7 @@ const scents: ScentOption[] = [
     rating: 5.3,
     reviews: 156,
     description: "Crisp herbal awakening",
-    variantId: "gid://shopify/ProductVariant/10263570448662"
+    productId: "mint-oil",
   },
   {
     id: "vanilla",
@@ -63,7 +72,7 @@ const scents: ScentOption[] = [
     rating: 5.8,
     reviews: 287,
     description: "Warm woods with creamy depth",
-    variantId: "gid://shopify/ProductVariant/10263569924374"
+    productId: "vanilla-oil",
   },
   {
     id: "ocean-mist",
@@ -73,9 +82,18 @@ const scents: ScentOption[] = [
     rating: 5.6,
     reviews: 201,
     description: "Coastal breeze captured",
-    variantId: "gid://shopify/ProductVariant/10263571890454"
+    productId: "ocean-mist-oil",
   },
-];
+].map((scent) => {
+  const variantId = scentVariantMap[scent.productId];
+  if (!variantId) {
+    console.warn(`Missing Shopify variantId for scent "${scent.name}" (product id: ${scent.productId})`);
+  }
+  return {
+    ...scent,
+    variantId,
+  };
+});
 
 const diffuserVariantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? 'gid://shopify/ProductVariant/REPLACE_ME';
 

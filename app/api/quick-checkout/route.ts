@@ -17,6 +17,7 @@ type CartCreateResult = {
 export async function GET(req: NextRequest) {
   const variant = req.nextUrl.searchParams.get("variant");
   const qtyParam = req.nextUrl.searchParams.get("qty") ?? "1";
+  const scentVariant = req.nextUrl.searchParams.get("scent");
   const quantity = Number.parseInt(qtyParam, 10);
 
   if (!variant) {
@@ -26,13 +27,22 @@ export async function GET(req: NextRequest) {
   const lineQuantity = Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
 
   try {
+    const lines = [
+      {
+        merchandiseId: variant,
+        quantity: lineQuantity,
+      },
+    ];
+
+    if (scentVariant) {
+      lines.push({
+        merchandiseId: scentVariant,
+        quantity: 1,
+      });
+    }
+
     const { data, errors } = await shopifyFetch<CartCreateResult>(GQL.cartCreate, {
-      lines: [
-        {
-          merchandiseId: variant,
-          quantity: lineQuantity,
-        },
-      ],
+      lines,
     });
 
     if (errors?.length) {
