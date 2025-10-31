@@ -279,7 +279,7 @@ const freeScentOptions: FreeScentOption[] = [
     name: "Vanilla Ember",
     mood: "Warm gourmand",
     notes: "Vanilla · Amber · Sandalwood",
-    image: "/vanilla.jpg",
+    image: "/Vanilla.jpg",
     accent: "#D1A88E",
     fit: 'contain',
     productId: "vanilla-oil",

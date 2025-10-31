@@ -68,7 +68,7 @@ const scents: ScentOption[] = [
     id: "vanilla",
     name: "Vanilla Ember",
     notes: "Vanilla · Amber · Sandalwood",
-    image: "/vanilla.jpg",
+    image: "/Vanilla.jpg",
     rating: 5.8,
     reviews: 287,
     description: "Warm woods with creamy depth",

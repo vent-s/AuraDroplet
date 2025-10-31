@@ -54,7 +54,7 @@ export const products: Product[] = [
     id: 'vanilla-oil',
     name: 'Vanilla Essential Oil',
     price: 28.99,
-    image: '/vanilla.jpg',
+    image: '/Vanilla.jpg',
     category: 'Essential Oils',
     badge: 'new',
     description: 'Rich vanilla bean with warm amber and sandalwood. Comforting and grounding. 15ml.',
