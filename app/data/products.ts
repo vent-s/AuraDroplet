@@ -16,7 +16,7 @@ export const products: Product[] = [
   {
     id: 'rose-petal-oil',
     name: 'Rose Petal Essential Oil',
-    price: 24.99,
+    price: 9.99,
     image: '/RoseProduct.jpg',
     category: 'Essential Oils',
     description: 'Luxurious rose essence with geranium and musk notes. 15ml of pure botanical bliss.',
@@ -25,7 +25,7 @@ export const products: Product[] = [
   {
     id: 'lavender-oil',
     name: 'Lavender Essential Oil',
-    price: 22.99,
+    price: 9.99,
     image: '/Lavender.jpg',
     category: 'Essential Oils',
     badge: 'bestseller',
@@ -35,7 +35,7 @@ export const products: Product[] = [
   {
     id: 'jasmine-oil',
     name: 'Jasmine Essential Oil',
-    price: 26.99,
+    price: 9.99,
     image: '/Jasmine.jpg',
     category: 'Essential Oils',
     description: 'Exotic white florals with bright citrus peel. Intoxicating and uplifting. 15ml.',
@@ -44,7 +44,7 @@ export const products: Product[] = [
   {
     id: 'mint-oil',
     name: 'Mint Leaf Essential Oil',
-    price: 21.99,
+    price: 9.99,
     image: '/Mint.jpg',
     category: 'Essential Oils',
     description: 'Crisp peppermint with basil and green tea. Refreshing and invigorating. 15ml.',
@@ -53,7 +53,7 @@ export const products: Product[] = [
   {
     id: 'vanilla-oil',
     name: 'Vanilla Essential Oil',
-    price: 28.99,
+    price: 9.99,
     image: '/Vanilla.jpg',
     category: 'Essential Oils',
     badge: 'new',
@@ -63,7 +63,7 @@ export const products: Product[] = [
   {
     id: 'ocean-mist-oil',
     name: 'Ocean Mist Essential Oil',
-    price: 23.99,
+    price: 9.99,
     image: '/Ocean.jpg',
     category: 'Essential Oils',
     description: 'Coastal breeze captured in a bottle. Sea salt, driftwood, and marine notes. 15ml.',
