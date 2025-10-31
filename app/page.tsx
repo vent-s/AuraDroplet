@@ -731,19 +731,22 @@ export default function Home() {
 
               <button
                 onClick={() => {
-                  if (selectedScent) {
-                    localStorage.setItem('selectedFreeScent', selectedScent);
+                  if (!selectedScent) {
+                    return;
                   }
-                  window.location.href = '/shop';
+                  localStorage.setItem('selectedFreeScent', selectedScent);
+                  window.location.href = needsVariantUpdate
+                    ? '#set-variant'
+                    : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId });
                 }}
-                disabled={!selectedScent}
+                disabled={!selectedScent || needsVariantUpdate}
                 className={`mt-8 w-full py-4 text-white tracking-[0.2em] text-xs font-semibold uppercase transition-all duration-300 ${
-                  selectedScent
+                  selectedScent && !needsVariantUpdate
                     ? 'bg-[#2F2B26] hover:bg-[#8B7355] cursor-pointer'
                     : 'bg-gray-300 cursor-not-allowed opacity-60'
                 }`}
               >
-                {selectedScent ? 'Build my ritual →' : 'Select a scent first'}
+                {needsVariantUpdate ? 'Set diffuser first' : selectedScent ? 'Checkout →' : 'Select a scent first'}
               </button>
             </div>
           </div>
