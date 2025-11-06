@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { products } from "./data/products";
+import { track } from "@/lib/analytics";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
 
@@ -382,13 +383,32 @@ export default function Home() {
       const current = prev[bundleId] ?? [];
       if (current.includes(scentId)) {
         const next = current.filter((id) => id !== scentId);
+        track('deselect_item', {
+          item_id: scentId,
+          item_list_id: bundleId,
+        });
         return { ...prev, [bundleId]: next };
       }
       if (current.length >= limit) {
+        track('selection_limit_reached', {
+          item_list_id: bundleId,
+          attempted_item: scentId,
+          limit,
+        });
         return prev;
       }
+      track('select_item', {
+        item_id: scentId,
+        item_list_id: bundleId,
+        index: current.length + 1,
+      });
       return { ...prev, [bundleId]: [...current, scentId] };
     });
+  };
+
+  const handlePricingBannerCta = () => {
+    const offerSection = document.getElementById('free-scent-offer');
+    offerSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleQuickAdd = (item: RitualShopItem) => {
@@ -401,6 +421,10 @@ export default function Home() {
     const selections = getBundleSelections(item.id);
 
     if (requiredSelections > 0 && selections.length < requiredSelections) {
+      track('view_item_list', {
+        item_list_id: item.id,
+        item_list_name: item.name,
+      });
       setActiveBundle(item.id);
       return;
     }
@@ -413,6 +437,40 @@ export default function Home() {
       alert('One or more selected scents are unavailable right now.');
       return;
     }
+
+    const selectionDetails = selections
+      .map((scentId) => freeScentOptions.find((scent) => scent.id === scentId))
+      .filter((scent): scent is FreeScentOption => Boolean(scent?.variantId));
+
+    const eventItems = [
+      {
+        item_id: item.id,
+        item_name: item.name,
+        item_category: 'bundle',
+        quantity: item.qty ?? 1,
+      },
+      ...selectionDetails.map((scent) => ({
+        item_id: scent.id,
+        item_name: scent.name,
+        item_category: 'bundle_scent',
+        quantity: 1,
+      })),
+    ];
+
+    if (selectedScentDetails && selectedScentVariantId) {
+      eventItems.push({
+        item_id: selectedScentDetails.id,
+        item_name: selectedScentDetails.name,
+        item_category: 'complimentary_scent',
+        quantity: 1,
+      });
+    }
+
+    track('begin_checkout', {
+      checkout_type: requiredSelections > 0 ? 'bundle_quick_add' : 'single_quick_add',
+      items: eventItems,
+      item_list_id: item.id,
+    });
 
     const url = quickCheckoutUrl({
       quantity: item.qty ?? 1,
@@ -557,8 +615,121 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing Banner */}
+      <section className="bg-[#FAF9F7] px-6 lg:px-8 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="block lg:hidden">
+            <div className="bg-white/90 border border-[#E8E6E3] px-6 py-8 rounded-sm shadow-[0_14px_40px_-30px_rgba(58,56,52,0.45)]">
+              <div className="relative w-full max-w-[220px] mx-auto mb-8 aspect-[3/4]">
+                <Image
+                  src="/DiffProductShot.png"
+                  alt="Aura Diffuser product image"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 70vw"
+                  className="object-cover rounded-sm"
+                />
+              </div>
+
+              <div className="text-left mb-4">
+                <h3 className="text-2xl font-light text-[#3A3834] mb-1">Aura Diffuser</h3>
+                <p className="text-sm tracking-[0.25em] text-[#8B7355] uppercase font-light">Whole-home scenting</p>
+              </div>
+
+              <div className="inline-flex items-center gap-2 mb-6 px-3 py-2 bg-[#F8F4EE] border border-[#E4D9CC] rounded-full">
+                <svg className="w-4 h-4 text-[#C4A27F]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                <span className="text-xs text-[#5A5550] font-medium">Includes free premium scent</span>
+              </div>
+
+              <p className="text-4xl font-light text-[#3A3834] mb-6">$40.00</p>
+
+              <button
+                onClick={handlePricingBannerCta}
+                className="w-full px-8 py-3.5 bg-[#3A3834] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300 rounded-sm"
+              >
+                Add to cart
+              </button>
+            </div>
+          </div>
+
+          <div className="hidden lg:grid gap-12 lg:grid-cols-[1.05fr_1fr] items-center bg-white/85 border border-[#E8E6E3] p-10 lg:p-14 shadow-[0_18px_45px_-30px_rgba(58,56,52,0.6)]">
+            <div className="relative aspect-[4/5] w-full max-w-md mx-auto lg:mx-0">
+              <Image
+                src="/DiffProductShot.png"
+                alt="Aura Diffuser product image"
+                fill
+                priority
+                sizes="(min-width: 1024px) 40vw, 80vw"
+                className="object-cover rounded-sm"
+              />
+            </div>
+
+            <div>
+              <p className="text-xs tracking-[0.45em] text-[#8B7355] uppercase font-medium mb-4">
+                Aura Diffuser
+              </p>
+
+              <h2 className="font-serif text-[2.75rem] lg:text-[3.25rem] font-light leading-tight text-[#3A3834] mb-6">
+                The effortless way to scent your entire home
+              </h2>
+
+              <ul className="space-y-3 text-sm sm:text-base text-[#3A3834] font-light mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
+                  <span>Walk into calm every day</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
+                  <span>Make your bedroom a sanctuary</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
+                  <span>Stop worrying about smell</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
+                  <span>Start mornings right</span>
+                </li>
+              </ul>
+
+              <div className="mb-6">
+                <p className="text-sm uppercase tracking-[0.35em] text-[#8B7355] font-medium">
+                  Includes 1 free premium scent
+                </p>
+                <p className="text-xs text-[#9B9792] uppercase tracking-[0.45em] mt-1">
+                  ($10 value)
+                </p>
+              </div>
+
+              <p className="text-4xl font-light text-[#3A3834] mb-6">$40.00</p>
+
+              <button
+                onClick={handlePricingBannerCta}
+                className="w-full sm:w-auto px-10 py-4 bg-[#3A3834] text-white font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300"
+              >
+                Add to cart — $40.00
+              </button>
+
+              <p className="text-sm text-[#6B6762] font-light mt-6">
+                ↓ Choose your free scent below
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-6 text-xs text-[#9B9792] font-light pt-6 lg:pt-8">
+            <span>2-year warranty</span>
+            <span>·</span>
+            <span>Free shipping over $X</span>
+            <span>·</span>
+            <span>Scent swap on paid essences</span>
+          </div>
+        </div>
+      </section>
+
       {/* Free Scent Picker */}
-      <section className="relative py-24 bg-gradient-to-br from-[#F8F3ED] via-[#FAF9F7] to-[#F1E7DA] overflow-hidden">
+      <section id="free-scent-offer" className="relative py-24 bg-gradient-to-br from-[#F8F3ED] via-[#FAF9F7] to-[#F1E7DA] overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-32 -right-20 w-72 h-72 bg-[#E8D7C6]/50 blur-3xl" />
           <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-[#DADFE6]/50 blur-3xl" />
@@ -617,7 +788,14 @@ export default function Home() {
                   <button
                     type="button"
                     key={scent.id}
-                    onClick={() => setSelectedScent(scent.id)}
+                    onClick={() => {
+                      setSelectedScent(scent.id);
+                      track('select_content', {
+                        content_type: 'free_scent',
+                        item_id: scent.id,
+                        item_name: scent.name,
+                      });
+                    }}
                     className={`group relative text-left bg-white/80 backdrop-blur-sm border-2 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(42,37,32,0.12)] ${
                       isSelected ? 'border-[#C4A27F] ring-2 ring-[#C4A27F]/30' : 'border-transparent'
                     }`}
@@ -735,6 +913,24 @@ export default function Home() {
                     return;
                   }
                   localStorage.setItem('selectedFreeScent', selectedScent);
+                  if (selectedScentDetails && selectedScentVariantId) {
+                    track('begin_checkout', {
+                      checkout_type: 'free_scent_cta',
+                      items: [
+                        {
+                          item_id: 'diffuser',
+                          item_name: 'Aura Diffuser',
+                          quantity: 1,
+                        },
+                        {
+                          item_id: selectedScentDetails.id,
+                          item_name: selectedScentDetails.name,
+                          item_category: 'complimentary_scent',
+                          quantity: 1,
+                        },
+                      ],
+                    });
+                  }
                   window.location.href = needsVariantUpdate
                     ? '#set-variant'
                     : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId });
@@ -746,7 +942,7 @@ export default function Home() {
                     : 'bg-gray-300 cursor-not-allowed opacity-60'
                 }`}
               >
-                {needsVariantUpdate ? 'Set diffuser first' : selectedScent ? 'Checkout →' : 'Select a scent first'}
+                {needsVariantUpdate ? 'Set diffuser first' : selectedScent ? 'Checkout with diffuser' : 'Select a scent first'}
               </button>
             </div>
           </div>
@@ -848,7 +1044,13 @@ export default function Home() {
             <span>4.9/5 · 15,000+ reviews</span>
           </div>
           <button
-            onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              track('select_promotion', {
+                promotion_id: 'hero_autumn_deals',
+                promotion_name: 'Hero Autumn Deals CTA',
+              });
+              document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' });
+            }}
             className="inline-flex items-center gap-2 text-[#3A3834] border border-[#3A3834] px-6 py-2 rounded-full text-sm hover:bg-[#3A3834] hover:text-white transition-colors"
           >
             View autumn deals ↓
@@ -927,6 +1129,11 @@ export default function Home() {
                                 return;
                               }
                               if (needsSelection) {
+                                const willOpen = activeBundle !== item.id;
+                                track(willOpen ? 'view_item_list' : 'collapse_item_list', {
+                                  item_list_id: item.id,
+                                  item_list_name: item.name,
+                                });
                                 setActiveBundle((prev) =>
                                   prev === item.id ? null : item.id
                                 );
@@ -1193,7 +1400,7 @@ export default function Home() {
               href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId })}
               className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
             >
-              Checkout
+              Checkout with diffuser
             </a>
           </div>
         </div>
