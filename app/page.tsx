@@ -769,7 +769,7 @@ export default function Home() {
                 We&apos;d like to help you discover a scent for autumn.
               </h3>
               <p className="text-lg text-[#4A4540] font-light leading-relaxed mb-6">
-                Select one essence to experience, <span className="font-medium text-[#C47A3B]">complimentary</span>. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through Thanksgiving.
+                Select one essence to experience, <span className="font-medium text-[#C47A3B]">complimentary</span> with your diffuser purchase. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through Thanksgiving.
               </p>
               <p className="text-base text-[#5F5B56] font-light mb-4">Take your time choosing below.</p>
               <p className="text-sm text-[#6B6762] font-light">
