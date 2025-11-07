@@ -1,7 +1,6 @@
 'use client';
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { products } from "./data/products";
 import { track } from "@/lib/analytics";
@@ -29,7 +28,23 @@ const quickCheckoutUrl = ({ quantity = 1, scentVariant, addonVariants = [] }: Qu
 };
 const needsVariantUpdate = variantId.includes("REPLACE_ME");
 
-const brands = [
+type Brand = {
+  name: string;
+  description: string;
+  color: string;
+  image: string;
+  notes: string;
+  spaces: string;
+  pair: string;
+  handle: string;
+  structure: {
+    top: string;
+    heart: string;
+    base: string;
+  };
+};
+
+const brands: Brand[] = [
   {
     name: "Heritage Florals",
     description: "Timeless botanical essences",
@@ -38,7 +53,12 @@ const brands = [
     notes: "Rose • Jasmine • Tuberose",
     spaces: "Living room, dressing table",
     pair: "Rose Petal",
-    handle: "heritage"
+    handle: "heritage",
+    structure: {
+      top: "Rose Dew",
+      heart: "Jasmine Leaf",
+      base: "Musk Amber",
+    },
   },
   {
     name: "Modern Woods",
@@ -48,7 +68,12 @@ const brands = [
     notes: "Cedar • Sandalwood • Pine",
     spaces: "Library, study",
     pair: "Mint Leaf",
-    handle: "modern"
+    handle: "modern",
+    structure: {
+      top: "Cedar",
+      heart: "Sandalwood",
+      base: "Smoked Pine",
+    },
   },
   {
     name: "Citrus Luxe",
@@ -58,7 +83,12 @@ const brands = [
     notes: "Bergamot • Neroli • Verbena",
     spaces: "Kitchen, entry",
     pair: "Lavender Veil",
-    handle: "citrus"
+    handle: "citrus",
+    structure: {
+      top: "Neroli",
+      heart: "Verbena",
+      base: "Cedarwood",
+    },
   },
   {
     name: "Ocean Mist",
@@ -68,7 +98,12 @@ const brands = [
     notes: "Marine • Driftwood • Salt",
     spaces: "Bath, bedroom",
     pair: "Ocean Mist",
-    handle: "ocean"
+    handle: "ocean",
+    structure: {
+      top: "Sea Spray",
+      heart: "Driftwood",
+      base: "Mineral Musk",
+    },
   },
   {
     name: "Spice & Earth",
@@ -78,7 +113,12 @@ const brands = [
     notes: "Cardamom • Amber • Vetiver",
     spaces: "Dining, lounge",
     pair: "Vanilla Ember",
-    handle: "spice"
+    handle: "spice",
+    structure: {
+      top: "Cardamom",
+      heart: "Amber Resin",
+      base: "Vetiver",
+    },
   },
   {
     name: "Zen Garden",
@@ -88,14 +128,31 @@ const brands = [
     notes: "Green tea • Bamboo • Rain",
     spaces: "Yoga nook, bedside",
     pair: "Lavender Veil",
-    handle: "zen"
+    handle: "zen",
+    structure: {
+      top: "Green Tea",
+      heart: "Lotus",
+      base: "Fresh Rain",
+    },
   },
 ];
 
-const quizQuestions = [
+type QuizQuestion = {
+  id: string;
+  title: string;
+  selectionLimit: number;
+  options: {
+    label: string;
+    value: string;
+    helper: string;
+  }[];
+};
+
+const quizQuestions: QuizQuestion[] = [
   {
     id: 'mood',
     title: 'What mood are you setting?',
+    selectionLimit: 1,
     options: [
       { label: 'Blooming & romantic', value: 'heritage', helper: 'Think fresh florals and candlelit dinners.' },
       { label: 'Modern & grounded', value: 'modern', helper: 'Structured woods for studies and libraries.' },
@@ -106,6 +163,7 @@ const quizQuestions = [
   {
     id: 'space',
     title: 'Where will it live?',
+    selectionLimit: 1,
     options: [
       { label: 'Bedroom / bath retreat', value: 'zen', helper: 'Soft greens and tea leaves calm evenings.' },
       { label: 'Dining or lounge', value: 'spice', helper: 'Cardamom and amber elevate gatherings.' },
@@ -116,6 +174,7 @@ const quizQuestions = [
   {
     id: 'energy',
     title: 'Pick an energy level',
+    selectionLimit: 1,
     options: [
       { label: 'Slow mornings', value: 'zen', helper: 'Meditative, quiet diffusion.' },
       { label: 'Entertaining at night', value: 'spice', helper: 'Warm, sensual layers.' },
@@ -203,6 +262,8 @@ type RitualShopItem = {
   name: string;
   subtitle: string;
   price: string;
+  compareAtPrice?: string;
+  savingsCopy?: string;
   value: string;
   image: string;
   badge: string;
@@ -216,6 +277,8 @@ const ritualShop: RitualShopItem[] = [
     name: "Aura Diffuser",
     subtitle: "Matte Sandstone",
     price: "$40",
+    compareAtPrice: "$59",
+    savingsCopy: "Save 32%",
     value: "Ships with free scent",
     image: "/AuraProduct.jpg",
     badge: "Ready to ship",
@@ -226,6 +289,8 @@ const ritualShop: RitualShopItem[] = [
     name: "Starter Pairing",
     subtitle: "Diffuser + 2 additional vials",
     price: "$49.99",
+    compareAtPrice: "$72",
+    savingsCopy: "Save 30%",
     value: "Best value bundle",
     image: "/2For1.jpg",
     badge: "Most selected",
@@ -237,6 +302,8 @@ const ritualShop: RitualShopItem[] = [
     name: "Seasonal Reserve",
     subtitle: "Diffuser + 4 essences",
     price: "$60.00",
+    compareAtPrice: "$92",
+    savingsCopy: "Save 35%",
     value: "Includes concierge swap",
     image: "/4For1.jpg",
     badge: "Limited October run",
@@ -345,16 +412,47 @@ const scentVariantLookup = freeScentOptions.reduce<Record<string, string>>((acc,
   return acc;
 }, {});
 
+type ButtonVariant = 'primary' | 'secondary';
+
+const buttonBaseClass =
+  "inline-flex items-center justify-center rounded-full text-[11px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.28em] px-6 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F2B26]";
+
+const buttonVariantClassMap: Record<ButtonVariant, string> = {
+  primary: "bg-[var(--ink)] text-[var(--paper)] hover:bg-[#463b32]",
+  secondary: "border border-[var(--ink)] text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)]",
+};
+
+const getButtonClass = (
+  variant: ButtonVariant = 'primary',
+  options: { disabled?: boolean; extra?: string } = {}
+) => {
+  const { disabled = false, extra = '' } = options;
+  return [
+    buttonBaseClass,
+    buttonVariantClassMap[variant],
+    disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '',
+    extra,
+  ]
+    .filter(Boolean)
+    .join(' ');
+};
+
 
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const firstProductRef = useRef<HTMLDivElement | null>(null);
+  const quizAutoSelectRef = useRef(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
   const [bundleSelections, setBundleSelections] = useState<Record<string, string[]>>({});
   const [activeBundle, setActiveBundle] = useState<string | null>(null);
+  const [hasPassedProductHero, setHasPassedProductHero] = useState(false);
+  const [showMobileStickyBar, setShowMobileStickyBar] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success'>('idle');
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
   const selectedScentVariantId = selectedScent ? scentVariantLookup[selectedScent] : undefined;
   const quizComplete = quizQuestions.every((question) => quizResponses[question.id]);
@@ -368,6 +466,13 @@ export default function Home() {
   }, [quizResponses]);
   const recommendedBrand = brands.find((brand) => brand.handle === recommendedHandle) ?? brands[0];
   const answeredCount = Object.values(quizResponses).filter(Boolean).length;
+  const heroProduct = ritualShop[0];
+  const heroReview = reviewEntries[0];
+  const aggregateReviewScore = 4.8;
+  const aggregateReviewCount = 182;
+  const recommendedScent = freeScentOptions.find(
+    (scent) => scent.name.toLowerCase() === recommendedBrand.pair.toLowerCase()
+  ) ?? freeScentOptions[0];
 
   const handleQuizSelect = (questionId: string, value: string) => {
     setQuizResponses((prev) => ({ ...prev, [questionId]: value }));
@@ -404,6 +509,108 @@ export default function Home() {
       });
       return { ...prev, [bundleId]: [...current, scentId] };
     });
+  };
+
+const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant?: 'grid' | 'carousel' } = {}) => {
+    const isSelected = selectedScent === scent.id;
+    const padding = variant === 'carousel' ? 'p-4' : 'p-5';
+    const imageHeight = variant === 'carousel' ? 'h-44' : 'h-52';
+    const minWidth = variant === 'carousel' ? 'min-w-[250px]' : '';
+
+    return (
+      <button
+        type="button"
+        key={`${variant}-${scent.id}`}
+        onClick={() => {
+          setSelectedScent(scent.id);
+          try {
+            localStorage.setItem('selectedFreeScent', scent.id);
+          } catch {
+            // ignore persistence issues
+          }
+          track('select_content', {
+            content_type: 'free_scent',
+            item_id: scent.id,
+            item_name: scent.name,
+          });
+        }}
+        aria-pressed={isSelected}
+        className={`group relative text-left bg-white border rounded-[var(--radius-card)] ${padding} ${minWidth} transition-shadow duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--amber)] ${
+          isSelected ? 'border-[var(--amber)] shadow-[var(--shadow-card)]' : 'border-[var(--mist)] hover:shadow-[var(--shadow-card)]'
+        }`}
+      >
+        <div className={`relative rounded-[var(--radius-card)] overflow-hidden ${imageHeight}`}>
+          <Image
+            src={scent.image}
+            alt={scent.name}
+            fill
+            sizes="(max-width: 768px) 70vw, (max-width: 1024px) 45vw, 25vw"
+            className={`${scent.fit === 'contain' ? 'object-contain' : 'object-cover'} transition-transform duration-500 group-hover:scale-105`}
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+          <div className="absolute top-3 left-3 text-[11px] uppercase tracking-[0.35em] text-white/80">
+            {scent.mood}
+          </div>
+          {isSelected && (
+            <div className="absolute top-3 right-3 w-9 h-9 rounded-full bg-[var(--amber)] text-white flex items-center justify-center text-sm font-semibold">
+              ✓
+            </div>
+          )}
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.35em] text-[#8B7355]">Complimentary</p>
+              <h4 className="text-2xl font-light text-[var(--ink)]">{scent.name}</h4>
+            </div>
+            <span
+              className={`w-12 h-12 rounded-full border flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.3em] ${
+                isSelected ? 'bg-[var(--amber)] border-[var(--amber)] text-white' : 'border-[var(--mist)] text-[#8B877F]'
+              }`}
+            >
+              {isSelected ? 'Set' : 'Tap'}
+            </span>
+          </div>
+          <p className="text-sm italic text-[#5F5B56]">{scent.notes}</p>
+          <p className="text-xs text-[#6B6762]">
+            {isSelected ? 'Currently selected.' : `Tap to include ${scent.name} in your order.`}
+          </p>
+        </div>
+      </button>
+    );
+  };
+
+  const handleFreeScentCheckout = () => {
+    if (!selectedScent || needsVariantUpdate) {
+      return;
+    }
+    try {
+      localStorage.setItem('selectedFreeScent', selectedScent);
+    } catch {
+      // ignore persistence failures
+    }
+    if (selectedScentDetails && selectedScentVariantId) {
+      track('begin_checkout', {
+        checkout_type: 'free_scent_cta',
+        items: [
+          {
+            item_id: 'diffuser',
+            item_name: 'Aura Diffuser',
+            quantity: 1,
+          },
+          {
+            item_id: selectedScentDetails.id,
+            item_name: selectedScentDetails.name,
+            item_category: 'complimentary_scent',
+            quantity: 1,
+          },
+        ],
+      });
+    }
+    window.location.href = needsVariantUpdate
+      ? '#set-variant'
+      : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId });
   };
 
   const handlePricingBannerCta = () => {
@@ -486,6 +693,7 @@ export default function Home() {
     const handleScroll = () => {
       setScrollY(window.scrollY);
       setShowNav(window.scrollY > 80);
+      setShowMobileStickyBar(window.scrollY > 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -503,6 +711,37 @@ export default function Home() {
     }
   }, [selectedScent, selectedScentVariantId]);
 
+  useEffect(() => {
+    if (
+      quizComplete &&
+      recommendedScent &&
+      !selectedScent &&
+      !quizAutoSelectRef.current
+    ) {
+      quizAutoSelectRef.current = true;
+      setSelectedScent(recommendedScent.id);
+      localStorage.setItem('selectedFreeScent', recommendedScent.id);
+    }
+  }, [quizComplete, recommendedScent, selectedScent]);
+
+  useEffect(() => {
+    if (!firstProductRef.current) {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry) {
+          return;
+        }
+        setHasPassedProductHero(!entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(firstProductRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#FAF9F7]">
       {/* Navigation */}
@@ -515,7 +754,7 @@ export default function Home() {
             {/* Mobile Shop Button */}
             <a
               href="/shop"
-              className="lg:hidden px-4 py-2 bg-[#C4A27F] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300 rounded-sm"
+              className={getButtonClass('primary', { extra: 'lg:hidden px-4 py-2 text-sm tracking-wide' })}
             >
               SHOP
             </a>
@@ -585,22 +824,76 @@ export default function Home() {
             <source src="/AuraDroplet.mp4" type="video/mp4" />
           </video>
           {/* Elegant overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/80" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-24 pb-12">
+        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-20 pb-12 lg:pt-24">
           <div
-            className={`max-w-3xl text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`max-w-2xl text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
               transform: `translateY(${scrollY * 0.3}px)`,
               opacity: Math.max(0, 1 - scrollY * 0.002)
             }}
           >
+            <p className="text-xs uppercase tracking-[0.35em] text-white/70 mb-4">Free fall scent included</p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white mb-6">
               Aura Diffuser. Whisper-quiet sanctuary.
             </h1>
-            <p className="text-white/70 text-sm uppercase tracking-[0.3em]">Scroll to see autumn offers</p>
+            <p className="text-lg text-white/80 mb-8">
+              Transform any room into a sanctuary in seconds with sculpted ceramic, 12-hour runtime, and concierge scent matching.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handlePricingBannerCta}
+                className={getButtonClass('primary')}
+              >
+                Shop Aura Diffuser
+              </button>
+              <a
+                href="#free-scent-offer"
+                className={getButtonClass('secondary', {
+                  extra: 'border-white/70 text-white hover:bg-white/20 hover:text-white',
+                })}
+              >
+                Get yours today
+              </a>
+            </div>
+            <p className="mt-4 text-sm text-white/80">Ships in 24h · 30-day returns</p>
+            <p className="mt-6 text-white/80 text-sm flex items-center justify-center gap-2">
+              <span className="flex text-[#F6C892] gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={`hero-star-${i}`}>★</span>
+                ))}
+              </span>
+              <span>Over 500+ happy customers</span>
+            </p>
+            <p className="mt-6 text-white/70 text-xs uppercase tracking-[0.3em]">Scroll to see autumn offers</p>
+          </div>
+          <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-white/90 text-[#2F2B26] rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
+            <div className="relative h-40 rounded-2xl overflow-hidden bg-[#F8F4EE]">
+              <Image
+                src="/DiffProductShot.png"
+                alt="Aura Diffuser on marble plinth"
+                fill
+                sizes="300px"
+                className="object-contain p-4"
+                loading="lazy"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355]">Aura Diffuser</p>
+                <p className="text-2xl font-light">$40</p>
+              </div>
+              <button
+                onClick={() => handleQuickAdd(heroProduct)}
+                className={getButtonClass('primary', { extra: 'px-4 py-2' })}
+              >
+                Add to cart
+              </button>
+            </div>
+            <p className="text-xs text-[#6B6762]">Includes free scent · Ships in 24h</p>
           </div>
         </div>
 
@@ -616,118 +909,137 @@ export default function Home() {
       </section>
 
       {/* Pricing Banner */}
-      <section className="bg-[#FAF9F7] px-6 lg:px-8 py-20">
+      <section className="bg-[var(--paper)] px-6 lg:px-8 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="block lg:hidden">
-            <div className="bg-white/90 border border-[#E8E6E3] px-6 py-8 rounded-sm shadow-[0_14px_40px_-30px_rgba(58,56,52,0.45)]">
-              <div className="relative w-full max-w-[220px] mx-auto mb-8 aspect-[3/4]">
+          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] items-center bg-white border border-[var(--mist)] rounded-[24px] p-8 lg:p-12 shadow-[var(--shadow-soft)]">
+            <div className="order-2 lg:order-1 space-y-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-[var(--amber)] mb-3">
+                  Aura Diffuser
+                </p>
+                <h2 className="text-4xl lg:text-[44px] font-light leading-tight text-[var(--ink)]">
+                  Quiet ceramic diffusion for every room.
+                </h2>
+                <p className="text-base text-[#4A4540] mt-3">
+                  Sculpted matte stone, 12-hour runtime, and concierge scent matching bundled as standard.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-baseline gap-4">
+                  <p className="text-5xl font-light text-[var(--ink)]">${heroProduct.price}</p>
+                  {heroProduct.compareAtPrice && (
+                    <p className="text-base text-[#8B877F]">was {heroProduct.compareAtPrice}</p>
+                  )}
+                </div>
+                <p className="text-base text-[var(--ink)] mt-2 font-medium">Includes a complimentary fall essence ($28 value).</p>
+                <p className="text-sm text-[#5F5B56] mt-1">Free shipping when you add any second vial.</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (needsVariantUpdate) {
+                      return;
+                    }
+                    if (selectedScent) {
+                      handleQuickAdd(heroProduct);
+                      return;
+                    }
+                    handlePricingBannerCta();
+                  }}
+                  disabled={needsVariantUpdate}
+                  className={getButtonClass('primary', {
+                    disabled: needsVariantUpdate,
+                    extra: 'w-full sm:flex-1',
+                  })}
+                >
+                  {needsVariantUpdate
+                    ? 'Finish store setup'
+                    : selectedScent
+                    ? 'Add diffuser + free scent'
+                    : 'Choose your free scent'}
+                </button>
+                <a
+                  href="#bundle-shop"
+                  className={getButtonClass('secondary', { extra: 'w-full sm:flex-1 text-center' })}
+                >
+                  See bundles
+                </a>
+              </div>
+              <p className="text-xs text-[#6B6762] uppercase tracking-[0.3em]">
+                Free shipping on US orders $50+ • 30-day returns
+              </p>
+              {needsVariantUpdate && (
+                <p className="text-xs text-[#8B7355] mt-2">
+                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
+                </p>
+              )}
+
+              <div className="rounded-2xl border border-[var(--mist)] bg-white p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                <div className="flex items-center gap-4">
+                  <div aria-hidden="true" className="flex text-[var(--amber)] text-lg">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={`aggregate-top-${i}`}>★</span>
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-4xl font-semibold text-[var(--ink)]">
+                      {aggregateReviewScore.toFixed(1)}/5
+                      <span className="text-base font-normal text-[#6B6762] ml-3">
+                        ({aggregateReviewCount} reviews)
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-[#4C4842] italic flex-1">
+                  &ldquo;{heroReview.title}&rdquo; — {heroReview.name}, {heroReview.location}
+                </p>
+                <a href="#reviews" className="text-[11px] uppercase tracking-[0.35em] text-[var(--amber)] font-semibold">
+                  Read reviews
+                </a>
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2">
+              <div className="relative aspect-[4/5] w-full rounded-[var(--radius-card)] bg-[var(--clay)] border border-[var(--mist)] overflow-hidden">
                 <Image
                   src="/DiffProductShot.png"
-                  alt="Aura Diffuser product image"
+                  alt="Aura Diffuser on marble plinth"
                   fill
-                  priority
-                  sizes="(max-width: 640px) 70vw"
-                  className="object-cover rounded-sm"
+                  loading="lazy"
+                  sizes="(min-width: 1024px) 35vw, 80vw"
+                  className="object-cover"
                 />
               </div>
-
-              <div className="text-left mb-4">
-                <h3 className="text-2xl font-light text-[#3A3834] mb-1">Aura Diffuser</h3>
-                <p className="text-sm tracking-[0.25em] text-[#8B7355] uppercase font-light">Whole-home scenting</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {[
+                  '12-hour runtime',
+                  'Auto shut-off glow',
+                  'Free fall scent',
+                  '2-year warranty',
+                ].map((copy) => (
+                  <span
+                    key={copy}
+                    className="px-4 py-1.5 text-xs tracking-[0.25em] uppercase text-[#6B6762] border border-[var(--mist)] rounded-full bg-white/70"
+                  >
+                    {copy}
+                  </span>
+                ))}
               </div>
-
-              <div className="inline-flex items-center gap-2 mb-6 px-3 py-2 bg-[#F8F4EE] border border-[#E4D9CC] rounded-full">
-                <svg className="w-4 h-4 text-[#C4A27F]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                </svg>
-                <span className="text-xs text-[#5A5550] font-medium">Includes free premium scent</span>
-              </div>
-
-              <p className="text-4xl font-light text-[#3A3834] mb-6">$40.00</p>
-
-              <button
-                onClick={handlePricingBannerCta}
-                className="w-full px-8 py-3.5 bg-[#3A3834] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300 rounded-sm"
-              >
-                Add to cart
-              </button>
             </div>
           </div>
 
-          <div className="hidden lg:grid gap-12 lg:grid-cols-[1.05fr_1fr] items-center bg-white/85 border border-[#E8E6E3] p-10 lg:p-14 shadow-[0_18px_45px_-30px_rgba(58,56,52,0.6)]">
-            <div className="relative aspect-[4/5] w-full max-w-md mx-auto lg:mx-0">
-              <Image
-                src="/DiffProductShot.png"
-                alt="Aura Diffuser product image"
-                fill
-                priority
-                sizes="(min-width: 1024px) 40vw, 80vw"
-                className="object-cover rounded-sm"
-              />
-            </div>
-
-            <div>
-              <p className="text-xs tracking-[0.45em] text-[#8B7355] uppercase font-medium mb-4">
-                Aura Diffuser
-              </p>
-
-              <h2 className="font-serif text-[2.75rem] lg:text-[3.25rem] font-light leading-tight text-[#3A3834] mb-6">
-                The effortless way to scent your entire home
-              </h2>
-
-              <ul className="space-y-3 text-sm sm:text-base text-[#3A3834] font-light mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
-                  <span>Walk into calm every day</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
-                  <span>Make your bedroom a sanctuary</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
-                  <span>Stop worrying about smell</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-[#6B8E7F] mt-[2px]">✓</span>
-                  <span>Start mornings right</span>
-                </li>
-              </ul>
-
-              <div className="mb-6">
-                <p className="text-sm uppercase tracking-[0.35em] text-[#8B7355] font-medium">
-                  Includes 1 free premium scent
-                </p>
-                <p className="text-xs text-[#9B9792] uppercase tracking-[0.45em] mt-1">
-                  ($10 value)
-                </p>
-              </div>
-
-              <p className="text-4xl font-light text-[#3A3834] mb-6">$40.00</p>
-
-              <button
-                onClick={handlePricingBannerCta}
-                className="w-full sm:w-auto px-10 py-4 bg-[#3A3834] text-white font-medium tracking-wide hover:bg-[#8B7355] transition-all duration-300"
-              >
-                Add to cart — $40.00
-              </button>
-
-              <p className="text-sm text-[#6B6762] font-light mt-6">
-                ↓ Choose your free scent below
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-6 text-xs text-[#9B9792] font-light pt-6 lg:pt-8">
-            <span>2-year warranty</span>
-            <span>·</span>
-            <span>Free shipping over $X</span>
-            <span>·</span>
-            <span>Scent swap on paid essences</span>
+          <div className="mt-10 flex flex-wrap gap-4 text-xs text-[#6B6762] uppercase tracking-[0.3em]">
+            <span>Concierge scent swaps</span>
+            <span>•</span>
+            <span>Ships in 24h</span>
+            <span>•</span>
+            <span>Clean, IFRA-compliant oils</span>
           </div>
         </div>
       </section>
-
       {/* Free Scent Picker */}
       <section id="free-scent-offer" className="relative py-24 bg-gradient-to-br from-[#F8F3ED] via-[#FAF9F7] to-[#F1E7DA] overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
@@ -735,339 +1047,204 @@ export default function Home() {
           <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-[#DADFE6]/50 blur-3xl" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
-          {/* Promotional Hero - Full Width */}
-          <div className="grid lg:grid-cols-2 gap-12 mb-14">
-            <div className="relative">
-              <div className="absolute -inset-5 border border-[#D78752]/50 rounded-[42px]" />
-              <div className="absolute inset-5 border border-[#E6B078]/40 rounded-[38px]" />
-              <div className="relative h-[430px] rounded-[36px] overflow-hidden shadow-[0_35px_70px_rgba(33,24,17,0.22)]">
+        <div className="relative max-w-6xl mx-auto px-6 lg:px-8 space-y-12">
+          <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] items-center">
+            <div className="relative order-1">
+              <div className="absolute top-6 left-6 z-10 text-[11px] uppercase tracking-[0.4em] text-white/85 bg-black/35 px-4 py-1 rounded-full backdrop-blur">
+                Step 1 of 3
+              </div>
+              <div className="relative h-[420px] rounded-[36px] overflow-hidden shadow-[0_35px_70px_rgba(33,24,17,0.22)]">
                 <Image
                   src="/AutumnOffer.jpg"
-                  alt="Autumn Atelier Offer"
+                  alt="Free scent offer styling"
                   fill
-                  priority
-                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  loading="lazy"
+                  sizes="(min-width: 1024px) 45vw, 90vw"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/30 to-transparent" />
-                <div className="absolute inset-0 p-10 flex flex-col justify-between text-white">
-                  <div className="flex items-center justify-between text-[10px] tracking-[0.55em] uppercase text-white/70">
-                    <span>Autumn Offer</span>
-                    <span>Issue No. 04</span>
-                  </div>
-                  <div className="text-sm font-light tracking-[0.4em] uppercase text-white/70">
-                    <span>The Golden Hour Edit</span>
-                  </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white/80 text-[11px] uppercase tracking-[0.4em]">
+                  Complimentary fall atelier
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-col justify-center">
-              <p className="text-xs tracking-[0.35em] uppercase text-[#D28755] mb-4 font-medium">Autumn ritual incentive</p>
-              <h3 className="text-4xl lg:text-5xl font-light text-[#2F2B26] tracking-tight mb-6">
-                We&apos;d like to help you discover a scent for autumn.
+            <div className="order-2 space-y-5">
+              <p className="text-xs tracking-[0.35em] uppercase text-[#D28755]">Complimentary scent concierge</p>
+              <div>
+                <div className="h-1 w-full bg-[#EADCCE] rounded-full overflow-hidden">
+                  <div className="h-full bg-[var(--amber)] w-1/3" />
+                </div>
+                <p className="text-[11px] uppercase tracking-[0.35em] text-[#6B6762] mt-2">Choose your free fall blend</p>
+              </div>
+              <h3 className="text-4xl lg:text-5xl font-light text-[var(--ink)] tracking-tight">
+                Free fall scent with every diffuser.
               </h3>
-              <p className="text-lg text-[#4A4540] font-light leading-relaxed mb-6">
-                Select one essence to experience, <span className="font-medium text-[#C47A3B]">complimentary</span> with your diffuser purchase. All six scents available{' '}<span aria-hidden="true">·</span>{' '}Through Thanksgiving.
-              </p>
-              <p className="text-base text-[#5F5B56] font-light mb-4">Take your time choosing below.</p>
-              <p className="text-sm text-[#6B6762] font-light">
-                If it&apos;s not quite right, exchange it within 14 days—we&apos;re here to help you find your perfect match.
-              </p>
+              <div className="space-y-3 text-base text-[#4A4540]">
+                <p>Pick any fall scent—it&apos;s complimentary with your first diffuser.</p>
+                <p>We tuck the vial into the box automatically.</p>
+                <p>No code, no minimums, and concierge swaps within 14 days.</p>
+              </div>
+              <p className="text-sm text-[#6B6762]">Prefer surprises? We&apos;ll send Rose Petal if you skip this step.</p>
             </div>
           </div>
 
-          {/* Scent Grid + Sticky Selection Card */}
-          <div className="grid lg:grid-cols-[1fr_380px] gap-8 items-start">
-            {/* Scent Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {freeScentOptions.map((scent) => {
-                const isSelected = selectedScent === scent.id;
-                return (
-                  <button
-                    type="button"
-                    key={scent.id}
-                    onClick={() => {
-                      setSelectedScent(scent.id);
-                      track('select_content', {
-                        content_type: 'free_scent',
-                        item_id: scent.id,
-                        item_name: scent.name,
-                      });
-                    }}
-                    className={`group relative text-left bg-white/80 backdrop-blur-sm border-2 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(42,37,32,0.12)] ${
-                      isSelected ? 'border-[#C4A27F] ring-2 ring-[#C4A27F]/30' : 'border-transparent'
-                    }`}
-                  >
-                    {/* FREE Badge */}
-                    <div className="absolute -top-3 -right-3 z-10">
-                      <div className="bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wider shadow-lg">
-                        FREE
-                      </div>
-                    </div>
-
-                    {/* Selected Checkmark */}
-                    {isSelected && (
-                      <div className="absolute top-4 left-4 z-10 w-8 h-8 bg-[#C4A27F] rounded-full flex items-center justify-center shadow-md animate-in fade-in zoom-in duration-300">
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
-
-                    <div
-                      className="absolute inset-x-6 top-0 h-[2px]"
-                      style={{ background: `linear-gradient(90deg, transparent, ${scent.accent}, transparent)` }}
-                    />
-                    <div className="flex flex-col gap-4">
-                      <div className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden ${scent.fit === 'contain' ? 'bg-[#F7F3ED]' : ''}`}>
-                        <Image
-                          src={scent.image}
-                          alt={scent.name}
-                          fill
-                          sizes="(min-width: 1024px) 25vw, 50vw"
-                          className={`transition-transform duration-500 group-hover:scale-105 ${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
-                        />
-                        <div className="absolute inset-0 ring-1 ring-black/5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs uppercase tracking-[0.25em] text-[#8B7355]">15 ml</p>
-                          <span className="text-xs font-bold tracking-wider text-[#C47A3B]">$0.00</span>
-                        </div>
-                        <h3 className="text-xl font-light text-[#2F2B26] mb-1">{scent.name}</h3>
-                        <p className="text-sm text-[#6B6762] mb-3 font-light italic">{scent.mood}</p>
-                        <p className="text-sm text-[#4A4743] font-medium tracking-wide mb-4">{scent.notes}</p>
-                        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em]">
-                          <span className="inline-flex items-center gap-2 text-[#5F5B56]">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: scent.accent }} />
-                            Botanical grade
-                          </span>
-                          <span className={`font-bold ${isSelected ? 'text-[#C4A27F]' : 'text-[#8B7355]'}`}>
-                            {isSelected ? '✓ Selected' : 'Select'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sticky Selection Card */}
-            <div className="lg:sticky lg:top-24 bg-white/90 backdrop-blur-lg border-2 border-[#E5E1DB] p-8 rounded-2xl shadow-[0_20px_60px_rgba(58,56,52,0.12)] h-fit">
-              <p className="text-sm text-[#8B7355] uppercase tracking-[0.3em] mb-6">Your selection</p>
-              {selectedScentDetails ? (
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="text-xs font-bold text-[#C47A3B] uppercase tracking-wider">Free with diffuser</span>
-                    </div>
-                    <h3 className="text-2xl font-light text-[#2F2B26] mb-2">{selectedScentDetails.name}</h3>
-                    <p className="text-[#5F5B56] text-sm font-light mb-4">{selectedScentDetails.notes}</p>
-                  </div>
-                  <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-xl p-4 text-sm text-[#4A4540]">
-                    <p className="font-medium text-[#2F2B26] text-xs uppercase tracking-wider mb-1">What&apos;s included</p>
-                    <p>✓ 15ml premium essential oil</p>
-                    <p>✓ Complimentary with any diffuser</p>
-                    <p>✓ 14-day exchange guarantee</p>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="mb-6 p-6 bg-gradient-to-br from-[#FFF9F0] to-[#F8F4EE] rounded-xl border-2 border-dashed border-[#C4A27F]/50">
-                    <div className="text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#D4AF37] to-[#C4A27F] rounded-full flex items-center justify-center">
-                        <span className="text-3xl text-white font-bold">1</span>
-                      </div>
-                      <p className="text-lg font-medium text-[#2F2B26] mb-2">Select Your Free Scent</p>
-                      <p className="text-sm text-[#6B6762]">Choose from 6 botanical blends</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-xs text-[#6B6762]">
-                    <p className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
-                      <span>$28 value — yours free</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
-                      <span>Complimentary with diffuser purchase</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A27F]" />
-                      <span>Free exchanges within 14 days</span>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={() => {
-                  if (!selectedScent) {
-                    return;
-                  }
-                  localStorage.setItem('selectedFreeScent', selectedScent);
-                  if (selectedScentDetails && selectedScentVariantId) {
-                    track('begin_checkout', {
-                      checkout_type: 'free_scent_cta',
-                      items: [
-                        {
-                          item_id: 'diffuser',
-                          item_name: 'Aura Diffuser',
-                          quantity: 1,
-                        },
-                        {
-                          item_id: selectedScentDetails.id,
-                          item_name: selectedScentDetails.name,
-                          item_category: 'complimentary_scent',
-                          quantity: 1,
-                        },
-                      ],
-                    });
-                  }
-                  window.location.href = needsVariantUpdate
-                    ? '#set-variant'
-                    : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId });
-                }}
-                disabled={!selectedScent || needsVariantUpdate}
-                className={`mt-8 w-full py-4 text-white tracking-[0.2em] text-xs font-semibold uppercase transition-all duration-300 ${
-                  selectedScent && !needsVariantUpdate
-                    ? 'bg-[#2F2B26] hover:bg-[#8B7355] cursor-pointer'
-                    : 'bg-gray-300 cursor-not-allowed opacity-60'
-                }`}
+          <div className="space-y-6">
+            <div className="-mx-6 md:hidden">
+              <div
+                id="free-scent-carousel"
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-6 pb-2 pr-16"
               >
-                {needsVariantUpdate ? 'Set diffuser first' : selectedScent ? 'Checkout with diffuser' : 'Select a scent first'}
-              </button>
+                {freeScentOptions.map((scent) => (
+                  <div key={`carousel-${scent.id}`} className="snap-center">
+                    {renderScentCard(scent, { variant: 'carousel' })}
+                  </div>
+                ))}
+              </div>
+              <p className="px-6 text-xs text-[#6B6762] uppercase tracking-[0.3em]">Swipe to explore scents →</p>
             </div>
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {freeScentOptions.map((scent) => renderScentCard(scent))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[#4A4540]">
+              Selected:&nbsp;
+              <strong>{selectedScentDetails ? selectedScentDetails.name : 'Rose Petal (default)'}</strong>
+              <button
+                type="button"
+                className="ml-3 text-xs uppercase tracking-[0.3em] text-[#8B7355]"
+                onClick={() =>
+                  document.getElementById('free-scent-carousel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                }
+              >
+                Change
+              </button>
+            </p>
+            <p className="text-xs text-[#6B6762] uppercase tracking-[0.3em]">Complimentary vial auto-applies at checkout</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <button
+              onClick={handleFreeScentCheckout}
+              disabled={!selectedScent || needsVariantUpdate}
+              className={getButtonClass('primary', {
+                disabled: !selectedScent || needsVariantUpdate,
+                extra: 'w-full',
+              })}
+            >
+              {needsVariantUpdate ? 'Finish store setup' : selectedScent ? 'Add diffuser + free scent' : 'Select a scent'}
+            </button>
+            <button
+              type="button"
+              onClick={() => document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-[#8B7355] underline underline-offset-4 text-center"
+            >
+              Need help choosing?
+            </button>
           </div>
         </div>
       </section>
-
       {/* Client Reviews */}
-      <section className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
-        <div className="max-w-4xl mx-auto px-6 lg:px-0">
-          <div className="mb-12 text-center">
+      <section id="reviews" className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-8">
+          <div className="text-center">
             <p className="text-xs uppercase tracking-[0.35em] text-[#B77950] mb-3">Verified Ritualists</p>
-            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">What our autumn clientele is saying</h2>
-            <p className="text-sm text-[#6B6762] mt-4">
-              4.9 average across 1,200+ Aura diffuser owners. Exchanges honored within 14 days.
-            </p>
+            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">Loved by autumn clientele</h2>
+            <p className="text-base text-[#6B6762] mt-3">Free scent swap within 14 days if you don&apos;t love it.</p>
           </div>
 
-          <div className="relative">
-            <div className="absolute inset-y-6 left-10 right-10 border border-[#E2D5C4]/80 rounded-[32px] pointer-events-none" />
-            <div className="relative overflow-x-auto pb-6 pl-4 snap-x snap-mandatory flex gap-6">
-              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#F9F4ED] to-transparent" />
-              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#F9F4ED] to-transparent" />
-              {reviewEntries.map((review, index) => (
-                <article
-                  key={`${review.name}-${index}`}
-                  className="relative shrink-0 w-[320px] h-[360px] bg-white/95 border border-[#E9DFD2] rounded-[28px] p-6 shadow-[0_25px_60px_rgba(42,37,32,0.08)] snap-center flex flex-col justify-between"
-                  style={{ transform: `translateX(-${index * 40}px)` }}
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4 gap-3">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-[#8B7355]">Aura Diffuser Owner</p>
-                        <p className="text-lg text-[#2F2B26] font-light">{review.name} · {review.location}</p>
-                      </div>
-                      <div className="flex items-center gap-2 text-[#2F2B26]">
-                        <div className="flex text-[#C47A3B]">
-                          {Array.from({ length: 5 }).map((_, starIndex) => (
-                            <svg key={starIndex} className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                        </div>
-                        <span className="text-sm font-medium text-[#5A544E]">5.0</span>
-                      </div>
-                    </div>
-                    <div className="mb-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#7B776F]">
-                      <span>Complimentary scent</span>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#D28755' }} />
-                      <span>{review.scent}</span>
-                    </div>
-                    <h3 className="text-xl font-light text-[#2F2B26] mb-3 leading-tight">{review.title}</h3>
-                    <p className="text-sm text-[#4C4842] leading-relaxed">{review.body}</p>
-                  </div>
-                  <div className="text-[11px] uppercase tracking-[0.35em] text-[#A59E95]">
-                    Verified purchase · {index + 1}/10
-                  </div>
-                </article>
+          <div className="rounded-3xl border border-[#E9DFD2] bg-white p-6 space-y-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-4">
+                <div aria-hidden="true" className="flex text-[#C47A3B] text-lg">
+                  {Array.from({ length: 5 }).map((_, starIndex) => (
+                    <span key={`aggregate-block-${starIndex}`}>★</span>
+                  ))}
+                </div>
+                <p className="text-4xl font-semibold text-[#2F2B26]">
+                  {aggregateReviewScore.toFixed(1)}/5
+                  <span className="text-base font-normal text-[#6B6762] ml-3">({aggregateReviewCount} reviews)</span>
+                </p>
+              </div>
+              <a
+                href="#reviews-list"
+                className={getButtonClass('secondary', { extra: 'px-6 py-2 text-[11px]' })}
+              >
+                Read all reviews
+              </a>
+            </div>
+            <p className="text-base text-[#4C4842] italic">&ldquo;{heroReview.body}&rdquo; — {heroReview.name}, {heroReview.location}</p>
+            <div id="reviews-list" className="grid gap-4 md:grid-cols-2">
+              {reviewEntries.slice(1, 3).map((review) => (
+                <div key={`pull-quote-${review.name}`} className="bg-[#FFFBF5] border border-[#F1E4D6] rounded-2xl p-4 flex flex-col gap-3">
+                  <p className="text-sm font-semibold text-[#2F2B26]">{review.title}</p>
+                  <p className="text-sm text-[#4C4842] leading-relaxed">{review.body}</p>
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-[#8B7355]">{review.name} · {review.location}</p>
+                </div>
               ))}
             </div>
+            <p className="text-sm font-semibold text-[#8B7355]">
+              <a href="#reviews">Read all {aggregateReviewCount} reviews →</a>
+            </p>
           </div>
         </div>
       </section>
-
       {/* Meet the Founder */}
       <section className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-6 text-center">
+        <div className="max-w-5xl mx-auto px-6 lg:px-0 space-y-8 text-center">
           <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Meet the Founder</p>
-          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">
-            Make every home feel like a sanctuary—quiet, hydrated, and beautifully scented.
-          </h3>
-          <div className="text-left max-w-2xl mx-auto space-y-4">
-            <p className="text-[#5A5550] text-base leading-relaxed">
-              Hi, I&apos;m Asher, the founder of AuraDroplet. Our mission when making this brand is to give you luxury diffusers that transform your space into the sanctuary you deserve.
-            </p>
-            <p className="text-[#5A5550] text-base leading-relaxed">
-              We&apos;ve helped over 15,000 homes nationwide create peaceful, beautifully scented spaces with our sculpted ceramic design, 12-hour runtime, and whisper-quiet performance.
-            </p>
-            <p className="text-[#5A5550] text-base leading-relaxed">
-              If you ever want to contact me personally, my email is{' '}
-              <a href="mailto:ashervaughn43@gmail.com" className="text-[#C47A3B] hover:underline font-medium">
-                ashervaughn43@gmail.com
-              </a>
-              {' '}or reach out to our business email at{' '}
-              <a href="mailto:auradroplet@gmail.com" className="text-[#C47A3B] hover:underline font-medium">
-                auradroplet@gmail.com
-              </a>
-            </p>
+          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">Intentional scent, minus the fuss.</h3>
+          <p className="text-base text-[#4A4540] max-w-2xl mx-auto">I built AuraDroplet so homes could smell curated instead of perfumey—clean oils, concierge guidance, and an easy swap if your first pick isn&apos;t love.</p>
+          <div className="grid sm:grid-cols-3 gap-4 text-left">
+            {[
+              {
+                title: 'Quiet hydration',
+                copy: '12-hour misting with a whisper-quiet motor and automatic shut-off.',
+              },
+              {
+                title: 'Clean scent',
+                copy: 'Premium botanical oils—never fillers or synthetics.',
+              },
+              {
+                title: 'Hassle-free',
+                copy: 'Free fall scent plus concierge swaps within 14 days.',
+              },
+            ].map((pillar) => (
+              <div key={pillar.title} className="rounded-[var(--radius-card)] border border-[var(--mist)] bg-[var(--clay)]/60 p-5">
+                <p className="text-sm font-semibold text-[#8B7355] uppercase tracking-[0.3em] mb-2">{pillar.title}</p>
+                <p className="text-base text-[#4A4540]">{pillar.copy}</p>
+              </div>
+            ))}
           </div>
-          <div className="bg-[#F8F4EE] border border-[#E4D9CC] rounded-2xl p-5 text-sm text-[#4A4540]">
-            <p className="font-medium text-[#2F2B26] uppercase tracking-[0.3em] text-xs">60-day home trial</p>
-            <p>Try Aura risk-free. If it doesn&apos;t transform your space, return it free—no forms, no restocking fees.</p>
+          <div className="flex flex-col items-center gap-4 pt-2">
+            <button
+              onClick={() => {
+                track('select_promotion', {
+                  promotion_id: 'founder_shop_cta',
+                  promotion_name: 'Founder block CTA',
+                });
+                handlePricingBannerCta();
+              }}
+              className={getButtonClass('primary', { extra: 'px-8 py-3 mt-2' })}
+            >
+              Shop Aura Diffuser + Free Fall Scent
+            </button>
+            <p className="text-sm text-[#6B6762]">Ships in 24h • Clean ingredients • Easy returns</p>
           </div>
-          <div className="flex items-center gap-3 text-sm text-[#3A3834] justify-center">
-            <div className="flex text-[#C47A3B] gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-            <span>4.9/5 · 15,000+ reviews</span>
-          </div>
-          <button
-            onClick={() => {
-              track('select_promotion', {
-                promotion_id: 'hero_autumn_deals',
-                promotion_name: 'Hero Autumn Deals CTA',
-              });
-              document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="inline-flex items-center gap-2 text-[#3A3834] border border-[#3A3834] px-6 py-2 rounded-full text-sm hover:bg-[#3A3834] hover:text-white transition-colors"
-          >
-            View autumn deals ↓
-          </button>
-          <p className="text-xs text-[#6B6762]">Free returns · 2-year warranty · Free shipping</p>
+          <p className="text-xs text-[#6B6762]">Need help? Email <a href="mailto:ashervaughn43@gmail.com" className="text-[#C47A3B] underline">ashervaughn43@gmail.com</a></p>
         </div>
       </section>
 
       {/* Conversion Shop Strip */}
-      <section className="py-24 bg-[#201C18] text-white border-t border-[#362F27]">
+      <section id="bundle-shop" className="py-24 bg-[#201C18] text-white border-t border-[#362F27]">
         <div className="max-w-6xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Secure your ritual</p>
-              <h2 className="text-4xl lg:text-5xl font-light leading-tight">Our Best-Selling Sets</h2>
-              <p className="text-base text-white/70 mt-4 max-w-2xl">
-                Transform your space with elegantly crafted ceramic diffusers that perform beautifully all day long. Join 15,000+ customers who&apos;ve elevated their home fragrance.
+              <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Bundle & save</p>
+              <h2 className="text-4xl lg:text-5xl font-light leading-tight">Prefer a set? Save up to 30%.</h2>
+              <p className="text-base text-white/70 mt-4 max-w-xl">
+                Bundle the diffuser with curated seasonal oils and save up to 30% on every order.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70">
@@ -1077,17 +1254,19 @@ export default function Home() {
             </div>
           </div>
 
-          <div id="conversion-shop" className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {ritualShop.map((item, index) => {
               const selections = getBundleSelections(item.id);
               const selectedCount = selections.length;
               const requiredSelections = item.requiredSelections ?? 0;
               const needsSelection = requiredSelections > 0;
+              const showChooseOptions = needsSelection;
 
               return (
                 <article
                   key={item.id}
-                  className="group relative bg-[#281F1A] border border-white/10 rounded-[28px] overflow-hidden flex flex-col"
+                  ref={index === 0 ? firstProductRef : undefined}
+                  className="group relative bg-[#281F1A] border border-white/20 rounded-3xl overflow-hidden flex flex-col"
                   style={{ overflow: activeBundle === item.id && needsSelection ? 'visible' : undefined }}
                 >
                   <div className="relative bg-gradient-to-br from-[#3A3430] to-[#281F1A]">
@@ -1096,39 +1275,49 @@ export default function Home() {
                       alt={item.name}
                       width={800}
                       height={600}
-                      className={`h-64 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
+                      className={`h-56 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">
                       {item.badge}
                     </span>
                   </div>
-                  <div className="flex-1 p-6 flex flex-col">
-                    <div className="mb-6">
+                  <div className="flex-1 p-5 flex flex-col">
+                    <div className="mb-4">
                       <p className="text-xs uppercase tracking-[0.35em] text-white/60">{index === 0 ? 'Diffuser' : 'Bundle'}</p>
-                      <h3 className="text-2xl font-light mt-3">{item.name}</h3>
+                      <h3 className="text-2xl font-light mt-2">{item.name}</h3>
                       <p className="text-sm text-white/70 mt-1">{item.subtitle}</p>
                     </div>
                     <div className="mt-auto">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p className="text-3xl font-light">{item.price}</p>
-                          <p className="text-xs uppercase tracking-[0.3em] text-[#ED9F72]">{item.value}</p>
+                      <div className="space-y-1 mb-3">
+                        <div className="flex items-baseline gap-2">
+                          {item.compareAtPrice && (
+                            <span className="text-sm text-white/50 line-through">{item.compareAtPrice}</span>
+                          )}
+                          <p className="text-2xl font-light">{item.price}</p>
+                          {item.savingsCopy && (
+                            <span className="text-[11px] uppercase tracking-[0.3em] text-[#F5C4A5]">{item.savingsCopy}</span>
+                          )}
                         </div>
-                        <div className="text-right text-xs text-white/60">
-                          <p>Complimentary scent</p>
-                          <p>2-year warranty</p>
-                        </div>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-white/70">{item.value}</p>
                       </div>
-                      <div className="flex gap-3">
-                        <div className="relative flex-1">
+                      <div className="space-y-3">
+                        <button
+                          type="button"
+                          className="text-xs text-white/80 underline underline-offset-4"
+                          onClick={() => track('select_content', { content_type: 'bundle_details', item_id: item.id })}
+                        >
+                          What&apos;s included
+                        </button>
+                        <div className="relative">
                           <button
                             type="button"
                             onClick={() => {
                               if (needsVariantUpdate) {
                                 return;
                               }
-                              if (needsSelection) {
+                              if (showChooseOptions) {
                                 const willOpen = activeBundle !== item.id;
                                 track(willOpen ? 'view_item_list' : 'collapse_item_list', {
                                   item_list_id: item.id,
@@ -1142,25 +1331,21 @@ export default function Home() {
                               handleQuickAdd(item);
                             }}
                             aria-expanded={needsSelection ? activeBundle === item.id : undefined}
-                            className={`w-full py-3 rounded-full font-medium tracking-wide transition-colors flex items-center justify-center gap-2 ${
-                              needsVariantUpdate
-                                ? 'bg-white/40 text-[#201C18]/60 cursor-not-allowed'
-                                : 'bg-white text-[#201C18] hover:bg-[#F7E9DE]'
-                            }`}
+                            className={getButtonClass('primary', {
+                              disabled: needsVariantUpdate,
+                              extra: 'w-full gap-2 justify-center',
+                            })}
                             disabled={needsVariantUpdate}
                           >
-                            {needsSelection
-                              ? `Select scents (${selectedCount}/${requiredSelections})`
-                              : 'Quick add'}
+                            {showChooseOptions ? `Choose options (${selectedCount}/${requiredSelections})` : 'Add to cart'}
                             {needsSelection && (
                               <svg
-                                className={`w-4 h-4 transition-transform ${
-                                  activeBundle === item.id ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${activeBundle === item.id ? 'rotate-180' : ''}`}
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="1.5"
+                                aria-hidden="true"
                               >
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
                               </svg>
@@ -1174,7 +1359,7 @@ export default function Home() {
                                     Customize your kit
                                   </p>
                                   <p className="text-sm text-[#6B6762] mt-1">
-                                    Pick {requiredSelections} color-coded essences to complete this bundle.
+                                    Pick {requiredSelections} essences to complete this bundle.
                                   </p>
                                 </div>
                                 <span className="text-xs font-semibold text-[#2F2B26] bg-[#F8F4EE] px-2 py-1 rounded-full">
@@ -1221,15 +1406,22 @@ export default function Home() {
                                   event.preventDefault();
                                   handleQuickAdd(item);
                                 }}
-                                className="mt-4 w-full py-2.5 rounded-full bg-[#2F2B26] text-white text-sm font-medium tracking-wide hover:bg-[#8B7355] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className={getButtonClass('primary', {
+                                  disabled: selectedCount < requiredSelections || needsVariantUpdate,
+                                  extra: 'w-full mt-4 py-2.5 text-sm',
+                                })}
                                 disabled={selectedCount < requiredSelections || needsVariantUpdate}
                               >
-                                Confirm & checkout
+                                Add to cart with scents
                               </button>
                             </div>
                           )}
                         </div>
-                        <button className="px-6 py-3 rounded-full border border-white/30 text-white text-sm tracking-wide hover:bg-white/10">
+                        <button
+                          type="button"
+                          className="text-sm text-white/80 underline underline-offset-4"
+                          onClick={() => track('select_content', { content_type: 'details', item_id: item.id })}
+                        >
                           Details
                         </button>
                       </div>
@@ -1240,38 +1432,49 @@ export default function Home() {
             })}
           </div>
 
-          <div className="mt-12 flex flex-col lg:flex-row items-center gap-4 text-sm text-white/70">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <div className="mt-12 grid md:grid-cols-2 gap-4 text-sm text-white">
+            <div className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-2xl">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Secure checkout via Shop Pay, Apple Pay, and major cards.
+              <p>Secure checkout via Shop Pay, Apple Pay, and major cards.</p>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-2xl">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Concierge texts you within 24 hours to confirm your complimentary scent.
+              <p>Concierge texts you within 24 hours to confirm your complimentary scent.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Brand Quiz */}
-      <section className="py-24 bg-white">
+      <section id="quiz" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-3">Two-minute quiz</p>
             <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">We&apos;ll match you to a palette</h2>
             <p className="text-lg text-[#6B6762] font-light">Answer three quick prompts to see the brand that fits your space.</p>
-            <p className="text-sm text-[#9B9792] mt-3">{answeredCount}/{quizQuestions.length} answered</p>
+            <div className="mt-4 flex items-center justify-center gap-4 text-sm text-[#9B9792]">
+              <p>{answeredCount}/{quizQuestions.length} answered</p>
+              <button
+                type="button"
+                onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
+                className="underline underline-offset-4 text-[#8B7355]"
+              >
+                Skip quiz →
+              </button>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
             <div className="space-y-6">
               {quizQuestions.map((question, questionIndex) => (
                 <div key={question.id} className="bg-[#F8F3ED] border border-[#E8E2D8] rounded-3xl p-6">
-                  <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-2">Step {questionIndex + 1}</p>
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-2">
+                    Step {questionIndex + 1} of {quizQuestions.length} · {question.selectionLimit > 1 ? `Choose up to ${question.selectionLimit}` : 'Choose one'}
+                  </p>
                   <h3 className="text-2xl font-light text-[#2F2B26] mb-4">{question.title}</h3>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {question.options.map((option) => {
@@ -1299,32 +1502,57 @@ export default function Home() {
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Recommendation</p>
                 <h3 className="text-4xl font-light mb-2">{recommendedBrand.name}</h3>
-                <p className="text-sm text-white/70 mb-6">{recommendedBrand.description}</p>
-                <div className="space-y-4 text-sm text-white/80">
+                <p className="text-base text-white/80 mb-6">{recommendedBrand.description}</p>
+                <div className="space-y-4 text-sm text-white/90">
                   <div>
-                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Notes</p>
-                    <p>{recommendedBrand.notes}</p>
+                    <p className="text-xs font-semibold tracking-[0.2em] text-white/60 mb-1">Notes</p>
+                    <p className="capitalize">{recommendedBrand.notes}</p>
                   </div>
                   <div>
-                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Best for</p>
+                    <p className="text-xs font-semibold tracking-[0.2em] text-white/60 mb-1">Best for</p>
                     <p>{recommendedBrand.spaces}</p>
                   </div>
                   <div>
-                    <p className="uppercase tracking-[0.3em] text-xs text-white/50 mb-1">Pairs with</p>
-                    <p>{recommendedBrand.pair}</p>
+                    <p className="text-xs font-semibold tracking-[0.2em] text-white/60 mb-2">Top · Heart · Base</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-white">
+                      {Object.entries(recommendedBrand.structure).map(([level, note]) => (
+                        <div key={level} className="bg-white/10 rounded-xl px-3 py-2 text-center">
+                          <p className="uppercase tracking-[0.25em] text-[10px] text-white/60">{level}</p>
+                          <p className="text-sm">{note}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
               <div className="mt-8 flex flex-col gap-3">
-                <Link
-                  href="/starter-kits"
-                  className={`w-full text-center py-3 rounded-full uppercase tracking-[0.3em] text-xs ${quizComplete ? 'bg-white text-[#1F1914]' : 'bg-white/20 text-white/60 pointer-events-none'}`}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (recommendedScent) {
+                      setSelectedScent(recommendedScent.id);
+                      localStorage.setItem('selectedFreeScent', recommendedScent.id);
+                      if (!needsVariantUpdate) {
+                        handleQuickAdd(heroProduct);
+                      }
+                    }
+                  }}
+                  disabled={!quizComplete || needsVariantUpdate}
+                  className={`w-full text-center py-3 rounded-full text-sm font-semibold uppercase tracking-[0.3em] ${
+                    quizComplete && !needsVariantUpdate ? 'bg-white text-[#1F1914]' : 'bg-white/10 text-white/50 cursor-not-allowed'
+                  }`}
                 >
-                  {quizComplete ? 'Shop this palette' : 'Answer all steps'}
-                </Link>
-                <a href="#conversion-shop" className="text-center text-sm text-white/70 underline underline-offset-4">
-                  Browse all collections
-                </a>
+                  {needsVariantUpdate
+                    ? 'Finish store setup'
+                    : `Add diffuser + ${recommendedScent?.name ?? recommendedBrand.name}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('free-scent-offer')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-center text-sm text-white/80 underline underline-offset-4"
+                >
+                  Browse all scents
+                </button>
               </div>
             </div>
           </div>
@@ -1364,17 +1592,48 @@ export default function Home() {
             </div>
             <div>
               <h4 className="font-medium mb-4 text-white">Newsletter</h4>
-              <p className="text-sm text-[#C4C0BA] mb-4 font-light">Join our community for exclusive rituals and offers.</p>
-              <div className="flex gap-2">
+              <p className="text-sm text-[#C4C0BA] mb-4 font-light">1–2 emails/month. Unsubscribe anytime.</p>
+              <form
+                className="flex gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (!newsletterEmail) {
+                    return;
+                  }
+                  setNewsletterStatus('success');
+                  setNewsletterEmail('');
+                }}
+              >
                 <input
                   type="email"
-                  placeholder="Your email"
+                  inputMode="email"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  required
+                  value={newsletterEmail}
+                  onChange={(event) => {
+                    setNewsletterEmail(event.target.value);
+                    setNewsletterStatus('idle');
+                  }}
+                  placeholder="you@example.com"
                   className="flex-1 px-4 py-2.5 bg-[#4A4844] text-white placeholder-[#9B9792] border border-[#5A5854] focus:border-[#8B7355] focus:outline-none transition-colors"
                 />
-                <button className="px-6 py-2.5 bg-[#8B7355] hover:bg-[#A08669] text-white font-medium transition-colors">
+                <button
+                  type="submit"
+                  className={getButtonClass('primary', { extra: 'px-6 py-2.5' })}
+                >
                   Join
                 </button>
-              </div>
+              </form>
+              {newsletterStatus === 'success' && (
+                <p className="mt-2 text-sm text-[#C4C0BA] flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#8B7355]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  You&apos;re in! Watch for rituals soon.
+                </p>
+              )}
             </div>
           </div>
           <div className="border-t border-[#4A4844] pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-[#9B9792]">
@@ -1388,20 +1647,60 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Sticky mobile checkout CTA - only display once a complimentary scent is selected */}
-      {selectedScent && (
-        <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
-          <div className="mx-4 mb-4 rounded-2xl border border-black/10 bg-white/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.2)] px-4 py-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-[#2F2B26]">Claim diffuser + free scent</p>
-              <p className="text-xs text-[#6B6762]">Ships in 48h · Shop Pay & Apple Pay</p>
+      {/* Sticky CTA for mobile within first scroll */}
+      {showMobileStickyBar && (
+        <div
+          className="lg:hidden fixed inset-x-0 bottom-0 z-50 px-4"
+          style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+        >
+          <div className="mx-auto rounded-2xl border border-black/10 bg-[#1F1914] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] px-4 py-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-white/70">Aura Diffuser</p>
+                <p className="text-lg font-semibold">{heroProduct.price} · Free fall scent</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleQuickAdd(heroProduct)}
+                disabled={needsVariantUpdate}
+                className={getButtonClass('primary', {
+                  disabled: needsVariantUpdate,
+                  extra: 'px-5 py-3 text-sm',
+                })}
+              >
+                {needsVariantUpdate ? 'Set variant' : 'Add to cart'}
+              </button>
             </div>
-            <a
-              href={needsVariantUpdate ? '#set-variant' : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId })}
-              className={`px-4 py-2 rounded-full text-sm font-semibold tracking-wide ${needsVariantUpdate ? 'bg-[#CFCBC5] text-[#8B877F] pointer-events-none' : 'bg-[#2F2B26] text-white hover:bg-[#8B7355]'}`}
-            >
-              Checkout with diffuser
-            </a>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-white/70">
+              Ships today · Free exchanges · Safe checkout
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sticky desktop CTA once the product grid is out of view */}
+      {hasPassedProductHero && (
+        <div className="hidden lg:block fixed inset-x-0 bottom-0 z-40 px-6 pb-6">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_18px_40px_rgba(0,0,0,0.25)] px-8 py-5 flex items-center gap-6">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#2F2B26] uppercase tracking-[0.3em] flex items-center gap-2">
+                Aura Diffuser
+                <span className="text-xs font-normal text-[#6B6762]">In stock — ships today</span>
+              </p>
+              <p className="text-xl font-light text-[#2F2B26]">{heroProduct.price} · Free premium scent automatically applies</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleQuickAdd(heroProduct)}
+                disabled={needsVariantUpdate}
+                className={`px-8 py-3 rounded-full text-sm font-semibold tracking-wide uppercase ${
+                  needsVariantUpdate ? 'bg-[#D8D3CC] text-[#8B877F] cursor-not-allowed' : 'bg-[#1F1914] text-white hover:bg-[#8B7355]'
+                }`}
+              >
+                {needsVariantUpdate ? 'Set variant' : 'Add to cart'}
+              </button>
+            </div>
           </div>
         </div>
       )}
