@@ -16,6 +16,8 @@
   --shadow-card: 0 14px 40px rgba(31, 25, 20, 0.08);
   --radius-card: 16px;
   --radius-pill: 999px;
+  --sage: #EAE3DA;
+  --deep-ink: #2B261F;
 }
 
 * {
@@ -29,8 +31,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
   background: var(--paper);
   color: var(--ink);
+}
+
+p,
+li {
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+  }
 }
 
 /* Luxury scrollbar */

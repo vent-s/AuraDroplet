@@ -187,6 +187,7 @@ const quizQuestions: QuizQuestion[] = [
 const reviewEntries = [
   {
     name: "Lena A.",
+    age: 56,
     location: "Hudson Valley, NY",
     scent: "Rose Petal",
     title: "Like a florist just left",
@@ -194,6 +195,7 @@ const reviewEntries = [
   },
   {
     name: "Priya M.",
+    age: 44,
     location: "San Francisco, CA",
     scent: "Lavender Veil",
     title: "Spa-level calm",
@@ -201,6 +203,7 @@ const reviewEntries = [
   },
   {
     name: "Jack Davis",
+    age: 52,
     location: "Fayetteville, AR",
     scent: "Mint Leaf",
     title: "Crisp and clean",
@@ -208,6 +211,7 @@ const reviewEntries = [
   },
   {
     name: "Harper V.",
+    age: 47,
     location: "Chicago, IL",
     scent: "Vanilla Ember",
     title: "Warm, not sugary",
@@ -215,6 +219,7 @@ const reviewEntries = [
   },
   {
     name: "Mila R.",
+    age: 61,
     location: "Brooklyn, NY",
     scent: "Ocean Mist",
     title: "Glasshouse on the coast",
@@ -222,6 +227,7 @@ const reviewEntries = [
   },
   {
     name: "Theo K.",
+    age: 58,
     location: "Portland, OR",
     scent: "Jasmine No. 02",
     title: "Evening ritual upgraded",
@@ -229,6 +235,7 @@ const reviewEntries = [
   },
   {
     name: "Marin D.",
+    age: 63,
     location: "Savannah, GA",
     scent: "Lavender Veil",
     title: "Verified diffuser owner",
@@ -236,6 +243,7 @@ const reviewEntries = [
   },
   {
     name: "Callum P.",
+    age: 49,
     location: "Seattle, WA",
     scent: "Mint Leaf",
     title: "Fresh office air",
@@ -243,6 +251,7 @@ const reviewEntries = [
   },
   {
     name: "Isla F.",
+    age: 54,
     location: "Los Angeles, CA",
     scent: "Ocean Mist",
     title: "Scent concierge is real",
@@ -250,6 +259,7 @@ const reviewEntries = [
   },
   {
     name: "Julien C.",
+    age: 57,
     location: "Boston, MA",
     scent: "Rose Petal",
     title: "Magazine-worthy",
@@ -415,7 +425,7 @@ const scentVariantLookup = freeScentOptions.reduce<Record<string, string>>((acc,
 type ButtonVariant = 'primary' | 'secondary';
 
 const buttonBaseClass =
-  "inline-flex items-center justify-center rounded-full text-[11px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.28em] px-6 py-3 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F2B26]";
+  "inline-flex items-center justify-center rounded-full text-sm md:text-base font-semibold uppercase tracking-[0.2em] px-6 py-3 transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F2B26]";
 
 const buttonVariantClassMap: Record<ButtonVariant, string> = {
   primary: "bg-[var(--ink)] text-[var(--paper)] hover:bg-[#463b32]",
@@ -437,7 +447,17 @@ const getButtonClass = (
     .join(' ');
 };
 
-
+const metaLabelClass = "text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold text-[#5A5047]";
+const sectionHeadingClass = "text-4xl lg:text-[44px] font-light leading-tight text-[var(--ink)]";
+const cardShellClass = "rounded-[24px] border border-[var(--mist)] bg-white shadow-[0_18px_48px_rgba(30,24,20,0.08)]";
+const supportPhoneNumber = "1-800-407-1910";
+const supportEmailAddress = "care@auradroplet.com";
+const navLinks = [
+  { label: 'Shop Diffuser', href: '#order-section' },
+  { label: 'Reviews', href: '#reviews' },
+  { label: 'Starter Kits', href: '/starter-kits' },
+  { label: 'Support', href: '#support' },
+];
 export default function Home() {
   const [scrollY, setScrollY] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -447,10 +467,11 @@ export default function Home() {
   const [showNav, setShowNav] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
   const [quizResponses, setQuizResponses] = useState<Record<string, string>>({});
-  const [bundleSelections, setBundleSelections] = useState<Record<string, string[]>>({});
-  const [activeBundle, setActiveBundle] = useState<string | null>(null);
+  const [showQuiz, setShowQuiz] = useState(false);
   const [hasPassedProductHero, setHasPassedProductHero] = useState(false);
   const [showMobileStickyBar, setShowMobileStickyBar] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAllScents, setShowAllScents] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success'>('idle');
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
@@ -473,149 +494,73 @@ export default function Home() {
   const recommendedScent = freeScentOptions.find(
     (scent) => scent.name.toLowerCase() === recommendedBrand.pair.toLowerCase()
   ) ?? freeScentOptions[0];
+  const scentOptionsToDisplay = useMemo(() => {
+    if (showAllScents) {
+      return freeScentOptions;
+    }
+    const favorites = freeScentOptions.slice(0, 3);
+    if (selectedScent) {
+      const active = freeScentOptions.find((option) => option.id === selectedScent);
+      if (active && !favorites.some((option) => option.id === active.id)) {
+        return [...favorites, active];
+      }
+    }
+    return favorites;
+  }, [showAllScents, selectedScent]);
+  const primaryCtaLabel = 'Add diffuser + free oil to bag';
+  const handlePrimaryCta = () => {
+    if (needsVariantUpdate) {
+      return;
+    }
+    if (!selectedScent) {
+      handlePricingBannerCta();
+      return;
+    }
+    handleQuickAdd(heroProduct);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || selectedScent) {
+      return;
+    }
+    try {
+      const stored = window.localStorage.getItem('selectedFreeScent');
+      if (stored && scentVariantLookup[stored]) {
+        setSelectedScent(stored);
+        return;
+      }
+    } catch {
+      // ignore hydration/localStorage issues
+    }
+    if (freeScentOptions[0]) {
+      setSelectedScent(freeScentOptions[0].id);
+    }
+  }, [selectedScent]);
 
   const handleQuizSelect = (questionId: string, value: string) => {
     setQuizResponses((prev) => ({ ...prev, [questionId]: value }));
   };
 
-  const getBundleSelections = (bundleId: string) => bundleSelections[bundleId] ?? [];
-
-  const handleBundleScentToggle = (bundleId: string, scentId: string, limit: number) => {
-    setBundleSelections((prev) => {
-      if (limit <= 0) {
-        return prev;
-      }
-      const current = prev[bundleId] ?? [];
-      if (current.includes(scentId)) {
-        const next = current.filter((id) => id !== scentId);
-        track('deselect_item', {
-          item_id: scentId,
-          item_list_id: bundleId,
-        });
-        return { ...prev, [bundleId]: next };
-      }
-      if (current.length >= limit) {
-        track('selection_limit_reached', {
-          item_list_id: bundleId,
-          attempted_item: scentId,
-          limit,
-        });
-        return prev;
-      }
-      track('select_item', {
-        item_id: scentId,
-        item_list_id: bundleId,
-        index: current.length + 1,
-      });
-      return { ...prev, [bundleId]: [...current, scentId] };
-    });
-  };
-
-const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant?: 'grid' | 'carousel' } = {}) => {
-    const isSelected = selectedScent === scent.id;
-    const padding = variant === 'carousel' ? 'p-4' : 'p-5';
-    const imageHeight = variant === 'carousel' ? 'h-44' : 'h-52';
-    const minWidth = variant === 'carousel' ? 'min-w-[250px]' : '';
-
-    return (
-      <button
-        type="button"
-        key={`${variant}-${scent.id}`}
-        onClick={() => {
-          setSelectedScent(scent.id);
-          try {
-            localStorage.setItem('selectedFreeScent', scent.id);
-          } catch {
-            // ignore persistence issues
-          }
-          track('select_content', {
-            content_type: 'free_scent',
-            item_id: scent.id,
-            item_name: scent.name,
-          });
-        }}
-        aria-pressed={isSelected}
-        className={`group relative text-left bg-white border rounded-[var(--radius-card)] ${padding} ${minWidth} transition-shadow duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--amber)] ${
-          isSelected ? 'border-[var(--amber)] shadow-[var(--shadow-card)]' : 'border-[var(--mist)] hover:shadow-[var(--shadow-card)]'
-        }`}
-      >
-        <div className={`relative rounded-[var(--radius-card)] overflow-hidden ${imageHeight}`}>
-          <Image
-            src={scent.image}
-            alt={scent.name}
-            fill
-            sizes="(max-width: 768px) 70vw, (max-width: 1024px) 45vw, 25vw"
-            className={`${scent.fit === 'contain' ? 'object-contain' : 'object-cover'} transition-transform duration-500 group-hover:scale-105`}
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-          <div className="absolute top-3 left-3 text-[11px] uppercase tracking-[0.35em] text-white/80">
-            {scent.mood}
-          </div>
-          {isSelected && (
-            <div className="absolute top-3 right-3 w-9 h-9 rounded-full bg-[var(--amber)] text-white flex items-center justify-center text-sm font-semibold">
-              ✓
-            </div>
-          )}
-        </div>
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.35em] text-[#8B7355]">Complimentary</p>
-              <h4 className="text-2xl font-light text-[var(--ink)]">{scent.name}</h4>
-            </div>
-            <span
-              className={`w-12 h-12 rounded-full border flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.3em] ${
-                isSelected ? 'bg-[var(--amber)] border-[var(--amber)] text-white' : 'border-[var(--mist)] text-[#8B877F]'
-              }`}
-            >
-              {isSelected ? 'Set' : 'Tap'}
-            </span>
-          </div>
-          <p className="text-sm italic text-[#5F5B56]">{scent.notes}</p>
-          <p className="text-xs text-[#6B6762]">
-            {isSelected ? 'Currently selected.' : `Tap to include ${scent.name} in your order.`}
-          </p>
-        </div>
-      </button>
-    );
-  };
-
-  const handleFreeScentCheckout = () => {
-    if (!selectedScent || needsVariantUpdate) {
-      return;
-    }
-    try {
-      localStorage.setItem('selectedFreeScent', selectedScent);
-    } catch {
-      // ignore persistence failures
-    }
-    if (selectedScentDetails && selectedScentVariantId) {
-      track('begin_checkout', {
-        checkout_type: 'free_scent_cta',
-        items: [
-          {
-            item_id: 'diffuser',
-            item_name: 'Aura Diffuser',
-            quantity: 1,
-          },
-          {
-            item_id: selectedScentDetails.id,
-            item_name: selectedScentDetails.name,
-            item_category: 'complimentary_scent',
-            quantity: 1,
-          },
-        ],
-      });
-    }
-    window.location.href = needsVariantUpdate
-      ? '#set-variant'
-      : quickCheckoutUrl({ quantity: 1, scentVariant: selectedScentVariantId });
-  };
-
   const handlePricingBannerCta = () => {
-    const offerSection = document.getElementById('free-scent-offer');
-    offerSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const orderSection = document.getElementById('order-section');
+    orderSection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleSelectScent = (scentId: string) => {
+    setSelectedScent(scentId);
+    try {
+      localStorage.setItem('selectedFreeScent', scentId);
+    } catch {
+      /* ignore persistence */
+    }
+    const scent = freeScentOptions.find((option) => option.id === scentId);
+    if (scent) {
+      track('select_content', {
+        content_type: 'free_scent',
+        item_id: scent.id,
+        item_name: scent.name,
+      });
+    }
   };
 
   const handleQuickAdd = (item: RitualShopItem) => {
@@ -623,48 +568,21 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
       alert('Please configure the diffuser variant ID before checking out.');
       return;
     }
-
-    const requiredSelections = item.requiredSelections ?? 0;
-    const selections = getBundleSelections(item.id);
-
-    if (requiredSelections > 0 && selections.length < requiredSelections) {
-      track('view_item_list', {
-        item_list_id: item.id,
-        item_list_name: item.name,
-      });
-      setActiveBundle(item.id);
+    if (!selectedScentVariantId) {
+      handlePricingBannerCta();
       return;
     }
-
-    const addonVariants = selections
-      .map((scentId) => scentVariantLookup[scentId])
-      .filter((id): id is string => Boolean(id));
-
-    if (requiredSelections > 0 && addonVariants.length < requiredSelections) {
-      alert('One or more selected scents are unavailable right now.');
-      return;
-    }
-
-    const selectionDetails = selections
-      .map((scentId) => freeScentOptions.find((scent) => scent.id === scentId))
-      .filter((scent): scent is FreeScentOption => Boolean(scent?.variantId));
 
     const eventItems = [
       {
         item_id: item.id,
         item_name: item.name,
-        item_category: 'bundle',
+        item_category: 'diffuser',
         quantity: item.qty ?? 1,
       },
-      ...selectionDetails.map((scent) => ({
-        item_id: scent.id,
-        item_name: scent.name,
-        item_category: 'bundle_scent',
-        quantity: 1,
-      })),
     ];
 
-    if (selectedScentDetails && selectedScentVariantId) {
+    if (selectedScentDetails) {
       eventItems.push({
         item_id: selectedScentDetails.id,
         item_name: selectedScentDetails.name,
@@ -674,7 +592,7 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
     }
 
     track('begin_checkout', {
-      checkout_type: requiredSelections > 0 ? 'bundle_quick_add' : 'single_quick_add',
+      checkout_type: 'single_quick_add',
       items: eventItems,
       item_list_id: item.id,
     });
@@ -682,10 +600,8 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
     const url = quickCheckoutUrl({
       quantity: item.qty ?? 1,
       scentVariant: selectedScentVariantId,
-      addonVariants: Array.from(new Set(addonVariants)),
     });
 
-    setActiveBundle(null);
     window.location.href = url;
   };
 
@@ -710,6 +626,20 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
       console.warn(`Missing Shopify variant ID for selected scent: ${selectedScent}`);
     }
   }, [selectedScent, selectedScentVariantId]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (
@@ -746,63 +676,147 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
     <main className="min-h-screen bg-[#FAF9F7]">
       {/* Navigation */}
       <header
-        className="fixed top-0 w-full bg-[#FAF9F7]/98 backdrop-blur-md z-50 border-b border-[#E8E6E3] transition-opacity duration-500"
-        style={{ opacity: showNav ? 1 : 0, pointerEvents: showNav ? 'auto' : 'none' }}
+        className={`fixed top-0 w-full bg-[#F5ECDD]/95 backdrop-blur-md z-50 border-b border-[#DFD1BF] transition-shadow duration-300 ${showNav ? 'shadow-[0_12px_35px_rgba(31,25,20,0.08)]' : ''}`}
       >
-        <nav className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 relative">
-            {/* Mobile Shop Button */}
-            <a
-              href="/shop"
-              className={getButtonClass('primary', { extra: 'lg:hidden px-4 py-2 text-sm tracking-wide' })}
-            >
-              SHOP
-            </a>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          {/* Trust Strip - Utility Row */}
+          <div className="flex items-center justify-center py-2 border-b border-[#E8DED0]">
+            <p className="flex items-center gap-3 text-xs sm:text-[13px] text-[#5A5047] font-medium">
+              <span className="inline-flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                </svg>
+                30-day returns
+              </span>
+              <span className="text-[#C4BAAB]">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                Secure checkout
+              </span>
+            </p>
+          </div>
 
-            {/* Left Menu - Desktop */}
-            <div className="hidden lg:flex items-center space-x-1 flex-1">
-              <a href="/shop" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors font-medium">Shop</a>
-              <span className="text-[#C4C0BA]">·</span>
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Diffusers</a>
-              <span className="text-[#C4C0BA]">·</span>
-              <a href="/starter-kits" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Starter Kits</a>
-              <span className="text-[#C4C0BA]">·</span>
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Brands</a>
+          {/* Main Nav Row */}
+          <nav className="flex items-center justify-between gap-6 py-3.5">
+            <div className="flex items-center gap-5 flex-1">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden inline-flex items-center gap-2 text-[#2F2B26] font-semibold px-3 py-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F2B26]"
+                aria-label="Open menu"
+                aria-expanded={mobileMenuOpen}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span className="text-[15px]">Menu</span>
+              </button>
+              <div className="hidden lg:flex items-center gap-6">
+                {navLinks.slice(0, 2).map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="text-[15px] font-medium text-[#3A3834] hover:text-[#8B7355] transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
 
-            {/* Logo - Centered */}
-            <h1 className="text-xl lg:text-2xl font-light tracking-[0.15em] text-[#3A3834] lg:px-8">AURADROPLET</h1>
+            <h1 className="text-xl lg:text-2xl font-light tracking-[0.15em] text-[#3A3834] text-center">AURADROPLET</h1>
 
-            {/* Right Menu + Icons */}
-            <div className="hidden lg:flex items-center space-x-1 flex-1 justify-end">
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Essences</a>
-              <span className="text-[#C4C0BA]">·</span>
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Refills</a>
-              <span className="text-[#C4C0BA]">·</span>
-              <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Gifts</a>
+            <div className="flex items-center gap-4 flex-1 justify-end">
+              <div className="hidden lg:flex items-center gap-6">
+                {navLinks.slice(2).map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="text-[15px] font-medium text-[#3A3834] hover:text-[#8B7355] transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+              <a
+                href="#order-section"
+                className="inline-flex items-center gap-1.5 text-[13px] sm:text-[15px] font-semibold text-[#2F2B26] border border-[#C4BAAB] rounded-full px-4 sm:px-5 py-2 shadow-sm bg-white/80 hover:bg-white hover:border-[#8B7355] transition-all"
+              >
+                <span className="hidden sm:inline">View $40 offer</span>
+                <span className="sm:hidden">View offer</span>
+                <span aria-hidden="true" className="text-[11px]">↓</span>
+              </a>
             </div>
-
-            {/* Right Icons - Mobile Always Visible */}
-            <div className="flex items-center space-x-6 lg:ml-6">
-              <button className="text-[#3A3834] hover:text-[#8B7355] transition-colors" aria-label="Account">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </nav>
+        </div>
+      </header>
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            className="relative ml-auto h-full w-full max-w-xs bg-[#FAF9F7] shadow-[0_25px_60px_rgba(0,0,0,0.35)] px-6 py-6 flex flex-col overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-lg font-semibold text-[#2F2B26]">Menu</p>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[#2F2B26]"
+                aria-label="Close menu"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <button className="text-[#3A3834] hover:text-[#8B7355] transition-colors" aria-label="Search">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </div>
+            <nav className="mt-6 space-y-4">
+              {navLinks.map((link) => (
+                <a
+                  key={`mobile-${link.label}`}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-lg font-medium text-[#2F2B26]"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+            <div className="mt-8 border-t border-[#E4D7C8] pt-6 text-sm text-[#4A4540] space-y-3">
+              <p className="font-semibold text-[#2F2B26]">We&apos;re here daily, 9a–8p ET.</p>
+              <a href={`tel:${supportPhoneNumber}`} className="flex items-center gap-2 text-[#2F2B26] font-medium">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75v10.5a1.5 1.5 0 001.5 1.5h2.25a1.5 1.5 0 011.5 1.5v.75a.75.75 0 001.125.65l2.745-1.647a1.5 1.5 0 01.765-.208H18a3 3 0 003-3V6.75A1.5 1.5 0 0019.5 5.25h-15A1.5 1.5 0 002.25 6.75z" />
                 </svg>
-              </button>
-              <button className="text-[#3A3834] hover:text-[#8B7355] transition-colors relative" aria-label="Cart">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                </svg>
+                {supportPhoneNumber}
+              </a>
+              <a href={`mailto:${supportEmailAddress}`} className="block font-medium text-[#2F2B26] underline underline-offset-4">
+                {supportEmailAddress}
+              </a>
+            </div>
+            <div className="mt-auto pt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={getButtonClass('primary', { extra: 'w-full' })}
+              >
+                Shop diffuser bundle
               </button>
             </div>
           </div>
-        </nav>
-      </header>
+        </div>
+      )}
 
       {/* Video Hero */}
       <section className="relative min-h-screen overflow-hidden bg-[#1B1611]">
@@ -824,51 +838,83 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
             <source src="/AuraDroplet.mp4" type="video/mp4" />
           </video>
           {/* Elegant overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/85" />
         </div>
 
         {/* Hero Content */}
-        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-20 pb-12 lg:pt-24">
+        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-32 pb-12 lg:pt-36">
           <div
-            className={`max-w-2xl text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`max-w-2xl w-full z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
-              transform: `translateY(${scrollY * 0.3}px)`,
+              transform: `translateY(${scrollY * 0.25}px)`,
               opacity: Math.max(0, 1 - scrollY * 0.002)
             }}
           >
-            <p className="text-xs uppercase tracking-[0.35em] text-white/70 mb-4">Free fall scent included</p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white mb-6">
-              Aura Diffuser. Whisper-quiet sanctuary.
-            </h1>
-            <p className="text-lg text-white/80 mb-8">
-              Transform any room into a sanctuary in seconds with sculpted ceramic, 12-hour runtime, and concierge scent matching.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={handlePricingBannerCta}
-                className={getButtonClass('primary')}
-              >
-                Shop Aura Diffuser
-              </button>
-              <a
-                href="#free-scent-offer"
-                className={getButtonClass('secondary', {
-                  extra: 'border-white/70 text-white hover:bg-white/20 hover:text-white',
-                })}
-              >
-                Get yours today
-              </a>
+            <div className="bg-white/95 text-[#1F1914] rounded-[32px] p-7 sm:p-9 shadow-[0_35px_90px_rgba(0,0,0,0.3)] space-y-7">
+              <div className="space-y-4">
+                <p className={`${metaLabelClass} text-[#8B7355]`}>Calming diffuser ritual · Ships in 24h</p>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight">
+                  Aura Diffuser. Whisper-quiet sanctuary.
+                </h1>
+                <p className="text-lg sm:text-xl text-[#4A3F37] leading-relaxed">
+                  Ceramic essential oil diffuser with gentle humidifying mist made for women who want a soothing home reset after a long day.
+                </p>
+                <p className="text-base sm:text-lg text-[#3A2C25] leading-relaxed">
+                  Essential oil diffuser that looks good and stays quiet. Better sleep. Done.
+                </p>
+                <p className="text-sm sm:text-base text-[#4A3F37] font-medium">
+                  ⭐ 4.8/5 from {aggregateReviewCount}+ customers — “Quiet, easy, and on my nightstand every night.”
+                </p>
+              </div>
+
+              <div className="rounded-[22px] bg-white/98 border border-[#F1E7DA] p-6 sm:p-7 space-y-5">
+                <div>
+                  <p className="text-sm font-semibold tracking-[0.2em] text-[#5A4D3F]">What you get today</p>
+                  <div className="mt-3 space-y-1">
+                    <p className="text-5xl font-semibold text-[#1E150F]">{heroProduct.price}</p>
+                    {heroProduct.compareAtPrice && (
+                      <p className="text-sm text-[#8B7355] uppercase tracking-[0.25em]">
+                        Was {heroProduct.compareAtPrice}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <ul className="space-y-2 text-base text-[#3A3834]">
+                  <li className="flex gap-3">
+                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
+                    Aura Diffuser in matte sandstone (12-hour runtime)
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
+                    One full-size fall oil of your choice
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
+                    Quick-start guide + measuring cup
+                  </li>
+                </ul>
+                <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-[#FFF6EA] border border-[#F0E4D6] px-4 py-3 text-sm font-semibold text-[#3A3834]">
+                  <span aria-hidden="true">✅</span>
+                  <span>30-day money-back · Free scent swap within 14 days if you don&apos;t love the first one · No auto-subscription</span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handlePrimaryCta}
+                    disabled={needsVariantUpdate}
+                    className={getButtonClass('primary', {
+                      disabled: needsVariantUpdate,
+                      extra: 'w-full text-base py-4',
+                    })}
+                  >
+                    {needsVariantUpdate ? 'Finish store setup' : primaryCtaLabel}
+                  </button>
+                  <p className="text-sm text-[#4A3F37] text-center">Ships in 24h · Secure checkout</p>
+                  <p className="text-sm text-[#4A3F37] text-center">
+                    Not sure on scent? Choose now or at checkout—we&apos;ll remind you.
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="mt-4 text-sm text-white/80">Ships in 24h · 30-day returns</p>
-            <p className="mt-6 text-white/80 text-sm flex items-center justify-center gap-2">
-              <span className="flex text-[#F6C892] gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={`hero-star-${i}`}>★</span>
-                ))}
-              </span>
-              <span>Over 500+ happy customers</span>
-            </p>
-            <p className="mt-6 text-white/70 text-xs uppercase tracking-[0.3em]">Scroll to see autumn offers</p>
           </div>
           <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-white/90 text-[#2F2B26] rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
             <div className="relative h-40 rounded-2xl overflow-hidden bg-[#F8F4EE]">
@@ -908,240 +954,142 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
         </div>
       </section>
 
-      {/* Pricing Banner */}
-      <section className="bg-[var(--paper)] px-6 lg:px-8 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] items-center bg-white border border-[var(--mist)] rounded-[24px] p-8 lg:p-12 shadow-[var(--shadow-soft)]">
-            <div className="order-2 lg:order-1 space-y-6">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-[var(--amber)] mb-3">
-                  Aura Diffuser
-                </p>
-                <h2 className="text-4xl lg:text-[44px] font-light leading-tight text-[var(--ink)]">
-                  Quiet ceramic diffusion for every room.
-                </h2>
-                <p className="text-base text-[#4A4540] mt-3">
-                  Sculpted matte stone, 12-hour runtime, and concierge scent matching bundled as standard.
-                </p>
-              </div>
-
-              <div>
-                <div className="flex items-baseline gap-4">
-                  <p className="text-5xl font-light text-[var(--ink)]">${heroProduct.price}</p>
-                  {heroProduct.compareAtPrice && (
-                    <p className="text-base text-[#8B877F]">was {heroProduct.compareAtPrice}</p>
-                  )}
-                </div>
-                <p className="text-base text-[var(--ink)] mt-2 font-medium">Includes a complimentary fall essence ($28 value).</p>
-                <p className="text-sm text-[#5F5B56] mt-1">Free shipping when you add any second vial.</p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (needsVariantUpdate) {
-                      return;
-                    }
-                    if (selectedScent) {
-                      handleQuickAdd(heroProduct);
-                      return;
-                    }
-                    handlePricingBannerCta();
-                  }}
-                  disabled={needsVariantUpdate}
-                  className={getButtonClass('primary', {
-                    disabled: needsVariantUpdate,
-                    extra: 'w-full sm:flex-1',
-                  })}
-                >
-                  {needsVariantUpdate
-                    ? 'Finish store setup'
-                    : selectedScent
-                    ? 'Add diffuser + free scent'
-                    : 'Choose your free scent'}
-                </button>
-                <a
-                  href="#bundle-shop"
-                  className={getButtonClass('secondary', { extra: 'w-full sm:flex-1 text-center' })}
-                >
-                  See bundles
-                </a>
-              </div>
-              <p className="text-xs text-[#6B6762] uppercase tracking-[0.3em]">
-                Free shipping on US orders $50+ • 30-day returns
-              </p>
-              {needsVariantUpdate && (
-                <p className="text-xs text-[#8B7355] mt-2">
-                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
-                </p>
-              )}
-
-              <div className="rounded-2xl border border-[var(--mist)] bg-white p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-                <div className="flex items-center gap-4">
-                  <div aria-hidden="true" className="flex text-[var(--amber)] text-lg">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span key={`aggregate-top-${i}`}>★</span>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="text-4xl font-semibold text-[var(--ink)]">
-                      {aggregateReviewScore.toFixed(1)}/5
-                      <span className="text-base font-normal text-[#6B6762] ml-3">
-                        ({aggregateReviewCount} reviews)
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm text-[#4C4842] italic flex-1">
-                  &ldquo;{heroReview.title}&rdquo; — {heroReview.name}, {heroReview.location}
-                </p>
-                <a href="#reviews" className="text-[11px] uppercase tracking-[0.35em] text-[var(--amber)] font-semibold">
-                  Read reviews
-                </a>
-              </div>
-            </div>
-
-            <div className="order-1 lg:order-2">
-              <div className="relative aspect-[4/5] w-full rounded-[var(--radius-card)] bg-[var(--clay)] border border-[var(--mist)] overflow-hidden">
+      {/* Order Stack */}
+      <section id="order-section" className="bg-[var(--paper)] px-6 lg:px-8 py-16">
+        <div
+          ref={firstProductRef}
+          className={`${cardShellClass} mx-auto max-w-5xl p-6 sm:p-8 lg:p-10`}
+        >
+          <div className="grid gap-10 md:grid-cols-[0.85fr_1.15fr]">
+            <div className="space-y-6">
+              <div className="relative aspect-[4/5] w-full rounded-[28px] overflow-hidden bg-[var(--clay)]">
                 <Image
                   src="/DiffProductShot.png"
                   alt="Aura Diffuser on marble plinth"
                   fill
                   loading="lazy"
-                  sizes="(min-width: 1024px) 35vw, 80vw"
+                  sizes="(min-width: 768px) 40vw, 80vw"
                   className="object-cover"
                 />
-              </div>
-              <div className="mt-6 flex flex-wrap gap-2">
-                {[
-                  '12-hour runtime',
-                  'Auto shut-off glow',
-                  'Free fall scent',
-                  '2-year warranty',
-                ].map((copy) => (
-                  <span
-                    key={copy}
-                    className="px-4 py-1.5 text-xs tracking-[0.25em] uppercase text-[#6B6762] border border-[var(--mist)] rounded-full bg-white/70"
-                  >
-                    {copy}
-                  </span>
-                ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+                <span className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.3em] text-white/80 bg-black/30 backdrop-blur px-4 py-1 rounded-full">
+                  Matte sandstone · 12h runtime
+                </span>
               </div>
             </div>
-          </div>
 
-          <div className="mt-10 flex flex-wrap gap-4 text-xs text-[#6B6762] uppercase tracking-[0.3em]">
-            <span>Concierge scent swaps</span>
-            <span>•</span>
-            <span>Ships in 24h</span>
-            <span>•</span>
-            <span>Clean, IFRA-compliant oils</span>
-          </div>
-        </div>
-      </section>
-      {/* Free Scent Picker */}
-      <section id="free-scent-offer" className="relative py-24 bg-gradient-to-br from-[#F8F3ED] via-[#FAF9F7] to-[#F1E7DA] overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 -right-20 w-72 h-72 bg-[#E8D7C6]/50 blur-3xl" />
-          <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-[#DADFE6]/50 blur-3xl" />
-        </div>
-
-        <div className="relative max-w-6xl mx-auto px-6 lg:px-8 space-y-12">
-          <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] items-center">
-            <div className="relative order-1">
-              <div className="absolute top-6 left-6 z-10 text-[11px] uppercase tracking-[0.4em] text-white/85 bg-black/35 px-4 py-1 rounded-full backdrop-blur">
-                Step 1 of 3
-              </div>
-              <div className="relative h-[420px] rounded-[36px] overflow-hidden shadow-[0_35px_70px_rgba(33,24,17,0.22)]">
-                <Image
-                  src="/AutumnOffer.jpg"
-                  alt="Free scent offer styling"
-                  fill
-                  loading="lazy"
-                  sizes="(min-width: 1024px) 45vw, 90vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#1E120B]/80 via-[#2B1C12]/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-6 text-white/80 text-[11px] uppercase tracking-[0.4em]">
-                  Complimentary fall atelier
-                </div>
-              </div>
-            </div>
-            <div className="order-2 space-y-5">
-              <p className="text-xs tracking-[0.35em] uppercase text-[#D28755]">Complimentary scent concierge</p>
+            <div className="space-y-6">
               <div>
-                <div className="h-1 w-full bg-[#EADCCE] rounded-full overflow-hidden">
-                  <div className="h-full bg-[var(--amber)] w-1/3" />
-                </div>
-                <p className="text-[11px] uppercase tracking-[0.35em] text-[#6B6762] mt-2">Choose your free fall blend</p>
+                <h2 className="text-3xl lg:text-[40px] font-light text-[var(--ink)] leading-tight">
+                  Aura Diffuser ritual set
+                </h2>
               </div>
-              <h3 className="text-4xl lg:text-5xl font-light text-[var(--ink)] tracking-tight">
-                Free fall scent with every diffuser.
-              </h3>
-              <div className="space-y-3 text-base text-[#4A4540]">
-                <p>Pick any fall scent—it&apos;s complimentary with your first diffuser.</p>
-                <p>We tuck the vial into the box automatically.</p>
-                <p>No code, no minimums, and concierge swaps within 14 days.</p>
-              </div>
-              <p className="text-sm text-[#6B6762]">Prefer surprises? We&apos;ll send Rose Petal if you skip this step.</p>
-            </div>
-          </div>
 
-          <div className="space-y-6">
-            <div className="-mx-6 md:hidden">
-              <div
-                id="free-scent-carousel"
-                className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-6 pb-2 pr-16"
-              >
-                {freeScentOptions.map((scent) => (
-                  <div key={`carousel-${scent.id}`} className="snap-center">
-                    {renderScentCard(scent, { variant: 'carousel' })}
-                  </div>
+              <div>
+                <p className="text-5xl font-light text-[var(--ink)]">${heroProduct.price}</p>
+                {heroProduct.compareAtPrice && (
+                  <p className="text-sm text-[#8B7355] uppercase tracking-[0.25em]">Was {heroProduct.compareAtPrice}</p>
+                )}
+              </div>
+
+              <ul className="space-y-2 text-sm text-[#4A4540]">
+                {[
+                  'Diffuser in matte sandstone (12-hour runtime)',
+                  'One fall oil of your choice',
+                  'Quick-start guide + measuring cup',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-[#C47A3B]" aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
                 ))}
+              </ul>
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickAdd(heroProduct)}
+                  disabled={!selectedScent || needsVariantUpdate}
+                  className={getButtonClass('primary', {
+                    disabled: !selectedScent || needsVariantUpdate,
+                    extra: 'w-full text-base',
+                  })}
+                >
+                  {needsVariantUpdate ? 'Finish store setup' : primaryCtaLabel}
+                </button>
+                <p className="text-sm text-[#4A4540] text-center font-medium">
+                  30-day returns · Ships in 24h · Secure checkout
+                </p>
+                <p className="text-sm text-[#4A4540] text-center">
+                  ⭐ 4.8/5 from {aggregateReviewCount} customers
+                </p>
               </div>
-              <p className="px-6 text-xs text-[#6B6762] uppercase tracking-[0.3em]">Swipe to explore scents →</p>
-            </div>
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {freeScentOptions.map((scent) => renderScentCard(scent))}
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-[#4A4540]">
-              Selected:&nbsp;
-              <strong>{selectedScentDetails ? selectedScentDetails.name : 'Rose Petal (default)'}</strong>
-              <button
-                type="button"
-                className="ml-3 text-xs uppercase tracking-[0.3em] text-[#8B7355]"
-                onClick={() =>
-                  document.getElementById('free-scent-carousel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-                }
-              >
-                Change
-              </button>
-            </p>
-            <p className="text-xs text-[#6B6762] uppercase tracking-[0.3em]">Complimentary vial auto-applies at checkout</p>
-          </div>
+              <div>
+                <p className="text-sm text-[#4A4540] mb-3">
+                  Includes the fall oils below—choose your favorite for the complimentary vial.
+                </p>
+                <div className="space-y-2">
+                  {scentOptionsToDisplay.map((scent) => {
+                    const isSelected = selectedScent === scent.id;
+                    return (
+                      <button
+                        key={scent.id}
+                        type="button"
+                        onClick={() => handleSelectScent(scent.id)}
+                        aria-pressed={isSelected}
+                        className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-left w-full transition-colors ${
+                          isSelected
+                            ? 'border-[var(--amber)] bg-white shadow-[0_12px_30px_rgba(33,27,22,0.12)]'
+                            : 'border-transparent bg-white/70 hover:border-[var(--mist)]'
+                        }`}
+                      >
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[var(--clay)]">
+                          <Image
+                            src={scent.image}
+                            alt={scent.name}
+                            fill
+                            className={`${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+                            sizes="48px"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-[#2F2B26]">{scent.name}</p>
+                          <p className="text-xs text-[#6B6762]">{scent.notes}</p>
+                        </div>
+                        {isSelected && (
+                          <span className="text-xs uppercase tracking-[0.3em] text-[#8B7355]">Chosen</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllScents((prev) => !prev)}
+                  className="text-sm font-semibold text-[#8B7355] underline underline-offset-4 mt-2"
+                >
+                  {showAllScents ? 'Hide scent list' : `View all ${freeScentOptions.length} scents`}
+                </button>
+                <p className="text-sm text-[#6B6762] mt-2">
+                  {selectedScentDetails
+                    ? `${selectedScentDetails.name} will be packed automatically.`
+                    : 'Skip this and we include Rose Petal by default.'}
+                </p>
+              </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <button
-              onClick={handleFreeScentCheckout}
-              disabled={!selectedScent || needsVariantUpdate}
-              className={getButtonClass('primary', {
-                disabled: !selectedScent || needsVariantUpdate,
-                extra: 'w-full',
-              })}
-            >
-              {needsVariantUpdate ? 'Finish store setup' : selectedScent ? 'Add diffuser + free scent' : 'Select a scent'}
-            </button>
-            <button
-              type="button"
-              onClick={() => document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' })}
-              className="text-sm text-[#8B7355] underline underline-offset-4 text-center"
-            >
-              Need help choosing?
-            </button>
+              {needsVariantUpdate && (
+                <p className="text-xs text-[#8B7355]">
+                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
+                </p>
+              )}
+
+              {needsVariantUpdate && (
+                <p className="text-xs text-[#8B7355]">
+                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -1149,326 +1097,84 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
       <section id="reviews" className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
         <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-8">
           <div className="text-center">
-            <p className="text-xs uppercase tracking-[0.35em] text-[#B77950] mb-3">Verified Ritualists</p>
-            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">Loved by autumn clientele</h2>
-            <p className="text-base text-[#6B6762] mt-3">Free scent swap within 14 days if you don&apos;t love it.</p>
+            <p className={`${metaLabelClass} text-[#B77950] mb-3`}>Verified ritualists</p>
+            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">4.8 ★ from {aggregateReviewCount} customers</h2>
           </div>
 
-          <div className="rounded-3xl border border-[#E9DFD2] bg-white p-6 space-y-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-4">
-                <div aria-hidden="true" className="flex text-[#C47A3B] text-lg">
-                  {Array.from({ length: 5 }).map((_, starIndex) => (
-                    <span key={`aggregate-block-${starIndex}`}>★</span>
-                  ))}
-                </div>
-                <p className="text-4xl font-semibold text-[#2F2B26]">
-                  {aggregateReviewScore.toFixed(1)}/5
-                  <span className="text-base font-normal text-[#6B6762] ml-3">({aggregateReviewCount} reviews)</span>
-                </p>
-              </div>
-              <a
-                href="#reviews-list"
-                className={getButtonClass('secondary', { extra: 'px-6 py-2 text-[11px]' })}
-              >
-                Read all reviews
-              </a>
+          <div className={`${cardShellClass} p-6 space-y-6`}>
+            <div className="text-center">
+              <p className="text-5xl font-semibold text-[#2F2B26]">{aggregateReviewScore.toFixed(1)}</p>
+              <p className="text-sm text-[#6B6762]">Average across {aggregateReviewCount} reviews</p>
             </div>
-            <p className="text-base text-[#4C4842] italic">&ldquo;{heroReview.body}&rdquo; — {heroReview.name}, {heroReview.location}</p>
             <div id="reviews-list" className="grid gap-4 md:grid-cols-2">
-              {reviewEntries.slice(1, 3).map((review) => (
-                <div key={`pull-quote-${review.name}`} className="bg-[#FFFBF5] border border-[#F1E4D6] rounded-2xl p-4 flex flex-col gap-3">
+              {reviewEntries.slice(0, 2).map((review) => (
+                <article key={`pull-quote-${review.name}`} className="rounded-[24px] border border-[#F1E4D6] bg-[#FFFBF5] p-5 flex flex-col gap-3">
                   <p className="text-sm font-semibold text-[#2F2B26]">{review.title}</p>
                   <p className="text-sm text-[#4C4842] leading-relaxed">{review.body}</p>
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-[#8B7355]">{review.name} · {review.location}</p>
-                </div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#8B7355]">
+                    {review.name}
+                    {review.age ? ` · ${review.age}` : ''} · {review.location}
+                  </p>
+                </article>
               ))}
             </div>
-            <p className="text-sm font-semibold text-[#8B7355]">
-              <a href="#reviews">Read all {aggregateReviewCount} reviews →</a>
-            </p>
+            <a href="#reviews" className="text-sm font-semibold text-[#8B7355] inline-flex items-center gap-2">
+              Read all reviews
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
       {/* Meet the Founder */}
-      <section className="bg-white py-16">
-        <div className="max-w-5xl mx-auto px-6 lg:px-0 space-y-8 text-center">
-          <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355]">Meet the Founder</p>
-          <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">Intentional scent, minus the fuss.</h3>
-          <p className="text-base text-[#4A4540] max-w-2xl mx-auto">I built AuraDroplet so homes could smell curated instead of perfumey—clean oils, concierge guidance, and an easy swap if your first pick isn&apos;t love.</p>
-          <div className="grid sm:grid-cols-3 gap-4 text-left">
-            {[
-              {
-                title: 'Quiet hydration',
-                copy: '12-hour misting with a whisper-quiet motor and automatic shut-off.',
-              },
-              {
-                title: 'Clean scent',
-                copy: 'Premium botanical oils—never fillers or synthetics.',
-              },
-              {
-                title: 'Hassle-free',
-                copy: 'Free fall scent plus concierge swaps within 14 days.',
-              },
-            ].map((pillar) => (
-              <div key={pillar.title} className="rounded-[var(--radius-card)] border border-[var(--mist)] bg-[var(--clay)]/60 p-5">
-                <p className="text-sm font-semibold text-[#8B7355] uppercase tracking-[0.3em] mb-2">{pillar.title}</p>
-                <p className="text-base text-[#4A4540]">{pillar.copy}</p>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-col items-center gap-4 pt-2">
-            <button
-              onClick={() => {
-                track('select_promotion', {
-                  promotion_id: 'founder_shop_cta',
-                  promotion_name: 'Founder block CTA',
-                });
-                handlePricingBannerCta();
-              }}
-              className={getButtonClass('primary', { extra: 'px-8 py-3 mt-2' })}
-            >
-              Shop Aura Diffuser + Free Fall Scent
-            </button>
-            <p className="text-sm text-[#6B6762]">Ships in 24h • Clean ingredients • Easy returns</p>
-          </div>
-          <p className="text-xs text-[#6B6762]">Need help? Email <a href="mailto:ashervaughn43@gmail.com" className="text-[#C47A3B] underline">ashervaughn43@gmail.com</a></p>
-        </div>
-      </section>
-
-      {/* Conversion Shop Strip */}
-      <section id="bundle-shop" className="py-24 bg-[#201C18] text-white border-t border-[#362F27]">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-14">
-            <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-[#F0C9A9] mb-4">Bundle & save</p>
-              <h2 className="text-4xl lg:text-5xl font-light leading-tight">Prefer a set? Save up to 30%.</h2>
-              <p className="text-base text-white/70 mt-4 max-w-xl">
-                Bundle the diffuser with curated seasonal oils and save up to 30% on every order.
+      <section id="support" className="bg-white py-16">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0">
+          <div className={`${cardShellClass} px-8 py-10`}>
+            <div className="text-left space-y-5">
+              <p className={`${metaLabelClass} text-[#8B7355]`}>Meet the founder</p>
+              <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">Intentional scent, minus the fuss.</h3>
+              <ul className="space-y-3 text-sm text-[#4A4540]">
+                {[
+                  'Built for quiet, all-night use.',
+                  'Simple to clean and refill.',
+                  'Looks like decor, not a plastic appliance.',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-[#C47A3B]" aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-sm text-[#4A4540]">30-day returns · Free scent swap if you don&apos;t love the first one.</p>
+              <p className="text-sm text-[#6B6762]">
+                Questions? Call <a href={`tel:${supportPhoneNumber}`} className="text-[#C47A3B] underline">{supportPhoneNumber}</a> or email <a href={`mailto:${supportEmailAddress}`} className="text-[#C47A3B] underline">{supportEmailAddress}</a>.
               </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 text-[11px] uppercase tracking-[0.35em] text-white/70">
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#ED9F72]" />Ships in 24h</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#D28755]" />Free exchanges</span>
-              <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#B07454]" />Pay in 4</span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {ritualShop.map((item, index) => {
-              const selections = getBundleSelections(item.id);
-              const selectedCount = selections.length;
-              const requiredSelections = item.requiredSelections ?? 0;
-              const needsSelection = requiredSelections > 0;
-              const showChooseOptions = needsSelection;
-
-              return (
-                <article
-                  key={item.id}
-                  ref={index === 0 ? firstProductRef : undefined}
-                  className="group relative bg-[#281F1A] border border-white/20 rounded-3xl overflow-hidden flex flex-col"
-                  style={{ overflow: activeBundle === item.id && needsSelection ? 'visible' : undefined }}
-                >
-                  <div className="relative bg-gradient-to-br from-[#3A3430] to-[#281F1A]">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={800}
-                      height={600}
-                      className={`h-56 w-full ${index === 0 ? 'object-contain' : 'object-cover'} group-hover:scale-105 transition-transform duration-700`}
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <span className="absolute top-4 left-4 text-[11px] uppercase tracking-[0.35em] bg-white/15 px-4 py-1 rounded-full">
-                      {item.badge}
-                    </span>
-                  </div>
-                  <div className="flex-1 p-5 flex flex-col">
-                    <div className="mb-4">
-                      <p className="text-xs uppercase tracking-[0.35em] text-white/60">{index === 0 ? 'Diffuser' : 'Bundle'}</p>
-                      <h3 className="text-2xl font-light mt-2">{item.name}</h3>
-                      <p className="text-sm text-white/70 mt-1">{item.subtitle}</p>
-                    </div>
-                    <div className="mt-auto">
-                      <div className="space-y-1 mb-3">
-                        <div className="flex items-baseline gap-2">
-                          {item.compareAtPrice && (
-                            <span className="text-sm text-white/50 line-through">{item.compareAtPrice}</span>
-                          )}
-                          <p className="text-2xl font-light">{item.price}</p>
-                          {item.savingsCopy && (
-                            <span className="text-[11px] uppercase tracking-[0.3em] text-[#F5C4A5]">{item.savingsCopy}</span>
-                          )}
-                        </div>
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-white/70">{item.value}</p>
-                      </div>
-                      <div className="space-y-3">
-                        <button
-                          type="button"
-                          className="text-xs text-white/80 underline underline-offset-4"
-                          onClick={() => track('select_content', { content_type: 'bundle_details', item_id: item.id })}
-                        >
-                          What&apos;s included
-                        </button>
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (needsVariantUpdate) {
-                                return;
-                              }
-                              if (showChooseOptions) {
-                                const willOpen = activeBundle !== item.id;
-                                track(willOpen ? 'view_item_list' : 'collapse_item_list', {
-                                  item_list_id: item.id,
-                                  item_list_name: item.name,
-                                });
-                                setActiveBundle((prev) =>
-                                  prev === item.id ? null : item.id
-                                );
-                                return;
-                              }
-                              handleQuickAdd(item);
-                            }}
-                            aria-expanded={needsSelection ? activeBundle === item.id : undefined}
-                            className={getButtonClass('primary', {
-                              disabled: needsVariantUpdate,
-                              extra: 'w-full gap-2 justify-center',
-                            })}
-                            disabled={needsVariantUpdate}
-                          >
-                            {showChooseOptions ? `Choose options (${selectedCount}/${requiredSelections})` : 'Add to cart'}
-                            {needsSelection && (
-                              <svg
-                                className={`w-4 h-4 transition-transform ${activeBundle === item.id ? 'rotate-180' : ''}`}
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                aria-hidden="true"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
-                              </svg>
-                            )}
-                          </button>
-                          {needsSelection && activeBundle === item.id && (
-                            <div className="absolute left-0 right-0 top-full z-20 mt-3 bg-white text-[#2F2B26] border border-white/20 rounded-2xl shadow-[0_18px_40px_rgba(0,0,0,0.35)] p-5">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="text-[11px] uppercase tracking-[0.35em] text-[#8B7355]">
-                                    Customize your kit
-                                  </p>
-                                  <p className="text-sm text-[#6B6762] mt-1">
-                                    Pick {requiredSelections} essences to complete this bundle.
-                                  </p>
-                                </div>
-                                <span className="text-xs font-semibold text-[#2F2B26] bg-[#F8F4EE] px-2 py-1 rounded-full">
-                                  {selectedCount}/{requiredSelections} selected
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 mt-4">
-                                {freeScentOptions.map((scent) => {
-                                  const isSelected = selections.includes(scent.id);
-                                  const limitReached = selectedCount >= requiredSelections;
-                                  const disableSelect = !isSelected && (limitReached || !scent.variantId);
-
-                                  return (
-                                    <button
-                                      key={scent.id}
-                                      type="button"
-                                      onClick={(event) => {
-                                        event.preventDefault();
-                                        handleBundleScentToggle(item.id, scent.id, requiredSelections);
-                                      }}
-                                      disabled={disableSelect}
-                                      className={`text-left p-3 rounded-xl border transition-all ${
-                                        isSelected
-                                          ? 'bg-[#2F2B26] text-white border-[#2F2B26]'
-                                          : 'bg-[#F8F4EE] text-[#2F2B26] border-transparent hover:border-[#C4A27F]'
-                                      } ${disableSelect ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                      <span className="block text-sm font-medium">{scent.name}</span>
-                                      <span className="block text-[11px] uppercase tracking-[0.25em] text-[#6B6762] mt-1">
-                                        {scent.notes}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              <p className="mt-4 text-xs text-[#6B6762]">
-                                {selectedCount < requiredSelections
-                                  ? `Choose ${requiredSelections - selectedCount} more ${requiredSelections - selectedCount === 1 ? 'scent' : 'scents'} to unlock checkout.`
-                                  : 'All set — lock in your bundle below.'}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  handleQuickAdd(item);
-                                }}
-                                className={getButtonClass('primary', {
-                                  disabled: selectedCount < requiredSelections || needsVariantUpdate,
-                                  extra: 'w-full mt-4 py-2.5 text-sm',
-                                })}
-                                disabled={selectedCount < requiredSelections || needsVariantUpdate}
-                              >
-                                Add to cart with scents
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="text-sm text-white/80 underline underline-offset-4"
-                          onClick={() => track('select_content', { content_type: 'details', item_id: item.id })}
-                        >
-                          Details
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="mt-12 grid md:grid-cols-2 gap-4 text-sm text-white">
-            <div className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-2xl">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p>Secure checkout via Shop Pay, Apple Pay, and major cards.</p>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-2xl">
-              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p>Concierge texts you within 24 hours to confirm your complimentary scent.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Brand Quiz */}
-      <section id="quiz" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-3">Two-minute quiz</p>
-            <h2 className="text-4xl lg:text-5xl font-light mb-4 text-[#3A3834] tracking-tight">We&apos;ll match you to a palette</h2>
-            <p className="text-lg text-[#6B6762] font-light">Answer three quick prompts to see the brand that fits your space.</p>
-            <div className="mt-4 flex items-center justify-center gap-4 text-sm text-[#9B9792]">
-              <p>{answeredCount}/{quizQuestions.length} answered</p>
-              <button
-                type="button"
-                onClick={() => document.getElementById('conversion-shop')?.scrollIntoView({ behavior: 'smooth' })}
-                className="underline underline-offset-4 text-[#8B7355]"
-              >
-                Skip quiz →
-              </button>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
+      <section id="quiz" className="py-20 bg-white border-t border-[#EFE7DC]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0 text-center space-y-4">
+          <h2 className="text-3xl lg:text-4xl font-light text-[#2F2B26]">Need help choosing a scent?</h2>
+          <p className="text-base text-[#4A4540]">Answer 3 quick questions and we&apos;ll suggest a match.</p>
+          {showQuiz && (
+            <p className="text-xs uppercase tracking-[0.3em] text-[#9B9792]">
+              {answeredCount}/{quizQuestions.length} answered
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowQuiz((prev) => !prev)}
+            className={getButtonClass('secondary', { extra: 'px-8 py-2 mx-auto mt-2' })}
+          >
+            {showQuiz ? 'Hide quiz' : 'Take 1-minute quiz'}
+          </button>
+        </div>
+        {showQuiz && (
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12 grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
             <div className="space-y-6">
               {quizQuestions.map((question, questionIndex) => (
                 <div key={question.id} className="bg-[#F8F3ED] border border-[#E8E2D8] rounded-3xl p-6">
@@ -1531,32 +1237,29 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
                   onClick={() => {
                     if (recommendedScent) {
                       setSelectedScent(recommendedScent.id);
-                      localStorage.setItem('selectedFreeScent', recommendedScent.id);
-                      if (!needsVariantUpdate) {
-                        handleQuickAdd(heroProduct);
+                      try {
+                        localStorage.setItem('selectedFreeScent', recommendedScent.id);
+                      } catch {
+                        /* ignore */
                       }
+                      document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  disabled={!quizComplete || needsVariantUpdate}
-                  className={`w-full text-center py-3 rounded-full text-sm font-semibold uppercase tracking-[0.3em] ${
-                    quizComplete && !needsVariantUpdate ? 'bg-white text-[#1F1914]' : 'bg-white/10 text-white/50 cursor-not-allowed'
-                  }`}
+                  className="text-center text-sm text-white font-semibold underline underline-offset-4"
                 >
-                  {needsVariantUpdate
-                    ? 'Finish store setup'
-                    : `Add diffuser + ${recommendedScent?.name ?? recommendedBrand.name}`}
+                  Apply {recommendedScent?.name ?? recommendedBrand.name} to my order
                 </button>
                 <button
                   type="button"
-                  onClick={() => document.getElementById('free-scent-offer')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="text-center text-sm text-white/80 underline underline-offset-4"
+                  onClick={() => document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-center text-sm text-white/70 underline underline-offset-4"
                 >
-                  Browse all scents
+                  Back to checkout
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Footer */}
@@ -1565,8 +1268,8 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">AURADROPLET</h3>
-              <p className="text-sm text-[#C4C0BA] leading-relaxed font-light">
-                Fragrance, considered. Transform your space into a sanctuary with our curated collection of diffusers and essences.
+              <p className="text-sm text-[#C4C0BA] leading-relaxed font-light mt-3">
+                Questions? Call <a href={`tel:${supportPhoneNumber}`} className="underline underline-offset-4 text-white">{supportPhoneNumber}</a> or email <a href={`mailto:${supportEmailAddress}`} className="underline underline-offset-4 text-white">{supportEmailAddress}</a>.
               </p>
             </div>
             <div>
@@ -1661,17 +1364,17 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
               </div>
               <button
                 type="button"
-                onClick={() => handleQuickAdd(heroProduct)}
+                onClick={handlePrimaryCta}
                 disabled={needsVariantUpdate}
                 className={getButtonClass('primary', {
                   disabled: needsVariantUpdate,
                   extra: 'px-5 py-3 text-sm',
                 })}
               >
-                {needsVariantUpdate ? 'Set variant' : 'Add to cart'}
+                {needsVariantUpdate ? 'Set variant' : primaryCtaLabel}
               </button>
             </div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-white/70">
+            <div className="text-xs uppercase tracking-[0.25em] text-white/70">
               Ships today · Free exchanges · Safe checkout
             </div>
           </div>
@@ -1692,13 +1395,13 @@ const renderScentCard = (scent: FreeScentOption, { variant = 'grid' }: { variant
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => handleQuickAdd(heroProduct)}
+                onClick={handlePrimaryCta}
                 disabled={needsVariantUpdate}
                 className={`px-8 py-3 rounded-full text-sm font-semibold tracking-wide uppercase ${
                   needsVariantUpdate ? 'bg-[#D8D3CC] text-[#8B877F] cursor-not-allowed' : 'bg-[#1F1914] text-white hover:bg-[#8B7355]'
                 }`}
               >
-                {needsVariantUpdate ? 'Set variant' : 'Add to cart'}
+                {needsVariantUpdate ? 'Set variant' : primaryCtaLabel}
               </button>
             </div>
           </div>
