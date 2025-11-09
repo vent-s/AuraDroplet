@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { products } from "./data/products";
 import { track } from "@/lib/analytics";
+import StarterKitStrip from "./components/StarterKitStrip";
 
 const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
 
@@ -850,70 +851,71 @@ export default function Home() {
               opacity: Math.max(0, 1 - scrollY * 0.002)
             }}
           >
-            <div className="bg-white/95 text-[#1F1914] rounded-[32px] p-7 sm:p-9 shadow-[0_35px_90px_rgba(0,0,0,0.3)] space-y-7">
-              <div className="space-y-4">
-                <p className={`${metaLabelClass} text-[#8B7355]`}>Calming diffuser ritual · Ships in 24h</p>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight">
-                  Aura Diffuser. Whisper-quiet sanctuary.
-                </h1>
-                <p className="text-lg sm:text-xl text-[#4A3F37] leading-relaxed">
-                  Ceramic essential oil diffuser with gentle humidifying mist made for women who want a soothing home reset after a long day.
-                </p>
-                <p className="text-base sm:text-lg text-[#3A2C25] leading-relaxed">
-                  Essential oil diffuser that looks good and stays quiet. Better sleep. Done.
-                </p>
-                <p className="text-sm sm:text-base text-[#4A3F37] font-medium">
-                  ⭐ 4.8/5 from {aggregateReviewCount}+ customers — “Quiet, easy, and on my nightstand every night.”
-                </p>
-              </div>
+            <div className="bg-white/95 text-[#1F1914] rounded-[32px] p-7 sm:p-9 shadow-[0_35px_90px_rgba(0,0,0,0.3)] space-y-6">
+              {/* Tagline */}
+              <p className={`${metaLabelClass} text-[#8B7355]`}>Ships in 24h · Free scent included</p>
 
-              <div className="rounded-[22px] bg-white/98 border border-[#F1E7DA] p-6 sm:p-7 space-y-5">
-                <div>
-                  <p className="text-sm font-semibold tracking-[0.2em] text-[#5A4D3F]">What you get today</p>
-                  <div className="mt-3 space-y-1">
-                    <p className="text-5xl font-semibold text-[#1E150F]">{heroProduct.price}</p>
-                    {heroProduct.compareAtPrice && (
-                      <p className="text-sm text-[#8B7355] uppercase tracking-[0.25em]">
-                        Was {heroProduct.compareAtPrice}
-                      </p>
-                    )}
-                  </div>
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight text-[#1E150F]">
+                Whisper-quiet diffuser. Calming scent. Done.
+              </h1>
+
+              {/* Price Card - Prominently above the fold */}
+              <div className="rounded-[22px] bg-[#FFF6EA] border-2 border-[#C47A3B] p-6 sm:p-7 space-y-4">
+                <div className="flex items-baseline gap-3">
+                  <p className="text-6xl sm:text-7xl font-bold text-[#1E150F]">{heroProduct.price}</p>
+                  {heroProduct.compareAtPrice && (
+                    <div>
+                      <p className="text-lg text-[#8B7355] line-through">{heroProduct.compareAtPrice}</p>
+                      <p className="text-sm font-semibold text-[#C47A3B] uppercase tracking-[0.2em]">{heroProduct.savingsCopy}</p>
+                    </div>
+                  )}
                 </div>
-                <ul className="space-y-2 text-base text-[#3A3834]">
+
+                {/* What's included */}
+                <ul className="space-y-2 text-base sm:text-lg text-[#3A3834] font-medium">
                   <li className="flex gap-3">
-                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
-                    Aura Diffuser in matte sandstone (12-hour runtime)
+                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
+                    Aura Diffuser (12-hour runtime, whisper-quiet)
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
-                    One full-size fall oil of your choice
+                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
+                    Free full-size oil of your choice
                   </li>
                   <li className="flex gap-3">
-                    <span className="text-[#C47A3B]" aria-hidden="true">•</span>
-                    Quick-start guide + measuring cup
+                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
+                    30-day returns · Free scent swap
                   </li>
                 </ul>
-                <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-[#FFF6EA] border border-[#F0E4D6] px-4 py-3 text-sm font-semibold text-[#3A3834]">
-                  <span aria-hidden="true">✅</span>
-                  <span>30-day money-back · Free scent swap within 14 days if you don&apos;t love the first one · No auto-subscription</span>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={handlePrimaryCta}
-                    disabled={needsVariantUpdate}
-                    className={getButtonClass('primary', {
-                      disabled: needsVariantUpdate,
-                      extra: 'w-full text-base py-4',
-                    })}
-                  >
-                    {needsVariantUpdate ? 'Finish store setup' : primaryCtaLabel}
-                  </button>
-                  <p className="text-sm text-[#4A3F37] text-center">Ships in 24h · Secure checkout</p>
-                  <p className="text-sm text-[#4A3F37] text-center">
-                    Not sure on scent? Choose now or at checkout—we&apos;ll remind you.
-                  </p>
-                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={handlePrimaryCta}
+                  disabled={needsVariantUpdate}
+                  className={getButtonClass('primary', {
+                    disabled: needsVariantUpdate,
+                    extra: 'w-full text-base sm:text-lg py-4 sm:py-5 shadow-lg',
+                  })}
+                >
+                  {needsVariantUpdate ? 'Finish store setup' : 'Add to cart — Ships today'}
+                </button>
               </div>
+
+              {/* Value proposition - Single, concise paragraph */}
+              <p className="text-base sm:text-lg text-[#4A3F37] leading-relaxed">
+                Ceramic diffuser with gentle mist for bedside calm. Looks like décor, runs all night without noise. Built for women who need better sleep after long days.
+              </p>
+
+              {/* Social Proof */}
+              <div className="flex items-center justify-center gap-2 text-sm sm:text-base text-[#4A3F37] font-medium bg-white/60 rounded-2xl px-4 py-3 border border-[#E8DED0]">
+                <span className="text-2xl" aria-hidden="true">⭐</span>
+                <span>4.8/5 from {aggregateReviewCount}+ verified customers</span>
+              </div>
+
+              {/* Secondary info */}
+              <p className="text-sm text-[#6B6762] text-center">
+                Not sure on scent? Choose now or at checkout—we&apos;ll remind you.
+              </p>
             </div>
           </div>
           <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-white/90 text-[#2F2B26] rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
@@ -1127,6 +1129,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <StarterKitStrip />
       {/* Meet the Founder */}
       <section id="support" className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-0">
