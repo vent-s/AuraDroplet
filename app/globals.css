@@ -4,20 +4,44 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
+@font-face {
+  font-family: 'Toledo';
+  src: url('/Toledo Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BrandonText';
+  src: url('/brandon-text-bold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BrandonText';
+  src: url('/brandon-text-regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --paper: #FAF9F7;
-  --clay: #F4EEE5;
-  --ink: #1F1914;
-  --charcoal: #2F2B26;
-  --amber: #C47A3B;
-  --mist: #E5DDD2;
-  --stone: #8B877F;
-  --shadow-soft: 0 20px 60px rgba(31, 25, 20, 0.12);
-  --shadow-card: 0 14px 40px rgba(31, 25, 20, 0.08);
+  --paper: #ede0d4;
+  --clay: #e6ccb2;
+  --ink: #7f5539;
+  --charcoal: #7f5539;
+  --amber: #9c6644;
+  --mist: #ddb892;
+  --stone: #b08968;
+  --shadow-soft: 0 20px 60px rgba(127, 85, 57, 0.12);
+  --shadow-card: 0 14px 40px rgba(127, 85, 57, 0.08);
   --radius-card: 16px;
   --radius-pill: 999px;
-  --sage: #EAE3DA;
-  --deep-ink: #2B261F;
+  --sage: #e6ccb2;
+  --deep-ink: #7f5539;
 }
 
 * {
@@ -34,8 +58,8 @@ body {
   font-size: 17px;
   line-height: 1.65;
   letter-spacing: -0.01em;
-  background: var(--paper);
-  color: var(--ink);
+  background: #ede0d4;
+  color: #7f5539;
 }
 
 p,
@@ -245,6 +269,55 @@ html {
 
 .nav-link:hover::after {
   width: 100%;
+}
+
+/* Magnetic scroll snap effect */
+.magnetic-scroll {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 24px;
+}
+
+.magnetic-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.magnetic-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.magnetic-snap {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.magnetic-snap:hover {
+  transform: scale(1.02);
+}
+
+/* Slower smooth scroll for starter kits */
+.smooth-scroll-slow {
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.smooth-scroll-slow::-webkit-scrollbar {
+  display: none;
+}
+
+.smooth-scroll-slow {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-scroll-slow {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Responsive adjustments */

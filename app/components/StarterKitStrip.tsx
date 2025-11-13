@@ -1,203 +1,172 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 
-type StarterKit = {
+type KitCard = {
   id: string;
   name: string;
   badge: string;
-  stamp: string;
+  badgeColor: string;
   image: string;
-  imageAlt: string;
-  limitedCopy: string;
-  oldPrice: string;
+  accent: string;
+  ribbon: string;
   price: string;
-  discount: string;
+  oldPrice: string;
   rating: number;
   reviews: number;
+  blurb: string;
   meta: string;
-  subcopy: string;
 };
 
-const starterKits: StarterKit[] = [
+const starterKits: KitCard[] = [
   {
-    id: 'fall-ritual',
-    name: 'Fall Ritual Starter Kit',
-    badge: 'Best seller',
-    stamp: 'Fall ritual kit',
-    image: '/AutumnOffer.jpg',
-    imageAlt: 'Fall ritual starter kit with diffuser and fall oils',
-    limitedCopy: '✨ LIMITED-TIME OFFER',
-    oldPrice: '$78',
-    price: '$54',
-    discount: '31% off',
-    rating: 4.8,
-    reviews: 182,
-    meta: '30-day returns · Ships in 24h',
-    subcopy: 'Includes diffuser + 4 fall oils',
-  },
-  {
-    id: 'nightstand-pair',
-    name: 'Nightstand Pairing Kit',
-    badge: 'Calm nights',
-    stamp: 'Bedside duo',
+    id: 'tranquil-nights',
+    name: 'Tranquil Nights',
+    badge: 'BEST SELLER',
+    badgeColor: '#39444F',
     image: '/DiffuserLavender.jpg',
-    imageAlt: 'Nightstand kit featuring diffuser with lavender oil',
-    limitedCopy: '✨ SLEEP BUNDLE',
-    oldPrice: '$86',
-    price: '$62',
-    discount: '28% off',
-    rating: 4.7,
-    reviews: 143,
-    meta: 'Linen-safe oils · Ships in 24h',
-    subcopy: 'Includes diffuser + 2 sleep oils',
+    accent: '#ECE7E0',
+    ribbon: 'Lavender veil ritual',
+    price: '$40',
+    oldPrice: '$55',
+    rating: 4.9,
+    reviews: 212,
+    blurb: 'Aura diffuser + lavender essence for slow-evening wind downs.',
+    meta: 'Ships in 24h · Includes free scent',
   },
   {
-    id: 'gift-ready',
-    name: 'Gift-ready Kit',
-    badge: 'Limited run',
-    stamp: 'Gifting fav',
-    image: '/AutumnOffer.jpg',
-    imageAlt: 'Gift-ready starter kit boxed with diffuser and oils',
-    limitedCopy: '✨ READY TO GIFT',
-    oldPrice: '$92',
-    price: '$68',
-    discount: '26% off',
-    rating: 4.9,
-    reviews: 204,
-    meta: 'Wrapped + handwritten note',
-    subcopy: 'Includes diffuser + bow-wrapped oils',
+    id: 'romance-ritual',
+    name: 'Romance Ritual',
+    badge: 'OPRAH’S FAVORITE',
+    badgeColor: '#4D2B2B',
+    image: '/DiffuserRose.jpg',
+    accent: '#F5E8EC',
+    ribbon: 'Rose petal evenings',
+    price: '$40',
+    oldPrice: '$54',
+    rating: 4.8,
+    reviews: 167,
+    blurb: 'Diffuser + rose essence pairing designed for intimate lighting.',
+    meta: 'Gift-ready wrap · Free scent swap',
+  },
+  {
+    id: 'coastal-escape',
+    name: 'Coastal Escape',
+    badge: 'CALM AIR',
+    badgeColor: '#1D4A5C',
+    image: '/DiffuserOcean.jpg',
+    accent: '#E3EFF4',
+    ribbon: 'Ocean mist mornings',
+    price: '$40',
+    oldPrice: '$52',
+    rating: 4.7,
+    reviews: 138,
+    blurb: 'Sea-salt diffusion that keeps open windows feeling freshly aired.',
+    meta: 'Salt-safe mist · Runs silent overnight',
+  },
+  {
+    id: 'sharp-start',
+    name: 'Sharp Start',
+    badge: 'New Arrival',
+    badgeColor: '#214737',
+    image: '/DiffuserMint.jpg',
+    accent: '#E6F0EA',
+    ribbon: 'Minted daylight focus',
+    price: '$40',
+    oldPrice: '$52',
+    rating: 4.8,
+    reviews: 149,
+    blurb: 'Peppermint-forward kit to energize work-from-home mornings.',
+    meta: 'Cordless-ready · Free scent swap',
   },
 ];
 
-export function StarterKitStrip() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [cardStride, setCardStride] = useState(0);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    const updateStride = () => {
-      const firstCard = cardRefs.current[0];
-      if (!firstCard) {
-        return;
-      }
-      const cardWidth = firstCard.getBoundingClientRect().width;
-      const styles = window.getComputedStyle(firstCard);
-      const marginRight = parseFloat(styles.marginRight || '0');
-      setCardStride(cardWidth + marginRight);
-    };
-
-    updateStride();
-    window.addEventListener('resize', updateStride);
-    return () => window.removeEventListener('resize', updateStride);
-  }, []);
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setActiveIndex((prev) => Math.min(starterKits.length - 1, prev + 1));
-  };
-
-  const translateX = -(activeIndex * cardStride);
+export default function StarterKitStrip() {
+  const cards = useMemo(() => starterKits, []);
 
   return (
-    <section className="bg-[#F5EEE6] py-12 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <h2 className="text-lg font-semibold text-[#2F2B26]">Starter kits to make it easy</h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrev}
-              disabled={activeIndex === 0}
-              aria-label="Previous starter kit"
-              className={`h-10 w-10 rounded-full border border-[#D0C4B5] shadow-[0_4px_12px_rgba(47,35,25,0.12)] text-[#2F2B26] text-lg transition-opacity ${
-                activeIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'opacity-100'
-              }`}
-            >
-              ◀
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={activeIndex === starterKits.length - 1}
-              aria-label="Next starter kit"
-              className={`h-10 w-10 rounded-full border border-[#2F2B26] shadow-[0_4px_18px_rgba(47,35,25,0.18)] text-[#2F2B26] text-lg transition-opacity ${
-                activeIndex === starterKits.length - 1 ? 'opacity-40 cursor-not-allowed' : 'opacity-100'
-              }`}
-            >
-              ▶
-            </button>
+    <section
+      className="bg-[#F6F7F9] py-14 px-6 sm:px-8"
+      style={{ fontFamily: "'BrandonText', 'Inter', sans-serif" }}
+    >
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <p className="text-xs uppercase tracking-[0.35em] text-[#6C7A89]">Best-selling starter kits</p>
+            <h2 className="text-3xl sm:text-4xl font-light text-[#1D2A32]">Best in Bed</h2>
+            <p className="text-sm text-[#6C7A89] mt-1">Diffuser + free oil to start your ritual</p>
           </div>
+          <p className="hidden sm:block text-xs text-[#8C98A4]">Swipe through kits</p>
         </div>
 
-        <div className="overflow-hidden">
-          <div
-            className="flex"
-            style={{
-              transform: `translateX(${translateX}px)`,
-              transition: 'transform 380ms cubic-bezier(0.22, 0.61, 0.36, 1)',
-            }}
-          >
-            {starterKits.map((kit, index) => (
+        <div className="relative -mx-6 sm:mx-0">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#F6F7F9] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#F6F7F9] to-transparent z-10" />
+
+          <div className="smooth-scroll-slow flex gap-8 overflow-x-auto pb-6 px-6 sm:px-0">
+            {cards.map((kit) => (
               <article
                 key={kit.id}
-                ref={(node) => {
-                  cardRefs.current[index] = node;
-                }}
-                className="flex-none w-[85vw] sm:w-[320px] max-w-[360px] mr-3 last:mr-0 rounded-[20px] bg-white shadow-[0_15px_45px_rgba(0,0,0,0.1)] p-4 sm:p-5 text-[#2F2B26]"
+                className="snap-start flex-none w-[80vw] sm:w-[340px]"
               >
-                <div className="relative rounded-[18px] overflow-hidden mb-3 bg-[#F8F4EE]">
-                  <Image
-                    src={kit.image}
-                    alt={kit.imageAlt}
-                    width={400}
-                    height={400}
-                    className="h-auto w-full object-cover"
-                    priority={index === 0}
-                  />
-                  <span className="absolute top-3 left-3 rounded-full bg-[#2F2319] text-white text-[11px] uppercase tracking-[0.15em] px-3 py-1">
+                <div
+                  className="relative h-64 rounded-[32px] overflow-hidden mb-4 shadow-[0_25px_60px_rgba(15,23,38,0.08)]"
+                  style={{ backgroundColor: kit.accent }}
+                >
+                  <span
+                    className="absolute top-4 left-4 z-10 text-[11px] font-semibold uppercase tracking-[0.35em] px-3 py-1 rounded-full text-white"
+                    style={{ backgroundColor: kit.badgeColor }}
+                  >
                     {kit.badge}
                   </span>
-                  <span className="absolute top-3 right-3 flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-black/50 text-[9px] font-semibold uppercase tracking-[0.2em] text-white">
-                    {kit.stamp}
+                  <Image
+                    src={kit.image}
+                    alt={kit.name}
+                    fill
+                    sizes="(max-width: 640px) 80vw, 340px"
+                    className="object-cover"
+                    priority={kit.id === 'tranquil-nights'}
+                  />
+                </div>
+
+                <div className="space-y-1 text-[#1F2A34]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[#4E6A42]">
+                    ✨ {kit.ribbon}
+                  </p>
+                  <h3 className="text-xl font-semibold leading-tight">{kit.name}</h3>
+                </div>
+
+                <div className="flex items-center gap-2 mt-3 text-sm text-[#4B5562]">
+                  <span className="text-xs text-[#7A858F] uppercase tracking-[0.3em]">From:</span>
+                  <span className="text-sm text-[#9CA5AF] line-through">{kit.oldPrice}</span>
+                  <span className="text-lg font-semibold text-[#1F2A34]">{kit.price}</span>
+                  <span className="inline-flex items-center rounded-full bg-[#E5F5E0] px-2 py-1 text-[11px] font-semibold text-[#2F6B3A]">
+                    {Math.round(((parseFloat(kit.oldPrice.replace('$', '')) - parseFloat(kit.price.replace('$', ''))) / parseFloat(kit.oldPrice.replace('$', ''))) * 100)}% off
                   </span>
                 </div>
 
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#2F6B3A] mb-2">{kit.limitedCopy}</p>
-
-                <h3 className="text-xl font-semibold leading-snug mb-2">{kit.name}</h3>
-
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-[#A39A8F] line-through">{kit.oldPrice}</span>
-                  <span className="text-lg font-semibold">{kit.price}</span>
-                  <span className="inline-flex items-center rounded-full bg-[#E1F5E4] px-2 py-1 text-[11px] font-semibold text-[#2F6B3A]">
-                    {kit.discount}
-                  </span>
+                <div className="flex items-center gap-2 text-xs text-[#4B5562] mt-2">
+                  <span className="text-[#F6A43A]" aria-hidden="true">★★★★★</span>
+                  <span className="font-semibold text-[#1F2A34]">{kit.rating.toFixed(1)}</span>
+                  <a href="#reviews" className="text-[#6B7682] underline underline-offset-4">
+                    ({kit.reviews.toLocaleString()})
+                  </a>
                 </div>
 
-                <div className="flex items-center gap-2 text-[13px] text-[#4A4540] mb-1">
-                  <span className="text-[#F5A623]" aria-hidden="true">
-                    ★★★★☆
-                  </span>
-                  <span className="font-semibold">{kit.rating.toFixed(1)}</span>
-                  <button type="button" className="text-[#6B6762] underline underline-offset-4">
-                    ({kit.reviews} reviews)
+                <p className="text-sm text-[#3C4550] mt-3">{kit.blurb}</p>
+
+                <div className="flex items-center gap-2 text-xs text-[#5B646D] mt-2">
+                  <span>{kit.meta}</span>
+                  <span className="w-1 h-1 rounded-full bg-[#C8CED6]" />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="font-semibold text-[#1F2A34] underline underline-offset-4"
+                  >
+                    View kit →
                   </button>
                 </div>
-
-                <p className="text-xs text-[#7B7268] mb-4">{kit.meta}</p>
-
-                <button
-                  type="button"
-                  className="w-full rounded-full bg-[#2F2319] py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(47,35,25,0.35)]"
-                >
-                  Add kit to bag
-                </button>
-                <p className="mt-2 text-[11px] text-[#7B7268]">{kit.subcopy}</p>
               </article>
             ))}
           </div>
@@ -206,5 +175,3 @@ export function StarterKitStrip() {
     </section>
   );
 }
-
-export default StarterKitStrip;

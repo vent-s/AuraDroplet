@@ -677,30 +677,12 @@ export default function Home() {
     <main className="min-h-screen bg-[#FAF9F7]">
       {/* Navigation */}
       <header
-        className={`fixed top-0 w-full bg-[#F5ECDD]/95 backdrop-blur-md z-50 border-b border-[#DFD1BF] transition-shadow duration-300 ${showNav ? 'shadow-[0_12px_35px_rgba(31,25,20,0.08)]' : ''}`}
+        className={`fixed top-0 w-full bg-[#ddb892]/95 backdrop-blur-md z-50 border-b border-[#b08968] transition-shadow duration-300 ${showNav ? 'shadow-[0_12px_35px_rgba(127,85,57,0.08)]' : ''}`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          {/* Trust Strip - Utility Row */}
-          <div className="flex items-center justify-center py-2 border-b border-[#E8DED0]">
-            <p className="flex items-center gap-3 text-xs sm:text-[13px] text-[#5A5047] font-medium">
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                </svg>
-                30-day returns
-              </span>
-              <span className="text-[#C4BAAB]">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
-                Secure checkout
-              </span>
-            </p>
-          </div>
 
           {/* Main Nav Row */}
-          <nav className="flex items-center justify-between gap-6 py-3.5">
+          <nav className="flex items-center justify-between gap-6 py-2.5">
             <div className="flex items-center gap-5 flex-1">
               <button
                 type="button"
@@ -820,7 +802,7 @@ export default function Home() {
       )}
 
       {/* Video Hero */}
-      <section className="relative min-h-screen overflow-hidden bg-[#1B1611]">
+      <section className="relative min-h-[80vh] lg:min-h-screen overflow-hidden bg-[#1B1611]">
         {/* Video Background */}
         <div className="absolute inset-0">
           <video
@@ -843,105 +825,44 @@ export default function Home() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-32 pb-12 lg:pt-36">
+        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-24 pb-10 lg:pt-28">
           <div
-            className={`max-w-2xl w-full z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`max-w-3xl w-full text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
               transform: `translateY(${scrollY * 0.25}px)`,
-              opacity: Math.max(0, 1 - scrollY * 0.002)
+              opacity: Math.max(0, 1 - scrollY * 0.002),
+              fontFamily: 'Toledo, Georgia, serif'
             }}
           >
-            <div className="bg-white/95 text-[#1F1914] rounded-[32px] p-7 sm:p-9 shadow-[0_35px_90px_rgba(0,0,0,0.3)] space-y-6">
-              {/* Tagline */}
-              <p className={`${metaLabelClass} text-[#8B7355]`}>Ships in 24h · Free scent included</p>
-
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold leading-tight text-[#1E150F]">
-                Whisper-quiet diffuser. Calming scent. Done.
-              </h1>
-
-              {/* Price Card - Prominently above the fold */}
-              <div className="rounded-[22px] bg-[#FFF6EA] border-2 border-[#C47A3B] p-6 sm:p-7 space-y-4">
-                <div className="flex items-baseline gap-3">
-                  <p className="text-6xl sm:text-7xl font-bold text-[#1E150F]">{heroProduct.price}</p>
-                  {heroProduct.compareAtPrice && (
-                    <div>
-                      <p className="text-lg text-[#8B7355] line-through">{heroProduct.compareAtPrice}</p>
-                      <p className="text-sm font-semibold text-[#C47A3B] uppercase tracking-[0.2em]">{heroProduct.savingsCopy}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* What's included */}
-                <ul className="space-y-2 text-base sm:text-lg text-[#3A3834] font-medium">
-                  <li className="flex gap-3">
-                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
-                    Aura Diffuser (12-hour runtime, whisper-quiet)
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
-                    Free full-size oil of your choice
-                  </li>
-                  <li className="flex gap-3">
-                    <span className="text-[#C47A3B] text-xl" aria-hidden="true">✓</span>
-                    30-day returns · Free scent swap
-                  </li>
-                </ul>
-
-                {/* CTA Button */}
-                <button
-                  onClick={handlePrimaryCta}
-                  disabled={needsVariantUpdate}
-                  className={getButtonClass('primary', {
-                    disabled: needsVariantUpdate,
-                    extra: 'w-full text-base sm:text-lg py-4 sm:py-5 shadow-lg',
-                  })}
-                >
-                  {needsVariantUpdate ? 'Finish store setup' : 'Add to cart — Ships today'}
-                </button>
-              </div>
-
-              {/* Value proposition - Single, concise paragraph */}
-              <p className="text-base sm:text-lg text-[#4A3F37] leading-relaxed">
-                Ceramic diffuser with gentle mist for bedside calm. Looks like décor, runs all night without noise. Built for women who need better sleep after long days.
-              </p>
-
-              {/* Social Proof */}
-              <div className="flex items-center justify-center gap-2 text-sm sm:text-base text-[#4A3F37] font-medium bg-white/60 rounded-2xl px-4 py-3 border border-[#E8DED0]">
-                <span className="text-2xl" aria-hidden="true">⭐</span>
-                <span>4.8/5 from {aggregateReviewCount}+ verified customers</span>
-              </div>
-
-              {/* Secondary info */}
-              <p className="text-sm text-[#6B6762] text-center">
-                Not sure on scent? Choose now or at checkout—we&apos;ll remind you.
-              </p>
-            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.1] mb-6">
+              Get More,<br />Get Merry
+            </h1>
+            <p className="text-xl sm:text-2xl lg:text-3xl text-white/95 leading-relaxed" style={{ fontFamily: 'BrandonText, sans-serif', fontWeight: 400 }}>
+              Gift the best in bed (and bath)<br />to you, yours, and theirs.
+            </p>
           </div>
-          <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-white/90 text-[#2F2B26] rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
-            <div className="relative h-40 rounded-2xl overflow-hidden bg-[#F8F4EE]">
+          <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-[#7f5539] text-white rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
+            <div className="relative h-40 rounded-2xl overflow-hidden bg-[#e6ccb2]">
               <Image
-                src="/DiffProductShot.png"
-                alt="Aura Diffuser on marble plinth"
+                src="/AutumnOffer.jpg"
+                alt="Autumn Sale"
                 fill
                 sizes="300px"
-                className="object-contain p-4"
+                className="object-cover"
                 loading="lazy"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355]">Aura Diffuser</p>
-                <p className="text-2xl font-light">$40</p>
-              </div>
-              <button
-                onClick={() => handleQuickAdd(heroProduct)}
-                className={getButtonClass('primary', { extra: 'px-4 py-2' })}
-              >
-                Add to cart
-              </button>
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.35em] text-[#ddb892]">Ends Thanksgiving</p>
+              <p className="text-2xl font-bold">35% Off Kits</p>
+              <p className="text-sm text-white/90">Free oil + diffuser</p>
             </div>
-            <p className="text-xs text-[#6B6762]">Includes free scent · Ships in 24h</p>
+            <button
+              onClick={() => document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="w-full px-4 py-3 bg-[#9c6644] text-white text-sm font-semibold rounded-full hover:bg-[#b08968] transition-colors"
+            >
+              Shop Sale
+            </button>
           </div>
         </div>
 
@@ -957,144 +878,64 @@ export default function Home() {
       </section>
 
       {/* Order Stack */}
-      <section id="order-section" className="bg-[var(--paper)] px-6 lg:px-8 py-16">
+      <section id="order-section" className="bg-[#ede0d4] px-6 lg:px-8 py-16">
         <div
           ref={firstProductRef}
-          className={`${cardShellClass} mx-auto max-w-5xl p-6 sm:p-8 lg:p-10`}
+          className="mx-auto max-w-4xl"
         >
-          <div className="grid gap-10 md:grid-cols-[0.85fr_1.15fr]">
-            <div className="space-y-6">
-              <div className="relative aspect-[4/5] w-full rounded-[28px] overflow-hidden bg-[var(--clay)]">
+          <div className="bg-[#7f5539] text-white rounded-[32px] overflow-hidden shadow-[0_25px_60px_rgba(127,85,57,0.25)]">
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="relative h-[400px] md:h-auto">
                 <Image
-                  src="/DiffProductShot.png"
-                  alt="Aura Diffuser on marble plinth"
+                  src="/AutumnOffer.jpg"
+                  alt="Autumn Sale"
                   fill
-                  loading="lazy"
-                  sizes="(min-width: 768px) 40vw, 80vw"
                   className="object-cover"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-                <span className="absolute bottom-4 left-4 text-xs uppercase tracking-[0.3em] text-white/80 bg-black/30 backdrop-blur px-4 py-1 rounded-full">
-                  Matte sandstone · 12h runtime
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl lg:text-[40px] font-light text-[var(--ink)] leading-tight">
-                  Aura Diffuser ritual set
-                </h2>
               </div>
 
-              <div>
-                <p className="text-5xl font-light text-[var(--ink)]">${heroProduct.price}</p>
-                {heroProduct.compareAtPrice && (
-                  <p className="text-sm text-[#8B7355] uppercase tracking-[0.25em]">Was {heroProduct.compareAtPrice}</p>
-                )}
-              </div>
-
-              <ul className="space-y-2 text-sm text-[#4A4540]">
-                {[
-                  'Diffuser in matte sandstone (12-hour runtime)',
-                  'One fall oil of your choice',
-                  'Quick-start guide + measuring cup',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-[#C47A3B]" aria-hidden="true" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickAdd(heroProduct)}
-                  disabled={!selectedScent || needsVariantUpdate}
-                  className={getButtonClass('primary', {
-                    disabled: !selectedScent || needsVariantUpdate,
-                    extra: 'w-full text-base',
-                  })}
-                >
-                  {needsVariantUpdate ? 'Finish store setup' : primaryCtaLabel}
-                </button>
-                <p className="text-sm text-[#4A4540] text-center font-medium">
-                  30-day returns · Ships in 24h · Secure checkout
-                </p>
-                <p className="text-sm text-[#4A4540] text-center">
-                  ⭐ 4.8/5 from {aggregateReviewCount} customers
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-[#4A4540] mb-3">
-                  Includes the fall oils below—choose your favorite for the complimentary vial.
-                </p>
-                <div className="space-y-2">
-                  {scentOptionsToDisplay.map((scent) => {
-                    const isSelected = selectedScent === scent.id;
-                    return (
-                      <button
-                        key={scent.id}
-                        type="button"
-                        onClick={() => handleSelectScent(scent.id)}
-                        aria-pressed={isSelected}
-                        className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-left w-full transition-colors ${
-                          isSelected
-                            ? 'border-[var(--amber)] bg-white shadow-[0_12px_30px_rgba(33,27,22,0.12)]'
-                            : 'border-transparent bg-white/70 hover:border-[var(--mist)]'
-                        }`}
-                      >
-                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[var(--clay)]">
-                          <Image
-                            src={scent.image}
-                            alt={scent.name}
-                            fill
-                            className={`${scent.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
-                            sizes="48px"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-[#2F2B26]">{scent.name}</p>
-                          <p className="text-xs text-[#6B6762]">{scent.notes}</p>
-                        </div>
-                        {isSelected && (
-                          <span className="text-xs uppercase tracking-[0.3em] text-[#8B7355]">Chosen</span>
-                        )}
-                      </button>
-                    );
-                  })}
+              <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#ddb892] mb-3">Ends Thanksgiving</p>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-2">$40</h2>
+                  <p className="text-lg text-[#ddb892] line-through mb-4">was $60</p>
+                  <p className="text-xl text-white/95">Diffuser + free oil</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAllScents((prev) => !prev)}
-                  className="text-sm font-semibold text-[#8B7355] underline underline-offset-4 mt-2"
-                >
-                  {showAllScents ? 'Hide scent list' : `View all ${freeScentOptions.length} scents`}
-                </button>
-                <p className="text-sm text-[#6B6762] mt-2">
-                  {selectedScentDetails
-                    ? `${selectedScentDetails.name} will be packed automatically.`
-                    : 'Skip this and we include Rose Petal by default.'}
-                </p>
+
+                <ul className="space-y-3 text-sm text-white/90">
+                  <li className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
+                    <span>12-hour whisper-quiet mist</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
+                    <span>Choose free oil at checkout</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
+                    <span>Ships in 24h</span>
+                  </li>
+                </ul>
+
+                <div className="space-y-3">
+                  <a
+                    href="/free-scent"
+                    className="block w-full px-6 py-4 bg-[#9c6644] text-white text-center text-base font-semibold rounded-full hover:bg-[#b08968] transition-colors"
+                  >
+                    Choose Your Free Oil
+                  </a>
+                  <p className="text-sm text-white/70 text-center">⭐ 4.8/5 from {aggregateReviewCount} customers</p>
+                </div>
               </div>
-
-              {needsVariantUpdate && (
-                <p className="text-xs text-[#8B7355]">
-                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
-                </p>
-              )}
-
-              {needsVariantUpdate && (
-                <p className="text-xs text-[#8B7355]">
-                  Add your NEXT_PUBLIC_SHOPIFY_VARIANT_ID in .env to enable checkout.
-                </p>
-              )}
             </div>
           </div>
         </div>
       </section>
+
+      <StarterKitStrip />
+
       {/* Client Reviews */}
       <section id="reviews" className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
         <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-8">
@@ -1129,7 +970,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <StarterKitStrip />
       {/* Meet the Founder */}
       <section id="support" className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-0">
@@ -1353,36 +1193,6 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Sticky CTA for mobile within first scroll */}
-      {showMobileStickyBar && (
-        <div
-          className="lg:hidden fixed inset-x-0 bottom-0 z-50 px-4"
-          style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
-        >
-          <div className="mx-auto rounded-2xl border border-black/10 bg-[#1F1914] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] px-4 py-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-white/70">Aura Diffuser</p>
-                <p className="text-lg font-semibold">{heroProduct.price} · Free fall scent</p>
-              </div>
-              <button
-                type="button"
-                onClick={handlePrimaryCta}
-                disabled={needsVariantUpdate}
-                className={getButtonClass('primary', {
-                  disabled: needsVariantUpdate,
-                  extra: 'px-5 py-3 text-sm',
-                })}
-              >
-                {needsVariantUpdate ? 'Set variant' : primaryCtaLabel}
-              </button>
-            </div>
-            <div className="text-xs uppercase tracking-[0.25em] text-white/70">
-              Ships today · Free exchanges · Safe checkout
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Sticky desktop CTA once the product grid is out of view */}
       {hasPassedProductHero && (
