@@ -877,13 +877,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Order Stack */}
-      <section id="order-section" className="bg-[#ede0d4] px-6 lg:px-8 py-16">
-        <div
-          ref={firstProductRef}
-          className="mx-auto max-w-4xl"
-        >
-          <div className="bg-[#7f5539] text-white rounded-[32px] overflow-hidden shadow-[0_25px_60px_rgba(127,85,57,0.25)]">
+      {/* Order Stack with Gradient Header */}
+      <section id="order-section" className="bg-gradient-to-b from-[#ede0d4] via-[#ddb892]/10 to-[#ede0d4] px-6 lg:px-8 pt-16 pb-20">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-3">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#7f5539]/70">Limited time • Ends Thanksgiving</p>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#7f5539] leading-tight" style={{ fontFamily: 'Toledo, Georgia, serif' }}>
+              35% Off Through Thanksgiving
+            </h2>
+          </div>
+
+          {/* Product Card */}
+          <div
+            ref={firstProductRef}
+            className="bg-[#7f5539] text-white rounded-[32px] overflow-hidden shadow-[0_25px_60px_rgba(127,85,57,0.25)]"
+          >
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative h-[400px] md:h-auto">
                 <Image
@@ -898,10 +907,10 @@ export default function Home() {
 
               <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.4em] text-[#ddb892] mb-3">Ends Thanksgiving</p>
-                  <h2 className="text-4xl md:text-5xl font-bold mb-2">$40</h2>
+                  <h3 className="text-4xl md:text-5xl font-bold mb-2">$40</h3>
                   <p className="text-lg text-[#ddb892] line-through mb-4">was $60</p>
-                  <p className="text-xl text-white/95">Diffuser + free oil</p>
+                  <p className="text-xl text-white/95 mb-2">Diffuser + free oil</p>
+                  <p className="text-sm text-white/70">Your choice of complimentary essence</p>
                 </div>
 
                 <ul className="space-y-3 text-sm text-white/90">
