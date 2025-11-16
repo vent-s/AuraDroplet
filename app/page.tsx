@@ -969,14 +969,14 @@ export default function Home() {
               >
                 {/* Hero Message - Full opacity cream */}
                 <h3 className="text-[22px] sm:text-[28px] md:text-[32px] font-semibold text-[#ede0d4] leading-tight tracking-tight">
-                  We'd like to help you discover a scent for autumn.
+                  We&apos;d like to help you discover a scent for autumn.
                 </h3>
 
                 <div className="space-y-2 md:space-y-3 pt-1 md:pt-2">
                   {/* Ghost Button */}
                   <a
                     href="/free-scent"
-                    className="inline-flex w-full md:w-auto justify-center px-6 md:px-8 py-2.5 md:py-3 bg-transparent border-2 border-[#ede0d4] text-[#ede0d4] text-sm md:text-base font-semibold rounded-full hover:bg-[#9c6644] transition-all"
+                    className="inline-flex w-full md:w-auto justify-center px-6 md:px-8 py-2.5 md:py-3 bg-[#C65D3B] text-white text-sm md:text-base font-semibold rounded-2xl hover:bg-[#a84d2f] transition-all"
                   >
                     Claim Your Free Scent
                   </a>

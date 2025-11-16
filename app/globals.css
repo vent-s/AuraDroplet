@@ -356,6 +356,28 @@ html {
   }
 }
 
+/* Starter kit scroll centering */
+.starter-kit-scroll {
+  scroll-padding-left: 10vw;
+  scroll-padding-right: 10vw;
+  padding-left: 10vw;
+  padding-right: 10vw;
+}
+
+@media (min-width: 640px) {
+  .starter-kit-scroll {
+    scroll-padding-left: calc(50vw - 160px);
+    scroll-padding-right: calc(50vw - 160px);
+    padding-left: calc(50vw - 160px);
+    padding-right: calc(50vw - 160px);
+  }
+}
+
+/* Starter kit snap to center */
+.starter-kit-snap {
+  scroll-snap-align: center;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .luxury-card:hover {

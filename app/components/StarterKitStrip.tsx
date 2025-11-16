@@ -24,8 +24,8 @@ const starterKits: KitCard[] = [
   {
     id: 'tranquil-nights',
     name: 'Tranquil Nights',
-    badge: 'BEST SELLER',
-    badgeColor: '#39444F',
+    badge: 'SALE | $50 OFF',
+    badgeColor: '#C65D38',
     image: '/DiffuserLavender2.jpg',
     hoverImage: '/DiffuserLavender.jpg',
     accent: '#ECE7E0',
@@ -40,8 +40,8 @@ const starterKits: KitCard[] = [
   {
     id: 'romance-ritual',
     name: 'Romance Ritual',
-    badge: "OPRAH'S FAVORITE",
-    badgeColor: '#4D2B2B',
+    badge: 'SALE | $50 OFF',
+    badgeColor: '#C65D38',
     image: '/DiffuserRose2.jpg',
     hoverImage: '/DiffuserRose.jpg',
     accent: '#F5E8EC',
@@ -56,8 +56,8 @@ const starterKits: KitCard[] = [
   {
     id: 'coastal-escape',
     name: 'Coastal Escape',
-    badge: 'CALM AIR',
-    badgeColor: '#1D4A5C',
+    badge: 'SALE | $50 OFF',
+    badgeColor: '#C65D38',
     image: '/DiffuserOcean2.jpg',
     hoverImage: '/DiffuserOcean.jpg',
     accent: '#E3EFF4',
@@ -72,8 +72,8 @@ const starterKits: KitCard[] = [
   {
     id: 'sharp-start',
     name: 'Sharp Start',
-    badge: 'New Arrival',
-    badgeColor: '#214737',
+    badge: 'SALE | $50 OFF',
+    badgeColor: '#C65D38',
     image: '/DiffuserMint2.jpg',
     hoverImage: '/DiffuserMint.jpg',
     accent: '#E6F0EA',
@@ -105,21 +105,18 @@ export default function StarterKitStrip() {
         </div>
 
         <div className="relative -mx-6 sm:mx-0">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#e6ccb2] to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#e6ccb2] to-transparent z-10" />
-
-          <div className="smooth-scroll-slow flex gap-8 overflow-x-auto pb-6 px-6 sm:px-0">
+          <div className="magnetic-scroll starter-kit-scroll flex gap-8 overflow-x-auto pb-6">
             {cards.map((kit) => (
               <article
                 key={kit.id}
-                className="group snap-start flex-none w-[80vw] sm:w-[340px]"
+                className="group starter-kit-snap flex-none w-[80vw] sm:w-[320px]"
               >
                 <div
                   className="relative aspect-square rounded-[32px] overflow-hidden mb-4 shadow-[0_25px_60px_rgba(15,23,38,0.08)]"
                   style={{ backgroundColor: kit.accent }}
                 >
                   <span
-                    className="absolute top-4 left-4 z-10 text-[11px] font-semibold uppercase tracking-[0.35em] px-3 py-1 rounded-full text-white"
+                    className="absolute top-4 left-4 z-10 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-white"
                     style={{ backgroundColor: kit.badgeColor }}
                   >
                     {kit.badge}
