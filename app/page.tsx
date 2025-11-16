@@ -268,6 +268,22 @@ const reviewEntries = [
   }
 ];
 
+const designTokens = {
+  surface: {
+    heroOffer: "bg-gradient-to-br from-[#1a0c08] via-[#140804] to-[#120806] backdrop-blur-[24px] border border-[rgba(255,255,255,0.12)] shadow-[0_32px_70px_rgba(0,0,0,0.75)]"
+  },
+  radius: {
+    lg: "rounded-[24px]"
+  },
+  color: {
+    accentBg: "bg-[#F3D4B3]",
+    accentText: "text-[#1a0c08]"
+  },
+  spacing: {
+    section: "space-y-6"
+  }
+} as const;
+
 type RitualShopItem = {
   id: string;
   name: string;
@@ -725,10 +741,9 @@ export default function Home() {
               </div>
               <a
                 href="#order-section"
-                className="inline-flex items-center gap-1.5 text-[13px] sm:text-[15px] font-semibold text-[#2F2B26] border border-[#C4BAAB] rounded-full px-4 sm:px-5 py-2 shadow-sm bg-white/80 hover:bg-white hover:border-[#8B7355] transition-all"
+                className="hidden sm:inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#2F2B26] border border-[#C4BAAB] rounded-full px-5 py-2 shadow-sm bg-white/80 hover:bg-white hover:border-[#8B7355] transition-all"
               >
-                <span className="hidden sm:inline">View $40 offer</span>
-                <span className="sm:hidden">View offer</span>
+                <span>View $40 offer</span>
                 <span aria-hidden="true" className="text-[11px]">↓</span>
               </a>
             </div>
@@ -801,7 +816,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Video Hero */}
+      {/* Hero Section - Clear value, price, CTA, rating */}
       <section className="relative min-h-[80vh] lg:min-h-screen overflow-hidden bg-[#1B1611]">
         {/* Video Background */}
         <div className="absolute inset-0">
@@ -820,49 +835,58 @@ export default function Home() {
           >
             <source src="/AuraDroplet.mp4" type="video/mp4" />
           </video>
-          {/* Elegant overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/85" />
+          {/* Subtle gradient - darker bottom half for text legibility */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%, rgba(0,0,0,0.5) 100%)'
+            }}
+          />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative h-full flex items-center justify-center px-6 lg:px-8 pt-24 pb-10 lg:pt-28">
+        {/* Hero Content - Simple centered stack over video */}
+        <div className="relative h-full flex items-center justify-center px-6 lg:px-8">
           <div
-            className={`max-w-3xl w-full text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`max-w-2xl mx-auto text-center z-10 transition-opacity duration-700 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
             style={{
               transform: `translateY(${scrollY * 0.25}px)`,
               opacity: Math.max(0, 1 - scrollY * 0.002),
-              fontFamily: 'Toledo, Georgia, serif'
             }}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.1] mb-6">
-              Get More,<br />Get Merry
+            {/* 1. Main Headline */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight mb-4" style={{ fontFamily: 'Toledo, Georgia, serif' }}>
+              Get More, Get Merry
             </h1>
-            <p className="text-xl sm:text-2xl lg:text-3xl text-white/95 leading-relaxed" style={{ fontFamily: 'BrandonText, sans-serif', fontWeight: 400 }}>
-              Gift the best in bed (and bath)<br />to you, yours, and theirs.
+
+            {/* 2. Subheadline */}
+            <p className="text-xl sm:text-2xl text-white/85 leading-relaxed mb-6" style={{ fontFamily: 'BrandonText, sans-serif', fontWeight: 400 }}>
+              Gift the best in bed (and bath)
             </p>
-          </div>
-          <div className="hidden md:flex flex-col gap-3 absolute bottom-12 right-10 bg-[#7f5539] text-white rounded-3xl p-5 w-72 shadow-[0_25px_60px_rgba(0,0,0,0.35)]">
-            <div className="relative h-40 rounded-2xl overflow-hidden bg-[#e6ccb2]">
-              <Image
-                src="/AutumnOffer.jpg"
-                alt="Autumn Sale"
-                fill
-                sizes="300px"
-                className="object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.35em] text-[#ddb892]">Ends Thanksgiving</p>
-              <p className="text-2xl font-bold">35% Off Kits</p>
-              <p className="text-sm text-white/90">Free oil + diffuser</p>
-            </div>
+
+            {/* 3. Single Information Line */}
+            <p className="text-base sm:text-lg text-white/90 mb-8 leading-relaxed">
+              <span className="font-semibold">Aura Diffuser + Free Premium Oil</span>
+              {' '}<span className="text-white/60">·</span>{' '}
+              <span className="font-bold text-xl">$40</span>
+              {' '}<span className="text-white/60">·</span>{' '}
+              <span className="text-[#ddb892]">Save $20</span>
+              {' '}<span className="text-white/60">·</span>{' '}
+              <span className="text-white/80">★ {aggregateReviewScore.toFixed(1)} ({aggregateReviewCount} reviews)</span>
+            </p>
+
+            {/* 4. One Main Button */}
             <button
+              type="button"
               onClick={() => document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full px-4 py-3 bg-[#9c6644] text-white text-sm font-semibold rounded-full hover:bg-[#b08968] transition-colors"
+              className="px-10 py-4 bg-[#ddb892] hover:bg-[#f5d5a8] text-[#1a0c08] text-base sm:text-lg font-bold uppercase tracking-wide rounded-full transition-all duration-200 hover:scale-[1.02] shadow-[0_12px_35px_rgba(0,0,0,0.4)] mb-3"
             >
-              Shop Sale
+              Add Diffuser + Free Oil to Bag
             </button>
+
+            {/* 5. Tiny Reassurance Line */}
+            <p className="text-sm text-white/60">
+              Ships in 24 hours · Free returns
+            </p>
           </div>
         </div>
 
@@ -877,7 +901,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Order Stack with Gradient Header */}
+      {/* Quiz Banner - Conversion Aid */}
+      <section className="bg-gradient-to-b from-[#7f5539] to-[#9c6644] py-12 px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-2xl lg:text-3xl font-light text-white mb-2">
+                Not sure which scent?
+              </h2>
+              <p className="text-white/80 text-base">Answer 3 quick questions and we'll suggest your perfect match.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowQuiz(true);
+                document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-8 py-4 bg-white text-[#2F2B26] text-base font-semibold rounded-full hover:bg-[#F5F5F5] transition-all shadow-lg whitespace-nowrap"
+            >
+              Take 1-Minute Quiz →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Best-Selling Starter Kits */}
+      <div id="starter-kits">
+        <StarterKitStrip />
+      </div>
+
+      {/* Free Scent Deal - Choose Your Oil */}
       <section id="order-section" className="bg-gradient-to-b from-[#ede0d4] via-[#ddb892]/10 to-[#ede0d4] px-6 lg:px-8 pt-16 pb-20">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
@@ -888,7 +941,7 @@ export default function Home() {
             </h2>
           </div>
 
-          {/* Product Card */}
+          {/* Product Card with Free Scent Deal */}
           <div
             ref={firstProductRef}
             className="bg-[#7f5539] text-white rounded-[32px] overflow-hidden shadow-[0_25px_60px_rgba(127,85,57,0.25)]"
@@ -905,45 +958,56 @@ export default function Home() {
                 />
               </div>
 
-              <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
+              <div className="p-8 md:p-12 flex flex-col justify-center space-y-8">
+                {/* Price Block */}
                 <div>
-                  <h3 className="text-4xl md:text-5xl font-bold mb-2">$40</h3>
-                  <p className="text-lg text-[#ddb892] line-through mb-4">was $60</p>
-                  <p className="text-xl text-white/95 mb-2">Diffuser + free oil</p>
-                  <p className="text-sm text-white/70">Your choice of complimentary essence</p>
+                  <h3 className="text-5xl md:text-6xl font-bold text-white leading-none mb-2">$40</h3>
+                  <div className="flex items-center gap-2 text-lg">
+                    <span className="text-white/60 line-through">$60</span>
+                    <span className="text-white/50">·</span>
+                    <span className="text-[#ddb892] font-semibold">Save $20</span>
+                  </div>
                 </div>
 
-                <ul className="space-y-3 text-sm text-white/90">
+                {/* Product Info */}
+                <div className="space-y-2">
+                  <h4 className="text-2xl font-semibold text-white">
+                    Diffuser + <span className="text-[#f5d5a8]">FREE</span> oil
+                  </h4>
+                  <p className="text-base text-white/80">Choose your scent</p>
+                </div>
+
+                {/* Benefits List */}
+                <ul className="space-y-3 text-base text-white/90">
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
+                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
                     <span>12-hour whisper-quiet mist</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
-                    <span>Choose free oil at checkout</span>
+                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
+                    <span>Pick your free oil at checkout</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-[#ddb892]" />
-                    <span>Ships in 24h</span>
+                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
+                    <span>Ships in 24 hours</span>
                   </li>
                 </ul>
 
-                <div className="space-y-3">
-                  <a
-                    href="/free-scent"
-                    className="block w-full px-6 py-4 bg-[#9c6644] text-white text-center text-base font-semibold rounded-full hover:bg-[#b08968] transition-colors"
-                  >
-                    Choose Your Free Oil
-                  </a>
-                  <p className="text-sm text-white/70 text-center">⭐ 4.8/5 from {aggregateReviewCount} customers</p>
-                </div>
+                {/* Social Proof */}
+                <p className="text-base text-white/90">⭐ {aggregateReviewScore.toFixed(1)} • {aggregateReviewCount} reviews</p>
+
+                {/* CTA Button */}
+                <a
+                  href="/free-scent"
+                  className="block w-full px-8 py-4 bg-[#ddb892] text-[#1F1914] text-center text-lg font-bold rounded-full hover:bg-[#f5d5a8] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] transform"
+                >
+                  Get Diffuser + Free Oil
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      <StarterKitStrip />
 
       {/* Client Reviews */}
       <section id="reviews" className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">

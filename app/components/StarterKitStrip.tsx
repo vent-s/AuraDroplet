@@ -9,6 +9,7 @@ type KitCard = {
   badge: string;
   badgeColor: string;
   image: string;
+  hoverImage: string;
   accent: string;
   ribbon: string;
   price: string;
@@ -25,7 +26,8 @@ const starterKits: KitCard[] = [
     name: 'Tranquil Nights',
     badge: 'BEST SELLER',
     badgeColor: '#39444F',
-    image: '/DiffuserLavender.jpg',
+    image: '/DiffuserLavender2.jpg',
+    hoverImage: '/DiffuserLavender.jpg',
     accent: '#ECE7E0',
     ribbon: 'Lavender veil ritual',
     price: '$40',
@@ -40,7 +42,8 @@ const starterKits: KitCard[] = [
     name: 'Romance Ritual',
     badge: 'OPRAH’S FAVORITE',
     badgeColor: '#4D2B2B',
-    image: '/DiffuserRose.jpg',
+    image: '/DiffuserRose2.jpg',
+    hoverImage: '/DiffuserRose.jpg',
     accent: '#F5E8EC',
     ribbon: 'Rose petal evenings',
     price: '$40',
@@ -55,7 +58,8 @@ const starterKits: KitCard[] = [
     name: 'Coastal Escape',
     badge: 'CALM AIR',
     badgeColor: '#1D4A5C',
-    image: '/DiffuserOcean.jpg',
+    image: '/DiffuserOcean2.jpg',
+    hoverImage: '/DiffuserOcean.jpg',
     accent: '#E3EFF4',
     ribbon: 'Ocean mist mornings',
     price: '$40',
@@ -70,7 +74,8 @@ const starterKits: KitCard[] = [
     name: 'Sharp Start',
     badge: 'New Arrival',
     badgeColor: '#214737',
-    image: '/DiffuserMint.jpg',
+    image: '/DiffuserMint2.jpg',
+    hoverImage: '/DiffuserMint.jpg',
     accent: '#E6F0EA',
     ribbon: 'Minted daylight focus',
     price: '$40',
@@ -92,10 +97,10 @@ export default function StarterKitStrip() {
     >
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-[0.35em] text-[#6C7A89]">Best-selling starter kits</p>
-            <h2 className="text-3xl sm:text-4xl font-light text-[#1D2A32]">Best in Bed</h2>
-            <p className="text-sm text-[#6C7A89] mt-1">Diffuser + free oil to start your ritual</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-[11px] tracking-[0.08em] text-[#8B7355]/70 font-medium" style={{ fontFamily: "'Cheltenham Regular', Georgia, serif" }}>Best-selling starter kits</p>
+            <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#1D2A32] tracking-tight leading-tight" style={{ fontFamily: "'Cheltenham Regular', Georgia, serif" }}>Our best Selling kits</h2>
+            <p className="text-[25px] sm:text-[31px] text-[#4A4540] leading-snug" style={{ fontFamily: "'BrandonText', 'Inter', sans-serif" }}>Try our favorites. Free scent included.</p>
           </div>
           <p className="hidden sm:block text-xs text-[#8C98A4]">Swipe through kits</p>
         </div>
@@ -108,10 +113,10 @@ export default function StarterKitStrip() {
             {cards.map((kit) => (
               <article
                 key={kit.id}
-                className="snap-start flex-none w-[80vw] sm:w-[340px]"
+                className="group snap-start flex-none w-[80vw] sm:w-[340px]"
               >
                 <div
-                  className="relative h-64 rounded-[32px] overflow-hidden mb-4 shadow-[0_25px_60px_rgba(15,23,38,0.08)]"
+                  className="relative aspect-square rounded-[32px] overflow-hidden mb-4 shadow-[0_25px_60px_rgba(15,23,38,0.08)]"
                   style={{ backgroundColor: kit.accent }}
                 >
                   <span
@@ -125,8 +130,15 @@ export default function StarterKitStrip() {
                     alt={kit.name}
                     fill
                     sizes="(max-width: 640px) 80vw, 340px"
-                    className="object-cover"
+                    className="object-cover transition-opacity duration-500 group-hover:opacity-0"
                     priority={kit.id === 'tranquil-nights'}
+                  />
+                  <Image
+                    src={kit.hoverImage}
+                    alt={`${kit.name} alternate view`}
+                    fill
+                    sizes="(max-width: 640px) 80vw, 340px"
+                    className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                   />
                 </div>
 

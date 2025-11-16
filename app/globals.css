@@ -42,6 +42,12 @@
   --radius-pill: 999px;
   --sage: #e6ccb2;
   --deep-ink: #7f5539;
+  --surface-hero-offer: rgba(18, 8, 6, 0.9);
+  --surface-hero-border: rgba(255, 255, 255, 0.12);
+  --surface-hero-shadow: 0 32px 70px rgba(0, 0, 0, 0.75);
+  --radius-lg: 24px;
+  --color-accent: #e9c9a7;
+  --spacing-section: 24px;
 }
 
 * {
@@ -194,6 +200,15 @@ html {
 .luxury-btn-secondary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
+}
+
+.surface-hero-offer {
+  background: rgba(31, 25, 20, 0.85);
+  border: 1px solid rgba(221, 184, 146, 0.2);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--surface-hero-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 /* Parallax scroll effects */
