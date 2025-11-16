@@ -480,6 +480,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const firstProductRef = useRef<HTMLDivElement | null>(null);
   const quizAutoSelectRef = useRef(false);
+  const reviewsScrollRef = useRef<HTMLDivElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
@@ -491,6 +492,8 @@ export default function Home() {
   const [showAllScents, setShowAllScents] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success'>('idle');
+  const [canScrollReviewsLeft, setCanScrollReviewsLeft] = useState(false);
+  const [canScrollReviewsRight, setCanScrollReviewsRight] = useState(true);
   const selectedScentDetails = freeScentOptions.find((scent) => scent.id === selectedScent);
   const selectedScentVariantId = selectedScent ? scentVariantLookup[selectedScent] : undefined;
   const quizComplete = quizQuestions.every((question) => quizResponses[question.id]);
@@ -622,6 +625,30 @@ export default function Home() {
     window.location.href = url;
   };
 
+  const updateReviewsScrollButtons = () => {
+    if (reviewsScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = reviewsScrollRef.current;
+      setCanScrollReviewsLeft(scrollLeft > 0);
+      setCanScrollReviewsRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scrollReviews = (direction: 'left' | 'right') => {
+    if (reviewsScrollRef.current) {
+      const scrollAmount = 400;
+      const newScrollLeft = direction === 'left'
+        ? reviewsScrollRef.current.scrollLeft - scrollAmount
+        : reviewsScrollRef.current.scrollLeft + scrollAmount;
+
+      reviewsScrollRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+
+      setTimeout(updateReviewsScrollButtons, 300);
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
@@ -690,10 +717,10 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#FAF9F7]">
+    <main className="min-h-screen bg-[#ede0d4]">
       {/* Navigation */}
       <header
-        className={`fixed top-0 w-full bg-[#ddb892]/95 backdrop-blur-md z-50 border-b border-[#b08968] transition-shadow duration-300 ${showNav ? 'shadow-[0_12px_35px_rgba(127,85,57,0.08)]' : ''}`}
+        className={`fixed top-0 w-full bg-[#e6ccb2]/95 backdrop-blur-md z-50 border-b border-[#b08968] transition-shadow duration-300 ${showNav ? 'shadow-[0_12px_35px_rgba(127,85,57,0.08)]' : ''}`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
@@ -901,108 +928,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quiz Banner - Conversion Aid */}
-      <section className="bg-gradient-to-b from-[#7f5539] to-[#9c6644] py-12 px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-2xl lg:text-3xl font-light text-white mb-2">
-                Not sure which scent?
-              </h2>
-              <p className="text-white/80 text-base">Answer 3 quick questions and we'll suggest your perfect match.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setShowQuiz(true);
-                document.getElementById('quiz')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="px-8 py-4 bg-white text-[#2F2B26] text-base font-semibold rounded-full hover:bg-[#F5F5F5] transition-all shadow-lg whitespace-nowrap"
-            >
-              Take 1-Minute Quiz →
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Best-Selling Starter Kits */}
       <div id="starter-kits">
         <StarterKitStrip />
       </div>
 
       {/* Free Scent Deal - Choose Your Oil */}
-      <section id="order-section" className="bg-gradient-to-b from-[#ede0d4] via-[#ddb892]/10 to-[#ede0d4] px-6 lg:px-8 pt-16 pb-20">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-3">
-            <p className="text-xs uppercase tracking-[0.4em] text-[#7f5539]/70">Limited time • Ends Thanksgiving</p>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-[#7f5539] leading-tight" style={{ fontFamily: 'Toledo, Georgia, serif' }}>
-              35% Off Through Thanksgiving
-            </h2>
-          </div>
-
-          {/* Product Card with Free Scent Deal */}
+      <section id="order-section" className="bg-gradient-to-b from-[#ede0d4] via-[#e6ccb2] to-[#ede0d4] px-6 lg:px-8 pt-8 md:pt-16 pb-10 md:pb-20">
+        <div className="max-w-4xl mx-auto">
+          {/* Rich Dark Brown Card */}
           <div
             ref={firstProductRef}
-            className="bg-[#7f5539] text-white rounded-[32px] overflow-hidden shadow-[0_25px_60px_rgba(127,85,57,0.25)]"
+            className="bg-[#7f5539] rounded-[20px] md:rounded-[32px] p-5 md:p-12 shadow-[0_30px_60px_rgba(127,85,57,0.4)]"
           >
-            <div className="grid md:grid-cols-2 gap-0">
-              <div className="relative h-[400px] md:h-auto">
-                <Image
-                  src="/AutumnOffer.jpg"
-                  alt="Autumn Sale"
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  priority
-                />
+            <div className="grid gap-5 md:gap-10 md:grid-cols-[0.95fr_1.05fr] items-center">
+              {/* Image Section */}
+              <div className="space-y-2 md:space-y-4">
+                {/* Label above image */}
+                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.35em] text-[#ede0d4] font-medium">
+                  Thanksgiving Offer · Cozy Home
+                </p>
+
+                {/* Image with cream border - reduced height on mobile */}
+                <div className="relative h-44 md:h-96 rounded-[20px] md:rounded-[28px] overflow-hidden border border-[#ede0d4]">
+                  <Image
+                    src="/AutumnOffer.jpg"
+                    alt="Aura Diffuser and fall oils"
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 768px) 45vw, 100vw"
+                    priority
+                  />
+                </div>
               </div>
 
-              <div className="p-8 md:p-12 flex flex-col justify-center space-y-8">
-                {/* Price Block */}
-                <div>
-                  <h3 className="text-5xl md:text-6xl font-bold text-white leading-none mb-2">$40</h3>
-                  <div className="flex items-center gap-2 text-lg">
-                    <span className="text-white/60 line-through">$60</span>
-                    <span className="text-white/50">·</span>
-                    <span className="text-[#ddb892] font-semibold">Save $20</span>
-                  </div>
+              {/* Text Section */}
+              <div
+                className="space-y-3 md:space-y-5 text-left"
+                style={{ fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif" }}
+              >
+                {/* Hero Message - Full opacity cream */}
+                <h3 className="text-[22px] sm:text-[28px] md:text-[32px] font-semibold text-[#ede0d4] leading-tight tracking-tight">
+                  We'd like to help you discover a scent for autumn.
+                </h3>
+
+                <div className="space-y-2 md:space-y-3 pt-1 md:pt-2">
+                  {/* Ghost Button */}
+                  <a
+                    href="/free-scent"
+                    className="inline-flex w-full md:w-auto justify-center px-6 md:px-8 py-2.5 md:py-3 bg-transparent border-2 border-[#ede0d4] text-[#ede0d4] text-sm md:text-base font-semibold rounded-full hover:bg-[#9c6644] transition-all"
+                  >
+                    Claim Your Free Scent
+                  </a>
+                  {/* Fine print - 75% opacity cream */}
+                  <p className="text-xs md:text-sm text-[#ede0d4]/75">
+                    Ships in 24h · ⭐ {aggregateReviewScore.toFixed(1)} from {aggregateReviewCount} owners
+                  </p>
                 </div>
-
-                {/* Product Info */}
-                <div className="space-y-2">
-                  <h4 className="text-2xl font-semibold text-white">
-                    Diffuser + <span className="text-[#f5d5a8]">FREE</span> oil
-                  </h4>
-                  <p className="text-base text-white/80">Choose your scent</p>
-                </div>
-
-                {/* Benefits List */}
-                <ul className="space-y-3 text-base text-white/90">
-                  <li className="flex items-start gap-3">
-                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
-                    <span>12-hour whisper-quiet mist</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
-                    <span>Pick your free oil at checkout</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-[#ddb892] text-lg mt-0.5">✓</span>
-                    <span>Ships in 24 hours</span>
-                  </li>
-                </ul>
-
-                {/* Social Proof */}
-                <p className="text-base text-white/90">⭐ {aggregateReviewScore.toFixed(1)} • {aggregateReviewCount} reviews</p>
-
-                {/* CTA Button */}
-                <a
-                  href="/free-scent"
-                  className="block w-full px-8 py-4 bg-[#ddb892] text-[#1F1914] text-center text-lg font-bold rounded-full hover:bg-[#f5d5a8] transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] transform"
-                >
-                  Get Diffuser + Free Oil
-                </a>
               </div>
             </div>
           </div>
@@ -1010,46 +992,102 @@ export default function Home() {
       </section>
 
       {/* Client Reviews */}
-      <section id="reviews" className="py-24 bg-[#F9F4ED] border-t border-[#E9DFD2]">
-        <div className="max-w-4xl mx-auto px-6 lg:px-0 space-y-8">
-          <div className="text-center">
-            <p className={`${metaLabelClass} text-[#B77950] mb-3`}>Verified ritualists</p>
-            <h2 className="text-4xl font-light text-[#2F2B26] tracking-tight">4.8 ★ from {aggregateReviewCount} customers</h2>
+      <section className="py-24 bg-gradient-to-b from-[#ede0d4] to-[#e6ccb2] border-t border-[#ddb892]">
+        <div className="max-w-4xl mx-auto px-6 lg:px-0">
+          <div className="mb-12 text-center">
+            <p className="text-xs uppercase tracking-[0.35em] text-[#b08968] mb-3">Verified Ritualists</p>
+            <h2 className="text-4xl font-light text-[#7f5539] tracking-tight">What our autumn clientele is saying</h2>
+            <p className="text-sm text-[#9c6644] mt-4">
+              4.9 average across 1,200+ Aura diffuser owners. Exchanges honored within 14 days.
+            </p>
           </div>
 
-          <div className={`${cardShellClass} p-6 space-y-6`}>
-            <div className="text-center">
-              <p className="text-5xl font-semibold text-[#2F2B26]">{aggregateReviewScore.toFixed(1)}</p>
-              <p className="text-sm text-[#6B6762]">Average across {aggregateReviewCount} reviews</p>
-            </div>
-            <div id="reviews-list" className="grid gap-4 md:grid-cols-2">
-              {reviewEntries.slice(0, 2).map((review) => (
-                <article key={`pull-quote-${review.name}`} className="rounded-[24px] border border-[#F1E4D6] bg-[#FFFBF5] p-5 flex flex-col gap-3">
-                  <p className="text-sm font-semibold text-[#2F2B26]">{review.title}</p>
-                  <p className="text-sm text-[#4C4842] leading-relaxed">{review.body}</p>
-                  <p className="text-xs uppercase tracking-[0.3em] text-[#8B7355]">
-                    {review.name}
-                    {review.age ? ` · ${review.age}` : ''} · {review.location}
-                  </p>
+          <div className="relative">
+            <div className="absolute inset-y-6 left-10 right-10 border border-[#ddb892]/80 rounded-[32px] pointer-events-none" />
+
+            {/* Left Arrow */}
+            {canScrollReviewsLeft && (
+              <button
+                type="button"
+                onClick={() => scrollReviews('left')}
+                className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-[#7f5539] text-[#ede0d4] shadow-lg hover:bg-[#9c6644] transition-all"
+                aria-label="Scroll reviews left"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Right Arrow */}
+            {canScrollReviewsRight && (
+              <button
+                type="button"
+                onClick={() => scrollReviews('right')}
+                className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-[#7f5539] text-[#ede0d4] shadow-lg hover:bg-[#9c6644] transition-all"
+                aria-label="Scroll reviews right"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+
+            <div
+              ref={reviewsScrollRef}
+              onScroll={updateReviewsScrollButtons}
+              className="relative overflow-x-auto pb-6 pl-4 snap-x snap-mandatory flex gap-6 scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#e6ccb2] to-transparent" />
+              <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#e6ccb2] to-transparent" />
+              {reviewEntries.map((review, index) => (
+                <article
+                  key={`${review.name}-${index}`}
+                  className="relative shrink-0 w-[320px] h-[360px] bg-[#ede0d4]/95 border border-[#ddb892] rounded-[28px] p-6 shadow-[0_25px_60px_rgba(127,85,57,0.12)] snap-center flex flex-col justify-between"
+                  style={{ transform: `translateX(-${index * 40}px)` }}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4 gap-3">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[#b08968]">Aura Diffuser Owner</p>
+                        <p className="text-lg text-[#7f5539] font-light">{review.name} · {review.location}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#7f5539]">
+                        <div className="flex text-[#b08968]">
+                          {Array.from({ length: 5 }).map((_, starIndex) => (
+                            <svg key={starIndex} className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-[#9c6644]">5.0</span>
+                      </div>
+                    </div>
+                    <div className="mb-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#9c6644]">
+                      <span>Complimentary scent</span>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#b08968' }} />
+                      <span>{review.scent}</span>
+                    </div>
+                    <h3 className="text-xl font-light text-[#7f5539] mb-3 leading-tight">{review.title}</h3>
+                    <p className="text-sm text-[#9c6644] leading-relaxed">{review.body}</p>
+                  </div>
+                  <div className="text-[11px] uppercase tracking-[0.35em] text-[#b08968]">
+                    Verified purchase · {index + 1}/10
+                  </div>
                 </article>
               ))}
             </div>
-            <a href="#reviews" className="text-sm font-semibold text-[#8B7355] inline-flex items-center gap-2">
-              Read all reviews
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
           </div>
         </div>
       </section>
       {/* Meet the Founder */}
-      <section id="support" className="bg-white py-16">
+      <section id="support" className="bg-gradient-to-b from-[#e6ccb2] to-[#ede0d4] py-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-0">
-          <div className={`${cardShellClass} px-8 py-10`}>
+          <div className={`${cardShellClass} px-8 py-10 bg-[#ede0d4]/90`}>
             <div className="text-left space-y-5">
-              <p className={`${metaLabelClass} text-[#8B7355]`}>Meet the founder</p>
-              <h3 className="text-3xl lg:text-4xl font-light text-[#2F2B26] leading-tight">Intentional scent, minus the fuss.</h3>
+              <p className={`${metaLabelClass} text-[#b08968]`}>Meet the founder</p>
+              <h3 className="text-3xl lg:text-4xl font-light text-[#7f5539] leading-tight">Intentional scent, minus the fuss.</h3>
               <ul className="space-y-3 text-sm text-[#4A4540]">
                 {[
                   'Built for quiet, all-night use.',
@@ -1072,9 +1110,9 @@ export default function Home() {
       </section>
 
       {/* Brand Quiz */}
-      <section id="quiz" className="py-20 bg-white border-t border-[#EFE7DC]">
+      <section id="quiz" className="py-20 bg-gradient-to-b from-[#ede0d4] to-[#e6ccb2] border-t border-[#ddb892]">
         <div className="max-w-4xl mx-auto px-6 lg:px-0 text-center space-y-4">
-          <h2 className="text-3xl lg:text-4xl font-light text-[#2F2B26]">Need help choosing a scent?</h2>
+          <h2 className="text-3xl lg:text-4xl font-light text-[#7f5539]">Need help choosing a scent?</h2>
           <p className="text-base text-[#4A4540]">Answer 3 quick questions and we&apos;ll suggest a match.</p>
           {showQuiz && (
             <p className="text-xs uppercase tracking-[0.3em] text-[#9B9792]">
@@ -1093,11 +1131,11 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12 grid lg:grid-cols-[1.2fr_0.8fr] gap-10">
             <div className="space-y-6">
               {quizQuestions.map((question, questionIndex) => (
-                <div key={question.id} className="bg-[#F8F3ED] border border-[#E8E2D8] rounded-3xl p-6">
-                  <p className="text-xs uppercase tracking-[0.35em] text-[#8B7355] mb-2">
+                <div key={question.id} className="bg-[#ede0d4] border border-[#ddb892] rounded-3xl p-6">
+                  <p className="text-xs uppercase tracking-[0.35em] text-[#b08968] mb-2">
                     Step {questionIndex + 1} of {quizQuestions.length} · {question.selectionLimit > 1 ? `Choose up to ${question.selectionLimit}` : 'Choose one'}
                   </p>
-                  <h3 className="text-2xl font-light text-[#2F2B26] mb-4">{question.title}</h3>
+                  <h3 className="text-2xl font-light text-[#7f5539] mb-4">{question.title}</h3>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {question.options.map((option) => {
                       const isSelected = quizResponses[question.id] === option.value;
@@ -1107,11 +1145,11 @@ export default function Home() {
                           type="button"
                           onClick={() => handleQuizSelect(question.id, option.value)}
                           className={`text-left border rounded-2xl px-4 py-3 transition-all ${
-                            isSelected ? 'border-[#3A3834] bg-white shadow-lg' : 'border-transparent bg-white/60'
+                            isSelected ? 'border-[#7f5539] bg-[#e6ccb2] shadow-lg' : 'border-transparent bg-[#e6ccb2]/60'
                           }`}
                         >
-                          <p className="font-medium text-[#2F2B26]">{option.label}</p>
-                          <p className="text-sm text-[#6B6762]">{option.helper}</p>
+                          <p className="font-medium text-[#7f5539]">{option.label}</p>
+                          <p className="text-sm text-[#9c6644]">{option.helper}</p>
                         </button>
                       );
                     })}
@@ -1120,7 +1158,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="bg-[#1F1914] text-white rounded-3xl p-8 flex flex-col justify-between">
+            <div className="bg-[#7f5539] text-white rounded-3xl p-8 flex flex-col justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Recommendation</p>
                 <h3 className="text-4xl font-light mb-2">{recommendedBrand.name}</h3>
@@ -1179,39 +1217,39 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#3A3834] text-[#E8E6E3] py-16">
+      <footer className="bg-[#7f5539] text-[#ede0d4] py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">AURADROPLET</h3>
-              <p className="text-sm text-[#C4C0BA] leading-relaxed font-light mt-3">
+              <p className="text-sm text-[#e6ccb2] leading-relaxed font-light mt-3">
                 Questions? Call <a href={`tel:${supportPhoneNumber}`} className="underline underline-offset-4 text-white">{supportPhoneNumber}</a> or email <a href={`mailto:${supportEmailAddress}`} className="underline underline-offset-4 text-white">{supportEmailAddress}</a>.
               </p>
             </div>
             <div>
-              <h4 className="font-medium mb-4 text-white">Shop</h4>
-              <ul className="space-y-3 text-sm text-[#C4C0BA] font-light">
-                <li><a href="#" className="hover:text-white transition-colors">Diffusers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Starter Kits</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Brands</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Essences</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Refills</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Gifts</a></li>
+              <h4 className="font-medium mb-4 text-[#ede0d4]">Shop</h4>
+              <ul className="space-y-3 text-sm text-[#e6ccb2] font-light">
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Diffusers</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Starter Kits</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Brands</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Essences</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Refills</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Gifts</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-4 text-white">Support</h4>
-              <ul className="space-y-3 text-sm text-[#C4C0BA] font-light">
-                <li><a href="#" className="hover:text-white transition-colors">Scent Quiz</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Shipping & Returns</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Care Guide</a></li>
+              <h4 className="font-medium mb-4 text-[#ede0d4]">Support</h4>
+              <ul className="space-y-3 text-sm text-[#e6ccb2] font-light">
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Scent Quiz</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Shipping & Returns</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-[#ede0d4] transition-colors">Care Guide</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-4 text-white">Newsletter</h4>
-              <p className="text-sm text-[#C4C0BA] mb-4 font-light">1–2 emails/month. Unsubscribe anytime.</p>
+              <h4 className="font-medium mb-4 text-[#ede0d4]">Newsletter</h4>
+              <p className="text-sm text-[#e6ccb2] mb-4 font-light">1–2 emails/month. Unsubscribe anytime.</p>
               <form
                 className="flex gap-2"
                 onSubmit={(event) => {
@@ -1236,7 +1274,7 @@ export default function Home() {
                     setNewsletterStatus('idle');
                   }}
                   placeholder="you@example.com"
-                  className="flex-1 px-4 py-2.5 bg-[#4A4844] text-white placeholder-[#9B9792] border border-[#5A5854] focus:border-[#8B7355] focus:outline-none transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-[#9c6644] text-white placeholder-[#ddb892] border border-[#b08968] focus:border-[#ddb892] focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
@@ -1246,8 +1284,8 @@ export default function Home() {
                 </button>
               </form>
               {newsletterStatus === 'success' && (
-                <p className="mt-2 text-sm text-[#C4C0BA] flex items-center gap-2">
-                  <svg className="w-4 h-4 text-[#8B7355]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <p className="mt-2 text-sm text-[#e6ccb2] flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#ddb892]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   You&apos;re in! Watch for rituals soon.
@@ -1255,12 +1293,12 @@ export default function Home() {
               )}
             </div>
           </div>
-          <div className="border-t border-[#4A4844] pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-[#9B9792]">
+          <div className="border-t border-[#9c6644] pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-[#ddb892]">
             <p className="font-light">&copy; 2024 AuraDroplet. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <a href="#" className="hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-white transition-colors">Accessibility</a>
+              <a href="#" className="hover:text-[#ede0d4] transition-colors">Privacy</a>
+              <a href="#" className="hover:text-[#ede0d4] transition-colors">Terms</a>
+              <a href="#" className="hover:text-[#ede0d4] transition-colors">Accessibility</a>
             </div>
           </div>
         </div>

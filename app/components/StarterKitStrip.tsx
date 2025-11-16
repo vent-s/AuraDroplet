@@ -40,7 +40,7 @@ const starterKits: KitCard[] = [
   {
     id: 'romance-ritual',
     name: 'Romance Ritual',
-    badge: 'OPRAH’S FAVORITE',
+    badge: "OPRAH'S FAVORITE",
     badgeColor: '#4D2B2B',
     image: '/DiffuserRose2.jpg',
     hoverImage: '/DiffuserRose.jpg',
@@ -92,22 +92,21 @@ export default function StarterKitStrip() {
 
   return (
     <section
-      className="bg-[#F6F7F9] py-14 px-6 sm:px-8"
+      className="bg-gradient-to-b from-[#ede0d4] to-[#e6ccb2] py-14 px-6 sm:px-8"
       style={{ fontFamily: "'BrandonText', 'Inter', sans-serif" }}
     >
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
-            <p className="text-[11px] tracking-[0.08em] text-[#8B7355]/70 font-medium" style={{ fontFamily: "'Cheltenham Regular', Georgia, serif" }}>Best-selling starter kits</p>
-            <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#1D2A32] tracking-tight leading-tight" style={{ fontFamily: "'Cheltenham Regular', Georgia, serif" }}>Our best Selling kits</h2>
-            <p className="text-[25px] sm:text-[31px] text-[#4A4540] leading-snug" style={{ fontFamily: "'BrandonText', 'Inter', sans-serif" }}>Try our favorites. Free scent included.</p>
+            <h2 className="text-[32px] sm:text-[40px] font-bold text-[#7f5539] tracking-tight leading-tight" style={{ fontFamily: "'Toledo', Georgia, serif" }}>Our best Selling kits</h2>
+            <p className="text-[25px] sm:text-[31px] text-[#9c6644] leading-snug" style={{ fontFamily: "'BrandonText', 'Inter', sans-serif" }}>Try our favorites. Free scent included.</p>
           </div>
-          <p className="hidden sm:block text-xs text-[#8C98A4]">Swipe through kits</p>
+          <p className="hidden sm:block text-xs text-[#b08968]">Swipe through kits</p>
         </div>
 
         <div className="relative -mx-6 sm:mx-0">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#F6F7F9] to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#F6F7F9] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#e6ccb2] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#e6ccb2] to-transparent z-10" />
 
           <div className="smooth-scroll-slow flex gap-8 overflow-x-auto pb-6 px-6 sm:px-0">
             {cards.map((kit) => (
@@ -142,39 +141,39 @@ export default function StarterKitStrip() {
                   />
                 </div>
 
-                <div className="space-y-1 text-[#1F2A34]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[#4E6A42]">
+                <div className="space-y-1 text-[#7f5539]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[#b08968]">
                     ✨ {kit.ribbon}
                   </p>
                   <h3 className="text-xl font-semibold leading-tight">{kit.name}</h3>
                 </div>
 
-                <div className="flex items-center gap-2 mt-3 text-sm text-[#4B5562]">
-                  <span className="text-xs text-[#7A858F] uppercase tracking-[0.3em]">From:</span>
-                  <span className="text-sm text-[#9CA5AF] line-through">{kit.oldPrice}</span>
-                  <span className="text-lg font-semibold text-[#1F2A34]">{kit.price}</span>
-                  <span className="inline-flex items-center rounded-full bg-[#E5F5E0] px-2 py-1 text-[11px] font-semibold text-[#2F6B3A]">
+                <div className="flex items-center gap-2 mt-3 text-sm text-[#9c6644]">
+                  <span className="text-xs text-[#b08968] uppercase tracking-[0.3em]">From:</span>
+                  <span className="text-sm text-[#b08968] line-through">{kit.oldPrice}</span>
+                  <span className="text-lg font-semibold text-[#7f5539]">{kit.price}</span>
+                  <span className="inline-flex items-center rounded-full bg-[#ddb892] px-2 py-1 text-[11px] font-semibold text-[#7f5539]">
                     {Math.round(((parseFloat(kit.oldPrice.replace('$', '')) - parseFloat(kit.price.replace('$', ''))) / parseFloat(kit.oldPrice.replace('$', ''))) * 100)}% off
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-[#4B5562] mt-2">
-                  <span className="text-[#F6A43A]" aria-hidden="true">★★★★★</span>
-                  <span className="font-semibold text-[#1F2A34]">{kit.rating.toFixed(1)}</span>
-                  <a href="#reviews" className="text-[#6B7682] underline underline-offset-4">
+                <div className="flex items-center gap-2 text-xs text-[#9c6644] mt-2">
+                  <span className="text-[#b08968]" aria-hidden="true">★★★★★</span>
+                  <span className="font-semibold text-[#7f5539]">{kit.rating.toFixed(1)}</span>
+                  <a href="#reviews" className="text-[#9c6644] underline underline-offset-4">
                     ({kit.reviews.toLocaleString()})
                   </a>
                 </div>
 
-                <p className="text-sm text-[#3C4550] mt-3">{kit.blurb}</p>
+                <p className="text-sm text-[#9c6644] mt-3">{kit.blurb}</p>
 
-                <div className="flex items-center gap-2 text-xs text-[#5B646D] mt-2">
+                <div className="flex items-center gap-2 text-xs text-[#9c6644] mt-2">
                   <span>{kit.meta}</span>
-                  <span className="w-1 h-1 rounded-full bg-[#C8CED6]" />
+                  <span className="w-1 h-1 rounded-full bg-[#b08968]" />
                   <button
                     type="button"
                     onClick={() => document.getElementById('order-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="font-semibold text-[#1F2A34] underline underline-offset-4"
+                    className="font-semibold text-[#7f5539] underline underline-offset-4"
                   >
                     View kit →
                   </button>
