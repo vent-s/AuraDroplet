@@ -971,6 +971,9 @@ export default function Home() {
                 <h3 className="text-[22px] sm:text-[28px] md:text-[32px] font-semibold text-[#ede0d4] leading-tight tracking-tight">
                   We&apos;d like to help you discover a scent for autumn.
                 </h3>
+                <p className="text-sm md:text-base text-[#F6EDE3]/80">
+                  Enjoy a free scent with your <strong>Aura Diffuser</strong> purchase.
+                </p>
 
                 <div className="space-y-2 md:space-y-3 pt-1 md:pt-2">
                   {/* Ghost Button */}
