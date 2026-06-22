@@ -11,7 +11,7 @@ export const products: Product[] = [
     category: 'Diffusers',
     badge: 'bestseller',
     description: 'Timeless design meets aromatherapy. The Stone Diffuser features a sleek ceramic finish and ultrasonic technology for whisper-quiet misting.',
-    variantId: 'gid://shopify/ProductVariant/50647405822230'
+    variantId: 'legacy-stone-diffuser'
   },
   {
     id: 'rose-petal-oil',
@@ -20,7 +20,7 @@ export const products: Product[] = [
     image: '/RoseProduct.jpg',
     category: 'Essential Oils',
     description: 'Luxurious rose essence with geranium and musk notes. 15ml of pure botanical bliss.',
-    variantId: 'gid://shopify/ProductVariant/50647404806422'
+    variantId: 'legacy-rose-petal-oil'
   },
   {
     id: 'lavender-oil',
@@ -30,7 +30,7 @@ export const products: Product[] = [
     category: 'Essential Oils',
     badge: 'bestseller',
     description: 'Calming lavender with bergamot and chamomile. Perfect for relaxation and restful sleep. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/50647396581654'
+    variantId: 'legacy-lavender-oil'
   },
   {
     id: 'jasmine-oil',
@@ -39,7 +39,7 @@ export const products: Product[] = [
     image: '/Jasmine.jpg',
     category: 'Essential Oils',
     description: 'Exotic white florals with bright citrus peel. Intoxicating and uplifting. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/50647401922838'
+    variantId: 'legacy-jasmine-oil'
   },
   {
     id: 'mint-oil',
@@ -48,7 +48,7 @@ export const products: Product[] = [
     image: '/Mint.jpg',
     category: 'Essential Oils',
     description: 'Crisp peppermint with basil and green tea. Refreshing and invigorating. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/50647402479894'
+    variantId: 'legacy-mint-oil'
   },
   {
     id: 'vanilla-oil',
@@ -58,7 +58,7 @@ export const products: Product[] = [
     category: 'Essential Oils',
     badge: 'new',
     description: 'Rich vanilla bean with warm amber and sandalwood. Comforting and grounding. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/50647401234710'
+    variantId: 'legacy-vanilla-oil'
   },
   {
     id: 'ocean-mist-oil',
@@ -67,6 +67,6 @@ export const products: Product[] = [
     image: '/Ocean.jpg',
     category: 'Essential Oils',
     description: 'Coastal breeze captured in a bottle. Sea salt, driftwood, and marine notes. 15ml.',
-    variantId: 'gid://shopify/ProductVariant/50647404413206'
+    variantId: 'legacy-ocean-mist-oil'
   },
 ];

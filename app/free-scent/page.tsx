@@ -87,15 +87,13 @@ const scents: ScentOption[] = [
 ].map((scent) => {
   const variantId = scentVariantMap[scent.productId];
   if (!variantId) {
-    console.warn(`Missing Shopify variantId for scent "${scent.name}" (product id: ${scent.productId})`);
+    console.warn(`Missing legacy variant ID for scent "${scent.name}" (product id: ${scent.productId})`);
   }
   return {
     ...scent,
     variantId,
   };
 });
-
-const diffuserVariantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? 'gid://shopify/ProductVariant/REPLACE_ME';
 
 export default function FreeScentPage() {
   const [selectedScent, setSelectedScent] = useState<string | null>(null);
@@ -110,12 +108,8 @@ export default function FreeScentPage() {
 
   const handleScentSelect = async (scentId: string) => {
     const scent = scents.find((option) => option.id === scentId);
-    if (!scent?.variantId) {
+    if (!scent) {
       alert('This scent is unavailable right now.');
-      return;
-    }
-    if (!diffuserVariantId || diffuserVariantId.includes('REPLACE_ME')) {
-      alert('Please configure the diffuser variant ID before checking out.');
       return;
     }
 
@@ -123,24 +117,7 @@ export default function FreeScentPage() {
     setIsCheckingOut(true);
 
     try {
-      const response = await fetch('/api/cart/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lines: [
-            { merchandiseId: diffuserVariantId, quantity: 1 },
-            { merchandiseId: scent.variantId, quantity: 1 },
-          ]
-        })
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok || !payload.checkoutUrl) {
-        throw new Error(payload?.error || 'Unable to start checkout');
-      }
-
-      window.location.href = payload.checkoutUrl;
+      window.location.href = `/checkout?source=auradroplet&scent=${encodeURIComponent(scent.id)}`;
     } catch (error) {
       console.error('Free scent checkout failed:', error);
       alert('We couldn\'t start checkout. Please try again or contact support.');

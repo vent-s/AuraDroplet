@@ -2,383 +2,583 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  AddressElement,
+  Elements,
+  PaymentElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
+import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+type CheckoutSource = 'auradroplet' | 'velluracare';
 
-const asset = (path: string) => (path.startsWith('http') ? path : `https:${path}`);
-
-const palette = {
-  cream: '#ede0d4',
-  sand: '#e6ccb2',
-  amber: '#ddb892',
-  clay: '#b08968',
-  espresso: '#7f5539',
-  chestnut: '#9c6644',
-  ember: '#C65D3B',
-} as const;
-
-const variantId =
-  process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? 'gid://shopify/ProductVariant/REPLACE_ME';
-const needsVariantUpdate = variantId.includes('REPLACE_ME');
-
-const heroPricing = {
-  current: 40,
-  compareAt: 60,
+type CheckoutSession = {
+  cartId: string;
+  clientSecret: string;
+  amount: number;
+  currency: string;
 };
 
-const colorways = [
-  {
-    id: 'blue-salt',
-    title: 'Tranquil Nights',
-    scent: 'Lavender',
-    tagline: 'Diffuser + lavender veil essence for slow-evening wind downs.',
-    image: '/DiffuserLavender2.jpg',
-    alt: 'Aura diffuser with lavender essence on a bedside.',
-    swatch: palette.sand,
-    background: [palette.cream, palette.sand],
-  },
-  {
-    id: 'spice',
-    title: 'Romance Ritual',
-    scent: 'Rose',
-    tagline: 'Rose petal essence for intimate, cozy lighting.',
-    image: '/DiffuserRose2.jpg',
-    alt: 'Aura diffuser styled with rose petals.',
-    swatch: palette.amber,
-    background: [palette.sand, palette.amber],
-  },
-  {
-    id: 'steam',
-    title: 'Sharp Start',
-    scent: 'Mint',
-    tagline: 'Minty uplift for bright, focused mornings.',
-    image: '/DiffuserMint2.jpg',
-    alt: 'Aura diffuser next to mint leaves.',
-    swatch: palette.clay,
-    background: [palette.cream, palette.amber],
-  },
-  {
-    id: 'char',
-    title: 'Coastal Escape',
-    scent: 'Ocean',
-    tagline: 'Ocean breeze accord for calm, airy afternoons.',
-    image: '/DiffuserOcean2.jpg',
-    alt: 'Aura diffuser with ocean-inspired styling.',
-    swatch: palette.chestnut,
-    background: [palette.chestnut, palette.espresso],
-  },
-] as const;
+type CheckoutDisplay = {
+  source: CheckoutSource;
+  title: string;
+  lineItemLabel: string;
+  image: string;
+  returnUrl?: string;
+};
 
-const bundleOptions = [
-  {
-    id: 'single',
-    label: 'Starter Kit',
-    pieces: '2 piece',
-    description: 'Includes 1 diffuser base, 1 essence vial, and quick-start guide.',
-    price: 40,
-    compareAt: 60
-  },
-  {
-    id: 'cornucopia',
-    label: 'Cornucopia Special',
-    pieces: '4 piece',
-    description: '2 diffusers + 2 scents - perfect for gifting or multiple rooms.',
-    price: 70,
-    compareAt: 100
-  },
-  {
-    id: 'triple',
-    label: 'Family Bundle',
-    pieces: '6 piece',
-    description: '3 diffusers + 3 scents - whole home aromatherapy experience.',
-    price: 100,
-    compareAt: 140
-  },
-] as const;
+type ResolvedHandoff = {
+  source: 'velluracare';
+  title: string;
+  lineItemLabel: string;
+  email: string;
+  customerName?: string;
+  returnUrl?: string;
+};
 
-const kitFeatures = [
-  'Soft-glow ceramic diffuser with two mist modes.',
-  'Complimentary 15ml essence vial in your chosen scent.',
-  'Automatic shut-off plus ambient halo light.',
-  'Free shipping and 3-year limited warranty.',
-] as const;
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
 
-const testimonials = [
-  {
-    title: 'Absolutely Love My Investment',
-    description:
-      "Truly understand the hype and aesthetic it can bring to any kitchen. I got the exclusive color of Azul and couldn't be happier!",
-    rating: 5,
-  },
-  {
-    title: 'Nothing Sticks!',
-    description:
-      'I absolutely love my cookware set! It’s super cute and chic. Nothing sticks and burns like my old pans and cleanup is effortless.',
-    rating: 5,
-  },
-  {
-    title: 'Cleanup is a Breeze!',
-    description:
-      'Great heat distribution and cleanup is a breeze. It works so well we bought a second set for our daughter.',
-    rating: 4.5,
-  },
-] as const;
+const serifClass = '[font-family:var(--font-playfair),ui-serif,Georgia,serif]';
+const shellClass =
+  '[font-family:var(--font-manrope),ui-sans-serif,system-ui,sans-serif] tracking-normal';
+const inputClass =
+  'w-full rounded-lg border border-line bg-white px-4 py-3.5 text-base text-ink placeholder:text-muted/70 focus-visible:outline-2 focus-visible:outline-brand-600';
+const primaryButtonClass =
+  'inline-flex items-center justify-center gap-2 rounded-full bg-ink px-8 py-3.5 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
+const secondaryButtonClass =
+  'inline-flex items-center justify-center gap-2 rounded-full border border-ink/20 bg-transparent px-8 py-3.5 text-base font-semibold text-ink transition active:scale-[0.98] hover:border-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
 
-const quickCheckoutUrl = (color?: string) => {
-  const params = new URLSearchParams({
-    variant: variantId,
-    qty: '1',
-  });
-  if (color) {
-    params.append('color', color);
+function formatAmount(amount: number, currency: string) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function getDisplay(
+  searchParams: URLSearchParams,
+  handoff?: ResolvedHandoff | null,
+): CheckoutDisplay {
+  if (handoff) {
+    return {
+      source: handoff.source,
+      title: handoff.title,
+      lineItemLabel: handoff.lineItemLabel,
+      image: '/AuraProduct.jpg',
+      returnUrl: handoff.returnUrl,
+    };
   }
-  return `/api/quick-checkout?${params.toString()}`;
-};
 
-const heroBadge = 'SAVE $20.00';
-const reviewMeta = { average: 4.9, count: 10842 };
+  const source =
+    searchParams.get('source') === 'velluracare' ? 'velluracare' : 'auradroplet';
+  const title =
+    source === 'velluracare'
+      ? 'VelluraCare plan'
+      : 'Aura Diffuser Kit';
 
-export default function CheckoutPage() {
-  const [selectedColor, setSelectedColor] = useState(colorways[0]);
-  const [selectedBundle, setSelectedBundle] = useState(bundleOptions[0]);
-  const savings = selectedBundle.compareAt - selectedBundle.price;
-  const percentOff = Math.round((savings / selectedBundle.compareAt) * 100);
+  return {
+    source,
+    title,
+    lineItemLabel:
+      source === 'velluracare' ? `${title} - first month` : `${title} - kit`,
+    image: '/AuraProduct.jpg',
+    returnUrl: searchParams.get('return_url') || undefined,
+  };
+}
 
-  const handleCheckout = () => {
-    if (needsVariantUpdate) {
-      alert('Please configure NEXT_PUBLIC_SHOPIFY_VARIANT_ID to enable checkout.');
+function PaymentForm({
+  session,
+  customerName,
+  onSuccess,
+}: {
+  session: CheckoutSession;
+  customerName?: string;
+  onSuccess: (orderId: string) => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!stripe || !elements) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    const addressElement = elements.getElement(AddressElement);
+    const addressResult = await addressElement?.getValue();
+    if (!addressResult?.complete) {
+      setError('Please enter a complete shipping address.');
+      setSubmitting(false);
       return;
     }
-    const url = quickCheckoutUrl(selectedColor.id);
-    window.location.href = url;
-  };
+
+    const value = addressResult.value;
+    const [firstName, ...lastNameParts] = value.name.trim().split(/\s+/);
+    const address = {
+      first_name: firstName || value.name,
+      last_name: lastNameParts.join(' ') || firstName || value.name,
+      address_1: value.address.line1,
+      address_2: value.address.line2 || undefined,
+      city: value.address.city,
+      province: value.address.state,
+      postal_code: value.address.postal_code,
+      country_code: value.address.country.toLowerCase(),
+      phone: value.phone,
+    };
+
+    const addressResponse = await fetch('/api/medusa-checkout/address', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ cartId: session.cartId, address }),
+    });
+
+    if (!addressResponse.ok) {
+      const data = (await addressResponse.json()) as { error?: string };
+      setError(data.error || 'We could not save your shipping address.');
+      setSubmitting(false);
+      return;
+    }
+
+    const { error: confirmError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: { return_url: window.location.href },
+      redirect: 'if_required',
+    });
+
+    if (confirmError) {
+      setError(confirmError.message || 'We could not process that payment.');
+      setSubmitting(false);
+      return;
+    }
+
+    const completeResponse = await fetch('/api/medusa-checkout/complete', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ cartId: session.cartId }),
+    });
+    const completeData = (await completeResponse.json()) as {
+      orderId?: string;
+      error?: string;
+    };
+
+    if (!completeResponse.ok || !completeData.orderId) {
+      setError(
+        completeData.error || 'Payment succeeded, but the order did not finish.',
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    onSuccess(completeData.orderId);
+  }
 
   return (
-    <main className="bg-[#ede0d4] text-[#7f5539] min-h-screen">
-      <header className="border-b border-black/5 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 text-sm uppercase tracking-[0.3em] text-[#9c6644]">
-          <button className="font-semibold">Menu</button>
-          <Link href="/" className="text-xl font-semibold tracking-[0.4em]">
-            Our Place
-          </Link>
-          <div className="flex items-center gap-4 text-base">
-            <span>Help</span>
-            <span>Cart</span>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <AddressElement
+        options={{
+          mode: 'shipping',
+          allowedCountries: ['US'],
+          fields: { phone: 'always' },
+          validation: { phone: { required: 'auto' } },
+          defaultValues: customerName ? { name: customerName } : undefined,
+        }}
+      />
+      <PaymentElement />
+      {error && (
+        <p
+          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+      <button
+        type="submit"
+        className={`${primaryButtonClass} w-full`}
+        disabled={!stripe || submitting}
+      >
+        {submitting
+          ? 'Processing...'
+          : `Pay ${formatAmount(session.amount, session.currency)}`}
+      </button>
+      <p className="flex items-start gap-2 text-sm text-muted">
+        <Lock size={15} className="mt-0.5 shrink-0 text-brand-500" />
+        Card details are encrypted and handled by Stripe. They never touch our
+        servers.
+      </p>
+    </form>
+  );
+}
+
+function CheckoutContent() {
+  const searchParams = useSearchParams();
+  const handoffToken = searchParams.get('handoff') || undefined;
+  const [handoff, setHandoff] = useState<ResolvedHandoff | null>(null);
+  const display = useMemo(
+    () => getDisplay(new URLSearchParams(searchParams.toString()), handoff),
+    [searchParams, handoff],
+  );
+  const startedFromHandoff = useRef(false);
+
+  const [email, setEmail] = useState('');
+  const [session, setSession] = useState<CheckoutSession | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [handoffLoading, setHandoffLoading] = useState(Boolean(handoffToken));
+  const [handoffError, setHandoffError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requiresHandoff = display.source === 'velluracare' && !handoffToken;
+
+  async function startCheckout(nextEmail = email) {
+    if (display.source === 'velluracare' && !handoffToken) {
+      setError('Return to VelluraCare and start secure checkout again.');
+      return;
+    }
+
+    if (handoffToken && !handoff) {
+      setError('Checkout handoff is still loading.');
+      return;
+    }
+
+    if (!handoffToken && !nextEmail.includes('@')) {
+      setError('Enter an email address to continue.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/medusa-checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(
+          handoffToken
+            ? { handoff: handoffToken }
+            : {
+                source: display.source,
+                email: nextEmail,
+              },
+        ),
+      });
+      const data = (await response.json()) as CheckoutSession & {
+        error?: string;
+      };
+
+      if (!response.ok || !data.clientSecret || !data.cartId) {
+        throw new Error(data.error || 'Could not start checkout.');
+      }
+
+      setSession({
+        cartId: data.cartId,
+        clientSecret: data.clientSecret,
+        amount: data.amount,
+        currency: data.currency,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start checkout.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!handoffToken) return;
+
+    let cancelled = false;
+    async function resolveHandoff() {
+      setHandoffLoading(true);
+      setHandoffError(null);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/checkout-handoff/resolve', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ handoff: handoffToken }),
+        });
+        const data = (await response.json()) as ResolvedHandoff & {
+          error?: string;
+        };
+
+        if (!response.ok || !data.email) {
+          throw new Error(data.error || 'Checkout handoff expired.');
+        }
+
+        if (!cancelled) {
+          setHandoff(data);
+          setEmail(data.email);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message =
+            err instanceof Error ? err.message : 'Checkout handoff expired.';
+          setHandoffError(message);
+          setError(message);
+        }
+      } finally {
+        if (!cancelled) setHandoffLoading(false);
+      }
+    }
+
+    void resolveHandoff();
+    return () => {
+      cancelled = true;
+    };
+  }, [handoffToken]);
+
+  useEffect(() => {
+    if (!handoffToken || !handoff || startedFromHandoff.current || session) {
+      return;
+    }
+    startedFromHandoff.current = true;
+    void startCheckout(handoff.email);
+    // startCheckout intentionally reads the resolved handoff state once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handoffToken, handoff, session]);
+
+  if (orderId) {
+    return (
+      <main className={`min-h-screen bg-cream py-12 sm:py-16 ${shellClass}`}>
+        <div className="mx-auto w-full max-w-xl px-5 sm:px-6">
+          <div className="rounded-lg border border-brand-200 bg-white p-8 text-center sm:p-10">
+            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-50 text-brand-600">
+              <CheckCircle2 size={32} />
+            </span>
+            <h1
+              className={`mt-5 text-3xl font-medium text-ink ${serifClass}`}
+            >
+              You&apos;re all set.
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted">
+              Your order is in. We&apos;ll follow up with next steps.
+            </p>
+            <ol className="mx-auto mt-6 max-w-sm space-y-3 text-left text-base text-ink">
+              <li className="flex gap-3">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
+                  1
+                </span>
+                Your payment was confirmed.
+              </li>
+              <li className="flex gap-3">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
+                  2
+                </span>
+                Medusa created order {orderId}.
+              </li>
+            </ol>
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/" className={primaryButtonClass}>
+                Continue
+              </Link>
+              {display.returnUrl && (
+                <a href={display.returnUrl} className={secondaryButtonClass}>
+                  Back
+                </a>
+              )}
+            </div>
           </div>
         </div>
-      </header>
+      </main>
+    );
+  }
 
-            <section className="bg-[#ede0d4] px-4 py-8 pb-28 sm:px-6">
-        <div className="mx-auto max-w-6xl space-y-6 lg:space-y-8">
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[28px] border border-[#ddb892] bg-white shadow-[0_30px_70px_rgba(127,85,57,0.12)]">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-t-[28px] sm:aspect-[5/4]">
-                <div className="absolute left-3 top-3 rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-[#7f5539]">
-                  {heroBadge}
-                </div>
+  return (
+    <main className={`min-h-screen bg-cream py-12 sm:py-16 ${shellClass}`}>
+      <div className="mx-auto w-full max-w-xl px-5 sm:px-6">
+        <div className="text-center">
+          <h1
+            className={`text-4xl font-medium tracking-tight text-ink sm:text-5xl ${serifClass}`}
+          >
+            Secure checkout
+          </h1>
+          <p className="mt-4 text-lg leading-relaxed text-muted">
+            Complete your order.
+          </p>
+        </div>
+
+        <div className="mt-10 rounded-lg border border-line bg-white p-6 shadow-sm sm:p-10">
+          <h2 className={`text-2xl font-medium text-ink ${serifClass}`}>
+            Complete your order
+          </h2>
+
+          <div className="mt-5 space-y-4 rounded-lg bg-cream p-4 text-sm">
+            <div className="flex items-center gap-4 text-left">
+              <span className="relative block h-20 w-16 shrink-0 overflow-hidden rounded-md shadow-sm">
                 <Image
-                  src={selectedColor.image}
-                  alt={selectedColor.alt}
+                  src={display.image}
+                  alt={display.title}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
+                  sizes="64px"
                   className="object-cover"
                 />
-              </div>
-              <div className="flex justify-center gap-2 border-t border-[#ede0d4] px-4 py-3">
-                {colorways.map((color) => (
-                  <button
-                    key={`hero-swatch-${color.id}`}
-                    onClick={() => setSelectedColor(color)}
-                    aria-label={`View ${color.title}`}
-                    className={`h-2.5 w-2.5 rounded-full transition ${
-                      selectedColor.id === color.id ? 'bg-[#7f5539]' : 'bg-[#b08968]'
-                    }`}
-                  />
-                ))}
-              </div>
+              </span>
+              <span>
+                <span className="block text-xs font-bold uppercase tracking-wider text-brand-600">
+                  Matched to your order
+                </span>
+                <span className="mt-1 block text-lg font-semibold text-ink">
+                  {display.title}
+                </span>
+                <span className="block text-sm text-muted">
+                  {session
+                    ? formatAmount(session.amount, session.currency)
+                    : 'Final total from Medusa'}
+                </span>
+              </span>
             </div>
 
-            <div className="rounded-[28px] border border-[#ddb892] bg-white p-5 sm:p-6 shadow-[0_20px_60px_rgba(127,85,57,0.08)] space-y-5">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-[#b08968]">
-                <span>★★★★★</span>
-                <span className="normal-case tracking-normal text-sm font-medium text-[#7f5539]">
-                  {reviewMeta.average.toFixed(1)} average ({reviewMeta.count.toLocaleString()} reviews)
+            <div className="space-y-2 border-t border-line pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-muted">{display.lineItemLabel}</span>
+                <span className="font-semibold text-ink">
+                  {session
+                    ? formatAmount(session.amount, session.currency)
+                    : 'Review'}
                 </span>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-[#9c6644]">Aura Diffuser Kit</p>
-                <h1 className="text-3xl font-semibold text-[#7f5539] sm:text-4xl">
-                  {selectedColor.title} ({selectedColor.scent})
-                </h1>
-                <p className="mt-1 text-sm text-[#9c6644]">{selectedColor.tagline}</p>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-[#ede0d4] px-4 py-3">
-                <div>
-                  <p className="text-3xl font-semibold text-[#7f5539]">
-                    {formatCurrency(selectedBundle.price)}
-                  </p>
-                  <p className="text-xs text-[#9c6644]">
-                    ({formatCurrency(selectedBundle.compareAt)} value)
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="inline-flex items-center rounded-full bg-[#ddb892] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#7f5539]">
-                    Save {formatCurrency(savings)}
-                  </span>
-                  <p className="text-xs text-[#9c6644]">{percentOff}% off</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.4em] text-[#9c6644]">Bundle</p>
-                <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
-                  {bundleOptions.map((bundle) => (
-                    <button
-                      key={bundle.id}
-                      onClick={() => setSelectedBundle(bundle)}
-                      className={`min-w-[210px] rounded-2xl border px-4 py-3 text-left text-sm transition sm:min-w-0 ${
-                        selectedBundle.id === bundle.id
-                          ? 'border-[#7f5539] bg-[#7f5539] text-white'
-                          : 'border-[#ddb892] bg-[#f7ede2] text-[#7f5539]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span>{bundle.label}</span>
-                        <span>
-                          {formatCurrency(bundle.price)}
-                          <span
-                            className={`ml-2 text-xs ${
-                              selectedBundle.id === bundle.id ? 'text-white/60' : 'text-[#b08968]'
-                            }`}
-                          >
-                            {formatCurrency(bundle.compareAt)}
-                          </span>
-                        </span>
-                      </div>
-                      <p
-                        className={`mt-1 text-xs ${
-                          selectedBundle.id === bundle.id ? 'text-white/80' : 'text-[#9c6644]'
-                        }`}
-                      >
-                        {bundle.pieces} · {bundle.description}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+              <div className="flex items-center justify-between border-t border-line pt-2 text-base">
+                <span className="font-semibold text-ink">Due today</span>
+                <span className="font-bold text-brand-700">
+                  {session
+                    ? formatAmount(session.amount, session.currency)
+                    : 'After setup'}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[28px] border-2 border-[#7f5539] bg-white p-6 shadow-[0_25px_65px_rgba(127,85,57,0.1)] grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div>
-              <p className="text-sm uppercase tracking-[0.4em] text-[#9c6644]">Your Selection</p>
-              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex-1">
-                  <p className="text-lg font-semibold text-[#7f5539]">
-                    {selectedBundle.label} ({selectedBundle.pieces})
-                  </p>
-                  <p className="text-sm text-[#9c6644]">{selectedBundle.description}</p>
-                </div>
-                <div className="text-left sm:text-right">
-                  <p className="text-2xl font-semibold text-[#7f5539]">
-                    {formatCurrency(selectedBundle.price)}
-                  </p>
-                  <p className="text-sm text-[#b08968]">
-                    ({formatCurrency(selectedBundle.compareAt)} value)
-                  </p>
-                </div>
-              </div>
-              <p className="mt-6 text-sm uppercase tracking-[0.4em] text-[#b08968]">
-                Color: {selectedColor.title}
-              </p>
-              <p className="text-base text-[#7f5539]">{selectedColor.tagline}</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {colorways.map((color) => (
-                  <button
-                    key={`card-swatch-${color.id}`}
-                    onClick={() => setSelectedColor(color)}
-                    className={`h-10 w-10 rounded-full border-2 transition ${
-                      selectedColor.id === color.id ? 'border-[#7f5539]' : 'border-[#b08968]'
-                    }`}
-                    style={{ background: color.swatch }}
-                    aria-label={`Select ${color.title}`}
-                  />
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={needsVariantUpdate}
-                className="mt-6 hidden w-full rounded-full bg-[#C65D3B] py-4 text-base font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-[#9c6644] disabled:cursor-not-allowed disabled:opacity-40 md:inline-block"
-              >
-                {needsVariantUpdate
-                  ? 'Finish store setup to checkout'
-                  : `Add to Bag — ${formatCurrency(selectedBundle.price)}`}
-              </button>
-              <p className="mt-2 text-xs text-[#b08968]">
-                Ships free in the contiguous U.S. Taxes calculated at checkout.
-              </p>
+          {!session && requiresHandoff && (
+            <p
+              className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+              role="alert"
+            >
+              Return to VelluraCare and start secure checkout again.
+            </p>
+          )}
+
+          {!session && handoffToken && (
+            <div className="mt-6 space-y-4">
+              {(handoffLoading || loading) && (
+                <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800">
+                  Setting up checkout...
+                </p>
+              )}
+              {(handoffError || error) && (
+                <p
+                  className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                  role="alert"
+                >
+                  {handoffError || error}
+                </p>
+              )}
             </div>
-            <div className="space-y-4">
-              <div className="rounded-2xl bg-[#ddb892] p-2">
-                <Image
-                  src={selectedColor.image}
-                  alt={selectedColor.alt}
-                  width={180}
-                  height={180}
-                  className="w-full rounded-2xl object-cover"
+          )}
+
+          {!session && !handoffToken && !requiresHandoff && (
+            <form
+              className="mt-6 space-y-5"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void startCheckout();
+              }}
+            >
+              <div>
+                <label
+                  htmlFor="checkoutEmail"
+                  className="mb-1.5 block text-base font-semibold text-ink"
+                >
+                  Email
+                </label>
+                <input
+                  id="checkoutEmail"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className={inputClass}
+                  placeholder="you@example.com"
                 />
               </div>
-              <ul className="list-disc space-y-2 pl-5 text-sm text-[#7f5539]">
-                {kitFeatures.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 px-4 py-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] md:hidden">
-        <button
-          type="button"
-          onClick={handleCheckout}
-          disabled={needsVariantUpdate}
-          className="w-full rounded-full bg-[#C65D3B] py-3 text-sm font-semibold uppercase tracking-[0.35em] text-white transition hover:bg-[#9c6644] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {needsVariantUpdate ? 'Finish store setup' : `Checkout — ${formatCurrency(selectedBundle.price)}`}
-        </button>
-      </div>
-
-      <section className="bg-[#ede0d4] py-16">
-        <div className="mx-auto max-w-6xl space-y-10 px-6">
-          <div className="text-center">
-            <p className="text-sm uppercase tracking-[0.4em] text-[#b08968]">Customer Love</p>
-            <h2 className="text-3xl font-light text-[#7f5539]">
-              The Aura Diffuser Kit has over {reviewMeta.count.toLocaleString()} glowing reviews
-            </h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((review) => (
-              <div
-                key={review.title}
-                className="h-full rounded-[28px] border border-black/5 bg-white p-6 shadow-[0_25px_60px_rgba(127,85,57,0.06)]"
-              >
-                <p className="text-lg font-semibold text-[#7f5539]">{review.title}</p>
-                <p className="mt-1 text-sm text-[#b08968]">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <span key={index}>{index < Math.round(review.rating) ? '★' : '☆'}</span>
-                  ))}
+              {error && (
+                <p
+                  className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+                  role="alert"
+                >
+                  {error}
                 </p>
-                <p className="mt-3 text-sm text-[#7f5539]">{review.description}</p>
-              </div>
-            ))}
-          </div>
+              )}
+              <button
+                type="submit"
+                className={`${primaryButtonClass} w-full`}
+                disabled={loading}
+                >
+                {loading
+                  ? 'Setting up checkout...'
+                  : 'Continue to secure checkout'}
+              </button>
+            </form>
+          )}
+
+          {session && !stripePromise && (
+            <p className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Payments are not configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+              in AuraDroplet.
+            </p>
+          )}
+
+          {session && stripePromise && (
+            <div className="mt-6">
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret: session.clientSecret,
+                  appearance: { theme: 'stripe' },
+                }}
+              >
+                <PaymentForm
+                  session={session}
+                  customerName={handoff?.customerName}
+                  onSuccess={setOrderId}
+                />
+              </Elements>
+            </div>
+          )}
+
+          <p className="mt-5 flex items-start gap-2 text-sm text-muted">
+            <ShieldCheck size={15} className="mt-0.5 shrink-0 text-brand-500" />
+            Your payment is processed through Stripe&apos;s encrypted form.
+          </p>
         </div>
-      </section>
+      </div>
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <main
+          className={`grid min-h-screen place-items-center bg-cream text-ink ${shellClass}`}
+        >
+          <p className="text-sm font-semibold uppercase tracking-wider">
+            Loading checkout
+          </p>
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

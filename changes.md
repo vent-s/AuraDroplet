@@ -1,9 +1,7 @@
-## 2024-05-26
-- bootstrapped Next.js App Router project structure with TypeScript config and lint setup
-- implemented Shopify Storefront helper plus quick checkout, variant lookup, and webhook API routes
-- reworked landing experience into a mobile-first, minimal luxury layout with new sections and CTA treatments
+# Changes
 
-## 2024-06-02
-- added `.env.example` to document the Shopify + public variant environment variables
-- expanded README with a Vercel deployment checklist (env management, CLI commands, API explanation)
-- moved the starter kit grid to a dedicated `/starter-kits` page and left a CTA teaser on the homepage
+- moved checkout ownership to AuraDroplet with Medusa cart/payment APIs
+- added Stripe Elements checkout page at `/checkout`
+- converted legacy quick-checkout/cart endpoints to same-origin Medusa checkout handoffs
+- removed legacy commerce helper, variant lookup, webhook route, and setup docs
+- documented Medusa/Railway and Stripe environment variables

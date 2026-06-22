@@ -12,7 +12,7 @@ export interface Product {
   badge?: 'bestseller' | 'new' | 'sale';
   discount?: number;
   description?: string;
-  variantId?: string; // Shopify variant ID
+  variantId?: string; // Legacy storefront variant ID; checkout now resolves in Medusa.
 }
 
 export interface CartItem extends Product {
@@ -110,36 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCheckingOut(true);
 
     try {
-      // Build cart lines for Shopify
-      const lines = cartItems.map(item => {
-        if (!item.variantId) {
-          throw new Error(`Missing variantId for ${item.name}`);
-        }
-        return {
-          merchandiseId: item.variantId,
-          quantity: item.quantity,
-        };
-      });
-
-      // Call our API to create a Shopify cart
-      const response = await fetch('/api/cart/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines }),
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Failed to create checkout');
-      }
-
-      const { checkoutUrl } = payload;
-
-      // Redirect to Shopify checkout
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      }
+      window.location.href = '/checkout?source=auradroplet';
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to start checkout. Please try again.');

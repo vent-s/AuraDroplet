@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
+import { Manrope, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
 
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
 export const metadata: Metadata = {
   title: "AURADroplet",
-  description: "Minimal Shopify quick-checkout landing page for AURADroplet.",
+  description: "AuraDroplet storefront and shared Medusa checkout.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${manrope.variable} ${playfair.variable}`}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-7Z8ZSYG07Y"

@@ -6,8 +6,6 @@ import { products } from "./data/products";
 import { track } from "@/lib/analytics";
 import StarterKitStrip from "./components/StarterKitStrip";
 
-const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
-
 type QuickCheckoutOptions = {
   quantity?: number;
   scentVariant?: string;
@@ -16,7 +14,7 @@ type QuickCheckoutOptions = {
 
 const quickCheckoutUrl = ({ quantity = 1, scentVariant, addonVariants = [] }: QuickCheckoutOptions = {}) => {
   const params = new URLSearchParams({
-    variant: variantId,
+    source: "auradroplet",
     qty: quantity.toString(),
   });
   if (scentVariant) {
@@ -25,9 +23,9 @@ const quickCheckoutUrl = ({ quantity = 1, scentVariant, addonVariants = [] }: Qu
   addonVariants.forEach((addon) => {
     params.append("addon", addon);
   });
-  return `/api/quick-checkout?${params.toString()}`;
+  return `/checkout?${params.toString()}`;
 };
-const needsVariantUpdate = variantId.includes("REPLACE_ME");
+const needsVariantUpdate = false;
 
 type Brand = {
   name: string;
@@ -424,7 +422,7 @@ const baseFreeScentOptions: FreeScentOptionBase[] = [
 const freeScentOptions: FreeScentOption[] = baseFreeScentOptions.map((option) => {
   const variantId = productVariantMap[option.productId];
   if (!variantId) {
-    console.warn(`Missing Shopify variant ID for scent option "${option.name}" (product id: ${option.productId})`);
+    console.warn(`Missing legacy variant ID for scent option "${option.name}" (product id: ${option.productId})`);
   }
   return {
     ...option,
@@ -588,11 +586,6 @@ export default function Home() {
       alert('Please configure the diffuser variant ID before checking out.');
       return;
     }
-    if (!selectedScentVariantId) {
-      handlePricingBannerCta();
-      return;
-    }
-
     const eventItems = [
       {
         item_id: item.id,
@@ -667,7 +660,7 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedScent && !selectedScentVariantId) {
-      console.warn(`Missing Shopify variant ID for selected scent: ${selectedScent}`);
+      console.warn(`Missing legacy variant ID for selected scent: ${selectedScent}`);
     }
   }, [selectedScent, selectedScentVariantId]);
 

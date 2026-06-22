@@ -4,9 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { starterKits } from "../data/starterKits";
 
-const variantId = process.env.NEXT_PUBLIC_SHOPIFY_VARIANT_ID ?? "gid://shopify/ProductVariant/REPLACE_ME";
-const checkoutUrl = `/api/quick-checkout?variant=${encodeURIComponent(variantId)}&qty=1`;
-const needsVariantUpdate = variantId.includes("REPLACE_ME");
+const checkoutUrl = "/checkout?source=auradroplet";
+const needsVariantUpdate = false;
 
 export default function StarterKitsPage() {
   return (
