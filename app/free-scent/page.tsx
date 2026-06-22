@@ -117,7 +117,7 @@ export default function FreeScentPage() {
     setIsCheckingOut(true);
 
     try {
-      window.location.href = `/checkout?source=auradroplet&scent=${encodeURIComponent(scent.id)}`;
+      window.location.href = `/checkout?source=satielle&scent=${encodeURIComponent(scent.id)}`;
     } catch (error) {
       console.error('Free scent checkout failed:', error);
       alert('We couldn\'t start checkout. Please try again or contact support.');
@@ -141,7 +141,7 @@ export default function FreeScentPage() {
               <a href="#" className="nav-link px-4 py-2 text-[#3A3834] hover:text-[#8B7355] transition-colors">Essences</a>
             </div>
 
-            <h1 className="text-2xl lg:absolute lg:left-1/2 lg:-translate-x-1/2 font-light tracking-[0.15em] text-[#3A3834]">AURADROPLET</h1>
+            <h1 className="text-2xl lg:absolute lg:left-1/2 lg:-translate-x-1/2 font-light tracking-[0.15em] text-[#3A3834]">Satielle</h1>
 
             <div className="flex items-center space-x-6">
               <button className="text-[#3A3834] hover:text-[#8B7355] transition-colors">
@@ -304,7 +304,7 @@ export default function FreeScentPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
-              <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">AURADROPLET</h3>
+              <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">Satielle</h3>
               <p className="text-sm text-[#C4C0BA] leading-relaxed font-light">
                 Fragrance, considered.
               </p>
@@ -328,12 +328,12 @@ export default function FreeScentPage() {
             <div>
               <h4 className="font-medium mb-4 text-white">Offer Details</h4>
               <p className="text-sm text-[#C4C0BA] font-light leading-relaxed">
-                Buy any Aura Diffuser, get one 15ml essence free. One per diffuser. Any eligible scent.
+                Buy any Satielle Diffuser, get one 15ml essence free. One per diffuser. Any eligible scent.
               </p>
             </div>
           </div>
           <div className="border-t border-[#4A4844] pt-8 text-center text-sm text-[#9B9792]">
-            <p className="font-light">&copy; 2024 AuraDroplet. All rights reserved.</p>
+            <p className="font-light">&copy; 2024 Satielle. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const productKey = source === "velluracare" ? "velluracare" : "auradroplet";
+    const productKey = source === "velluracare" ? "velluracare" : "satielle";
     const session = await createCheckout({
       productKey,
       variantId,

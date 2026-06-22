@@ -5,7 +5,7 @@ const BACKEND_URL = (
 ).replace(/\/+$/, "");
 const PUBLISHABLE_KEY = process.env.MEDUSA_PUBLISHABLE_KEY;
 
-type CheckoutProductKey = "auradroplet" | "velluracare";
+type CheckoutProductKey = "satielle" | "velluracare";
 
 interface MedusaCart {
   id: string;
@@ -59,13 +59,13 @@ export interface ShippingAddressInput {
 }
 
 const PRODUCT_HANDLES: Record<CheckoutProductKey, string> = {
-  auradroplet: "aura-diffuser-kit",
+  satielle: "satielle-diffuser-kit",
   velluracare: "semaglutide-injection",
 };
 
 async function medusa<T>(path: string, init?: RequestInit): Promise<T> {
   if (!PUBLISHABLE_KEY) {
-    throw new Error("Missing MEDUSA_PUBLISHABLE_KEY in AuraDroplet.");
+    throw new Error("Missing MEDUSA_PUBLISHABLE_KEY in Satielle.");
   }
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -105,8 +105,8 @@ async function resolveVariantId(
   if (requestedVariantId) return requestedVariantId;
 
   const envVariant =
-    productKey === "auradroplet"
-      ? process.env.AURADROPLET_MEDUSA_VARIANT_ID
+    productKey === "satielle"
+      ? process.env.SATIELLE_MEDUSA_VARIANT_ID
       : process.env.VELLURACARE_MEDUSA_VARIANT_ID;
 
   if (envVariant) return envVariant;

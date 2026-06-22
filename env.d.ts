@@ -9,7 +9,7 @@ declare namespace NodeJS {
     KV_REST_API_TOKEN?: string;
     UPSTASH_REDIS_REST_URL?: string;
     UPSTASH_REDIS_REST_TOKEN?: string;
-    AURADROPLET_MEDUSA_VARIANT_ID?: string;
+    SATIELLE_MEDUSA_VARIANT_ID?: string;
     VELLURACARE_MEDUSA_VARIANT_ID?: string;
   }
 }

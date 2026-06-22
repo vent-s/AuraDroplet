@@ -34,7 +34,7 @@ const starterKits: KitCard[] = [
     oldPrice: '$55',
     rating: 4.9,
     reviews: 212,
-    blurb: 'Aura diffuser + lavender essence for slow-evening wind downs.',
+    blurb: 'Satielle diffuser + lavender essence for slow-evening wind downs.',
     meta: 'Ships in 24h · Includes free scent',
   },
   {

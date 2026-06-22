@@ -1,17 +1,17 @@
-# AuraDroplet
+# Satielle
 
-AuraDroplet is now the shared Medusa checkout frontend for AuraDroplet and
+Satielle is now the shared Medusa checkout frontend for Satielle and
 VelluraCare.
 
 ## Checkout Flow
 
-- AuraDroplet product buttons link directly to `/checkout?source=auradroplet`.
-- VelluraCare posts checkout context to AuraDroplet's
+- Satielle product buttons link directly to `/checkout?source=satielle`.
+- VelluraCare posts checkout context to Satielle's
   `/api/checkout-handoff` route and sends the browser to
   `/checkout?handoff=ho_...`.
-- AuraDroplet creates the Medusa cart server-side through `/api/medusa-checkout`.
-- Stripe Elements collects card details on the AuraDroplet checkout page.
-- After Stripe confirms payment, AuraDroplet calls Medusa to complete the cart.
+- Satielle creates the Medusa cart server-side through `/api/medusa-checkout`.
+- Stripe Elements collects card details on the Satielle checkout page.
+- After Stripe confirms payment, Satielle calls Medusa to complete the cart.
 
 This uses normal same-tab navigation. No popups, hidden windows, iframes around
 third-party pages, raw card fields, or PII checkout query strings are used.
@@ -32,11 +32,11 @@ UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 
 # Optional variant pins
-AURADROPLET_MEDUSA_VARIANT_ID=
+SATIELLE_MEDUSA_VARIANT_ID=
 VELLURACARE_MEDUSA_VARIANT_ID=
 CHECKOUT_HANDOFF_TTL_SECONDS=900
 ```
 
-The backend seed creates `aura-diffuser-kit` at `$200`. If the Railway database
+The backend seed creates `satielle-diffuser-kit` at `$200`. If the Railway database
 already exists, create that product in Medusa Admin or run the seed/migration
-against the production database before turning on the AuraDroplet checkout.
+against the production database before turning on the Satielle checkout.

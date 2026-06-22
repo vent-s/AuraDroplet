@@ -14,7 +14,7 @@ type QuickCheckoutOptions = {
 
 const quickCheckoutUrl = ({ quantity = 1, scentVariant, addonVariants = [] }: QuickCheckoutOptions = {}) => {
   const params = new URLSearchParams({
-    source: "auradroplet",
+    source: "satielle",
     qty: quantity.toString(),
   });
   if (scentVariant) {
@@ -299,13 +299,13 @@ type RitualShopItem = {
 const ritualShop: RitualShopItem[] = [
   {
     id: "diffuser-only",
-    name: "Aura Diffuser",
+    name: "Satielle Diffuser",
     subtitle: "Matte Sandstone",
     price: "$40",
     compareAtPrice: "$59",
     savingsCopy: "Save 32%",
     value: "Ships with free scent",
-    image: "/AuraProduct.jpg",
+    image: "/SatielleProduct.jpg",
     badge: "Ready to ship",
     qty: 1
   },
@@ -466,7 +466,7 @@ const metaLabelClass = "text-xs sm:text-sm uppercase tracking-[0.3em] font-semib
 const sectionHeadingClass = "text-4xl lg:text-[44px] font-light leading-tight text-[var(--ink)]";
 const cardShellClass = "rounded-[24px] border border-[var(--mist)] bg-white shadow-[0_18px_48px_rgba(30,24,20,0.08)]";
 const supportPhoneNumber = "1-800-407-1910";
-const supportEmailAddress = "care@auradroplet.com";
+const supportEmailAddress = "care@satielle.com";
 const navLinks = [
   { label: 'Shop Diffuser', href: '#order-section' },
   { label: 'Reviews', href: '#reviews' },
@@ -745,7 +745,7 @@ export default function Home() {
               </div>
             </div>
 
-            <h1 className="text-xl lg:text-2xl font-light tracking-[0.15em] text-[#3A3834] text-center">AURADROPLET</h1>
+            <h1 className="text-xl lg:text-2xl font-light tracking-[0.15em] text-[#3A3834] text-center">Satielle</h1>
 
             <div className="flex items-center gap-4 flex-1 justify-end">
               <div className="hidden lg:flex items-center gap-6">
@@ -853,7 +853,7 @@ export default function Home() {
             playsInline
             onLoadedData={() => setIsVideoLoaded(true)}
           >
-            <source src="/AuraDroplet.mp4" type="video/mp4" />
+            <source src="/Satielle.mp4" type="video/mp4" />
           </video>
           {/* Subtle gradient - darker bottom half for text legibility */}
           <div
@@ -885,7 +885,7 @@ export default function Home() {
 
             {/* 3. Single Information Line */}
             <p className="text-base sm:text-lg text-white/90 mb-8 leading-relaxed">
-              <span className="font-semibold">Aura Diffuser + Free Premium Oil</span>
+              <span className="font-semibold">Satielle Diffuser + Free Premium Oil</span>
               {' '}<span className="text-white/60">·</span>{' '}
               <span className="font-bold text-xl">$40</span>
               {' '}<span className="text-white/60">·</span>{' '}
@@ -946,7 +946,7 @@ export default function Home() {
                 <div className="relative h-44 md:h-96 rounded-[20px] md:rounded-[28px] overflow-hidden border border-[#ede0d4]">
                   <Image
                     src="/AutumnOffer.jpg"
-                    alt="Aura Diffuser and fall oils"
+                    alt="Satielle Diffuser and fall oils"
                     fill
                     className="object-cover"
                     sizes="(min-width: 768px) 45vw, 100vw"
@@ -965,7 +965,7 @@ export default function Home() {
                   We&apos;d like to help you discover a scent for autumn.
                 </h3>
                 <p className="text-sm md:text-base text-[#F6EDE3]/80">
-                  Enjoy a free scent with your <strong>Aura Diffuser</strong> purchase.
+                  Enjoy a free scent with your <strong>Satielle Diffuser</strong> purchase.
                 </p>
 
                 <div className="space-y-2 md:space-y-3 pt-1 md:pt-2">
@@ -994,7 +994,7 @@ export default function Home() {
             <p className="text-xs uppercase tracking-[0.35em] text-[#b08968] mb-3">Verified Ritualists</p>
             <h2 className="text-4xl font-light text-[#7f5539] tracking-tight">What our autumn clientele is saying</h2>
             <p className="text-sm text-[#9c6644] mt-4">
-              4.9 average across 1,200+ Aura diffuser owners. Exchanges honored within 14 days.
+              4.9 average across 1,200+ Satielle diffuser owners. Exchanges honored within 14 days.
             </p>
           </div>
 
@@ -1046,7 +1046,7 @@ export default function Home() {
                   <div>
                     <div className="flex items-center justify-between mb-4 gap-3">
                       <div>
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-[#b08968]">Aura Diffuser Owner</p>
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[#b08968]">Satielle Diffuser Owner</p>
                         <p className="text-lg text-[#7f5539] font-light">{review.name} · {review.location}</p>
                       </div>
                       <div className="flex items-center gap-2 text-[#7f5539]">
@@ -1217,7 +1217,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
-              <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">AURADROPLET</h3>
+              <h3 className="font-light text-2xl mb-4 tracking-[0.15em]">Satielle</h3>
               <p className="text-sm text-[#e6ccb2] leading-relaxed font-light mt-3">
                 Questions? Call <a href={`tel:${supportPhoneNumber}`} className="underline underline-offset-4 text-white">{supportPhoneNumber}</a> or email <a href={`mailto:${supportEmailAddress}`} className="underline underline-offset-4 text-white">{supportEmailAddress}</a>.
               </p>
@@ -1290,7 +1290,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-[#9c6644] pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-[#ddb892]">
-            <p className="font-light">&copy; 2024 AuraDroplet. All rights reserved.</p>
+            <p className="font-light">&copy; 2024 Satielle. All rights reserved.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="#" className="hover:text-[#ede0d4] transition-colors">Privacy</a>
               <a href="#" className="hover:text-[#ede0d4] transition-colors">Terms</a>
@@ -1307,7 +1307,7 @@ export default function Home() {
           <div className="mx-auto max-w-4xl rounded-2xl border border-black/10 bg-white/95 backdrop-blur-xl shadow-[0_18px_40px_rgba(0,0,0,0.25)] px-8 py-5 flex items-center gap-6">
             <div className="flex-1">
               <p className="text-sm font-semibold text-[#2F2B26] uppercase tracking-[0.3em] flex items-center gap-2">
-                Aura Diffuser
+                Satielle Diffuser
                 <span className="text-xs font-normal text-[#6B6762]">In stock — ships today</span>
               </p>
               <p className="text-xl font-light text-[#2F2B26]">{heroProduct.price} · Free premium scent automatically applies</p>

@@ -5,10 +5,10 @@
       "has": [
         {
           "type": "host",
-          "value": "www.auradroplet.com"
+          "value": "www.satielle.com"
         }
       ],
-      "destination": "https://auradroplet.com/:path*",
+      "destination": "https://satielle.com/:path*",
       "permanent": true
     }
   ],

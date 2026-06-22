@@ -44,7 +44,7 @@ export default function Shop() {
             {/* Logo */}
             <Link href="/">
               <h1 className="text-2xl font-light tracking-[0.15em] text-[#3A3834] hover:text-[#8B7355] transition-colors cursor-pointer">
-                AURA
+                Satielle
               </h1>
             </Link>
 
@@ -71,7 +71,7 @@ export default function Shop() {
       <section className="pt-24 lg:pt-32 pb-8 lg:pb-16 px-4 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8 lg:mb-12">
           <h1 className="text-3xl lg:text-6xl font-light mb-2 lg:mb-4 text-[#3A3834] tracking-tight">
-            Shop Aura
+            Shop Satielle
           </h1>
           <p className="text-sm lg:text-lg text-[#6B6762] font-light">
             Diffusers & essential oils for your ritual

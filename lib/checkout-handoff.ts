@@ -26,7 +26,7 @@ const PRODUCT_TITLES: Record<VelluraProductHandle, string> = {
 
 type StoreMap = Map<string, string>;
 type GlobalWithStore = typeof globalThis & {
-  __auraCheckoutHandoffs?: StoreMap;
+  __satielleCheckoutHandoffs?: StoreMap;
 };
 
 function ttlSeconds() {
@@ -36,8 +36,8 @@ function ttlSeconds() {
 
 function getMemoryStore(): StoreMap {
   const globalStore = globalThis as GlobalWithStore;
-  globalStore.__auraCheckoutHandoffs ??= new Map<string, string>();
-  return globalStore.__auraCheckoutHandoffs;
+  globalStore.__satielleCheckoutHandoffs ??= new Map<string, string>();
+  return globalStore.__satielleCheckoutHandoffs;
 }
 
 function kvConfig() {

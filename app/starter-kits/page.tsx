@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { starterKits } from "../data/starterKits";
 
-const checkoutUrl = "/checkout?source=auradroplet";
+const checkoutUrl = "/checkout?source=satielle";
 const needsVariantUpdate = false;
 
 export default function StarterKitsPage() {
@@ -12,7 +12,7 @@ export default function StarterKitsPage() {
     <main className="min-h-screen bg-[#FAF9F7] text-[#3A3834]">
       <header className="fixed top-0 w-full z-40 bg-[#FAF9F7]/95 backdrop-blur-md border-b border-[#E8E6E3]">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link href="/" className="text-lg tracking-[0.35em] font-light">AURADROPLET</Link>
+          <Link href="/" className="text-lg tracking-[0.35em] font-light">Satielle</Link>
           <nav className="hidden sm:flex items-center gap-8 text-xs tracking-[0.3em] uppercase text-[#6B6762]">
             <Link href="/" className="hover:text-[#3A3834]">Home</Link>
             <Link href="/starter-kits" className="text-[#3A3834]">Starter Kits</Link>
@@ -32,7 +32,7 @@ export default function StarterKitsPage() {
           <p className="text-xs uppercase tracking-[0.4em] text-[#8B7355] mb-4">Complete Ritual Bundles</p>
           <h1 className="text-4xl lg:text-6xl font-light mb-6">Best-Selling Starter Kits</h1>
           <p className="text-base lg:text-lg text-[#6B6762] font-light">
-            Choose your mood story and save 15% when you pair the Aura diffuser with a curated trio of essences.
+            Choose your mood story and save 15% when you pair the Satielle diffuser with a curated trio of essences.
           </p>
         </div>
       </section>

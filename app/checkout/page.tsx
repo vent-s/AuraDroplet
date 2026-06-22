@@ -14,7 +14,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 
-type CheckoutSource = 'auradroplet' | 'velluracare';
+type CheckoutSource = 'satielle' | 'velluracare';
 
 type CheckoutSession = {
   cartId: string;
@@ -70,24 +70,24 @@ function getDisplay(
       source: handoff.source,
       title: handoff.title,
       lineItemLabel: handoff.lineItemLabel,
-      image: '/AuraProduct.jpg',
+      image: '/SatielleProduct.jpg',
       returnUrl: handoff.returnUrl,
     };
   }
 
   const source =
-    searchParams.get('source') === 'velluracare' ? 'velluracare' : 'auradroplet';
+    searchParams.get('source') === 'velluracare' ? 'velluracare' : 'satielle';
   const title =
     source === 'velluracare'
       ? 'VelluraCare plan'
-      : 'Aura Diffuser Kit';
+      : 'Satielle Diffuser Kit';
 
   return {
     source,
     title,
     lineItemLabel:
       source === 'velluracare' ? `${title} - first month` : `${title} - kit`,
-    image: '/AuraProduct.jpg',
+    image: '/SatielleProduct.jpg',
     returnUrl: searchParams.get('return_url') || undefined,
   };
 }
@@ -533,7 +533,7 @@ function CheckoutContent() {
           {session && !stripePromise && (
             <p className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Payments are not configured. Set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-              in AuraDroplet.
+              in Satielle.
             </p>
           )}
 

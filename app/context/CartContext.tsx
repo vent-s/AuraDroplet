@@ -42,7 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('aura-cart');
+    const savedCart = localStorage.getItem('satielle-cart');
     if (savedCart) {
       try {
         setCartItems(JSON.parse(savedCart));
@@ -55,9 +55,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (cartItems.length > 0) {
-      localStorage.setItem('aura-cart', JSON.stringify(cartItems));
+      localStorage.setItem('satielle-cart', JSON.stringify(cartItems));
     } else {
-      localStorage.removeItem('aura-cart');
+      localStorage.removeItem('satielle-cart');
     }
   }, [cartItems]);
 
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCheckingOut(true);
 
     try {
-      window.location.href = '/checkout?source=auradroplet';
+      window.location.href = '/checkout?source=satielle';
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to start checkout. Please try again.');

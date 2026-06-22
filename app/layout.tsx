@@ -17,8 +17,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "AURADroplet",
-  description: "AuraDroplet storefront and shared Medusa checkout.",
+  title: "Satielle",
+  description: "Satielle storefront and shared Medusa checkout.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
