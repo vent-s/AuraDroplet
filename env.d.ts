@@ -10,6 +10,9 @@ declare namespace NodeJS {
     UPSTASH_REDIS_REST_URL?: string;
     UPSTASH_REDIS_REST_TOKEN?: string;
     SATIELLE_MEDUSA_VARIANT_ID?: string;
+    RETATRUTIDE_MEDUSA_VARIANT_ID?: string;
+    SEMAGLUTIDE_MEDUSA_VARIANT_ID?: string;
+    TIRZEPATIDE_MEDUSA_VARIANT_ID?: string;
     VELLURACARE_MEDUSA_VARIANT_ID?: string;
   }
 }

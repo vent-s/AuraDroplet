@@ -63,6 +63,21 @@ const PRODUCT_HANDLES: Record<CheckoutProductKey, string> = {
   velluracare: "semaglutide-injection",
 };
 
+function velluraVariantEnv(handle?: VelluraProductHandle): string | undefined {
+  if (handle === "retatrutide-injection") {
+    return process.env.RETATRUTIDE_MEDUSA_VARIANT_ID;
+  }
+
+  if (handle === "tirzepatide-injection") {
+    return process.env.TIRZEPATIDE_MEDUSA_VARIANT_ID;
+  }
+
+  return (
+    process.env.SEMAGLUTIDE_MEDUSA_VARIANT_ID ??
+    process.env.VELLURACARE_MEDUSA_VARIANT_ID
+  );
+}
+
 async function medusa<T>(path: string, init?: RequestInit): Promise<T> {
   if (!PUBLISHABLE_KEY) {
     throw new Error("Missing MEDUSA_PUBLISHABLE_KEY in Satielle.");
@@ -107,7 +122,7 @@ async function resolveVariantId(
   const envVariant =
     productKey === "satielle"
       ? process.env.SATIELLE_MEDUSA_VARIANT_ID
-      : process.env.VELLURACARE_MEDUSA_VARIANT_ID;
+      : velluraVariantEnv(requestedProductHandle);
 
   if (envVariant) return envVariant;
 

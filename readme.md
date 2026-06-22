@@ -33,10 +33,16 @@ UPSTASH_REDIS_REST_TOKEN=
 
 # Optional variant pins
 SATIELLE_MEDUSA_VARIANT_ID=
+RETATRUTIDE_MEDUSA_VARIANT_ID=
+SEMAGLUTIDE_MEDUSA_VARIANT_ID=
+TIRZEPATIDE_MEDUSA_VARIANT_ID=
+
+# Legacy semaglutide fallback
 VELLURACARE_MEDUSA_VARIANT_ID=
 CHECKOUT_HANDOFF_TTL_SECONDS=900
 ```
 
-The backend seed creates `satielle-diffuser-kit` at `$200`. If the Railway database
-already exists, create that product in Medusa Admin or run the seed/migration
-against the production database before turning on the Satielle checkout.
+The backend seed creates `satielle-diffuser-kit` at `$200` and the VelluraCare
+weight-management products. If the Railway database already exists, create those
+products in Medusa Admin or run the seed/migration against the production
+database before turning on the Satielle checkout.

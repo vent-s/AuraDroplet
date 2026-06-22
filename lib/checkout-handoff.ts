@@ -1,6 +1,7 @@
 import { randomBytes, timingSafeEqual } from "crypto";
 
 export type VelluraProductHandle =
+  | "retatrutide-injection"
   | "semaglutide-injection"
   | "tirzepatide-injection";
 
@@ -20,6 +21,7 @@ const DEFAULT_TTL_SECONDS = 15 * 60;
 const TOKEN_PATTERN = /^ho_[A-Za-z0-9_-]{32,}$/;
 
 const PRODUCT_TITLES: Record<VelluraProductHandle, string> = {
+  "retatrutide-injection": "Retatrutide Injection",
   "semaglutide-injection": "Semaglutide Injection",
   "tirzepatide-injection": "Tirzepatide Injection",
 };
@@ -124,9 +126,9 @@ function normalizeReturnUrl(value: unknown): string | undefined {
 }
 
 function normalizeProductHandle(value: unknown): VelluraProductHandle {
-  return value === "tirzepatide-injection"
-    ? "tirzepatide-injection"
-    : "semaglutide-injection";
+  if (value === "tirzepatide-injection") return "tirzepatide-injection";
+  if (value === "semaglutide-injection") return "semaglutide-injection";
+  return "retatrutide-injection";
 }
 
 export function handoffProductTitle(handle: VelluraProductHandle): string {
