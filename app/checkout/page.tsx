@@ -70,7 +70,7 @@ function getDisplay(
       source: handoff.source,
       title: handoff.title,
       lineItemLabel: handoff.lineItemLabel,
-      image: '/SatielleProduct.jpg',
+      image: '/sema-product.png',
       returnUrl: handoff.returnUrl,
     };
   }
@@ -87,7 +87,8 @@ function getDisplay(
     title,
     lineItemLabel:
       source === 'velluracare' ? `${title} - first month` : `${title} - kit`,
-    image: '/SatielleProduct.jpg',
+    image:
+      source === 'velluracare' ? '/sema-product.png' : '/SatielleProduct.jpg',
     returnUrl: searchParams.get('return_url') || undefined,
   };
 }
