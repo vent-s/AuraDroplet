@@ -3,6 +3,7 @@ import { Manrope, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
+import { AnalyticsTracker } from "@/lib/analytics";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body>
+        <AnalyticsTracker app="satielle" />
         <CartProvider>
           {children}
         </CartProvider>

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       lineItemLabel: `${title} - first month`,
       email: data.email,
       customerName: data.customerName,
+      posthogDistinctId: data.posthogDistinctId,
       returnUrl: data.returnUrl,
     });
   } catch (err) {

@@ -11,6 +11,7 @@ export interface CheckoutHandoff {
   variantId?: string;
   email: string;
   customerName?: string;
+  posthogDistinctId?: string;
   returnUrl?: string;
   createdAt: number;
   expiresAt: number;
@@ -152,6 +153,7 @@ export async function createCheckoutHandoff(input: {
   variantId?: unknown;
   email?: unknown;
   customerName?: unknown;
+  posthogDistinctId?: unknown;
   returnUrl?: unknown;
 }): Promise<{ token: string; handoff: CheckoutHandoff }> {
   const email = normalizeEmail(input.email);
@@ -168,6 +170,7 @@ export async function createCheckoutHandoff(input: {
     variantId: normalizeText(input.variantId),
     email,
     customerName: normalizeText(input.customerName),
+    posthogDistinctId: normalizeText(input.posthogDistinctId),
     returnUrl: normalizeReturnUrl(input.returnUrl),
     createdAt: now,
     expiresAt: now + ttl * 1000,

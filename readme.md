@@ -23,6 +23,9 @@ MEDUSA_BACKEND_URL=https://your-medusa-backend.up.railway.app
 MEDUSA_PUBLISHABLE_KEY=pk_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 CHECKOUT_HANDOFF_SECRET=use-the-same-random-secret-as-velluracare
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+NEXT_PUBLIC_POSTHOG_SESSION_REPLAY=false
 
 # Production token storage. Local development falls back to memory.
 KV_REST_API_URL=

@@ -13,6 +13,10 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
+import {
+  captureAnalyticsEvent,
+  identifyAnalyticsDistinctId,
+} from '@/lib/analytics';
 
 type CheckoutSource = 'satielle' | 'velluracare';
 
@@ -37,6 +41,7 @@ type ResolvedHandoff = {
   lineItemLabel: string;
   email: string;
   customerName?: string;
+  posthogDistinctId?: string;
   returnUrl?: string;
 };
 
@@ -95,10 +100,14 @@ function getDisplay(
 
 function PaymentForm({
   session,
+  analyticsSource,
+  analyticsTitle,
   customerName,
   onSuccess,
 }: {
   session: CheckoutSession;
+  analyticsSource: CheckoutSource;
+  analyticsTitle: string;
   customerName?: string;
   onSuccess: (orderId: string) => void;
 }) {
@@ -107,17 +116,36 @@ function PaymentForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    captureAnalyticsEvent('satielle', 'payment_info_loaded', {
+      checkout_source: analyticsSource,
+      product_title: analyticsTitle,
+      amount: session.amount,
+      currency: session.currency,
+    });
+  }, [analyticsSource, analyticsTitle, session.amount, session.currency]);
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!stripe || !elements) return;
 
     setSubmitting(true);
     setError(null);
+    captureAnalyticsEvent('satielle', 'payment_submitted', {
+      checkout_source: analyticsSource,
+      product_title: analyticsTitle,
+      amount: session.amount,
+      currency: session.currency,
+    });
 
     const addressElement = elements.getElement(AddressElement);
     const addressResult = await addressElement?.getValue();
     if (!addressResult?.complete) {
       setError('Please enter a complete shipping address.');
+      captureAnalyticsEvent('satielle', 'payment_address_incomplete', {
+        checkout_source: analyticsSource,
+        product_title: analyticsTitle,
+      });
       setSubmitting(false);
       return;
     }
@@ -145,6 +173,10 @@ function PaymentForm({
     if (!addressResponse.ok) {
       const data = (await addressResponse.json()) as { error?: string };
       setError(data.error || 'We could not save your shipping address.');
+      captureAnalyticsEvent('satielle', 'payment_address_failed', {
+        checkout_source: analyticsSource,
+        product_title: analyticsTitle,
+      });
       setSubmitting(false);
       return;
     }
@@ -157,6 +189,10 @@ function PaymentForm({
 
     if (confirmError) {
       setError(confirmError.message || 'We could not process that payment.');
+      captureAnalyticsEvent('satielle', 'payment_failed', {
+        checkout_source: analyticsSource,
+        product_title: analyticsTitle,
+      });
       setSubmitting(false);
       return;
     }
@@ -175,10 +211,20 @@ function PaymentForm({
       setError(
         completeData.error || 'Payment succeeded, but the order did not finish.',
       );
+      captureAnalyticsEvent('satielle', 'order_completion_failed', {
+        checkout_source: analyticsSource,
+        product_title: analyticsTitle,
+      });
       setSubmitting(false);
       return;
     }
 
+    captureAnalyticsEvent('satielle', 'order_completed', {
+      checkout_source: analyticsSource,
+      product_title: analyticsTitle,
+      amount: session.amount,
+      currency: session.currency,
+    });
     onSuccess(completeData.orderId);
   }
 
@@ -239,6 +285,16 @@ function CheckoutContent() {
   const [error, setError] = useState<string | null>(null);
   const requiresHandoff = display.source === 'velluracare' && !handoffToken;
 
+  useEffect(() => {
+    if (handoffToken) return;
+
+    captureAnalyticsEvent('satielle', 'checkout_loaded', {
+      checkout_source: display.source,
+      product_title: display.title,
+      handoff_present: false,
+    });
+  }, [display.source, display.title, handoffToken]);
+
   async function startCheckout(nextEmail = email) {
     if (display.source === 'velluracare' && !handoffToken) {
       setError('Return to VelluraCare and start secure checkout again.');
@@ -257,6 +313,11 @@ function CheckoutContent() {
 
     setLoading(true);
     setError(null);
+    captureAnalyticsEvent('satielle', 'checkout_session_requested', {
+      checkout_source: display.source,
+      product_title: display.title,
+      handoff_present: Boolean(handoffToken),
+    });
 
     try {
       const response = await fetch('/api/medusa-checkout', {
@@ -285,7 +346,19 @@ function CheckoutContent() {
         amount: data.amount,
         currency: data.currency,
       });
+      captureAnalyticsEvent('satielle', 'checkout_session_created', {
+        checkout_source: display.source,
+        product_title: display.title,
+        amount: data.amount,
+        currency: data.currency,
+        handoff_present: Boolean(handoffToken),
+      });
     } catch (err) {
+      captureAnalyticsEvent('satielle', 'checkout_session_failed', {
+        checkout_source: display.source,
+        product_title: display.title,
+        handoff_present: Boolean(handoffToken),
+      });
       setError(err instanceof Error ? err.message : 'Could not start checkout.');
     } finally {
       setLoading(false);
@@ -316,6 +389,12 @@ function CheckoutContent() {
         }
 
         if (!cancelled) {
+          identifyAnalyticsDistinctId('satielle', data.posthogDistinctId);
+          captureAnalyticsEvent('satielle', 'checkout_loaded', {
+            checkout_source: data.source,
+            product_title: data.title,
+            handoff_present: true,
+          });
           setHandoff(data);
           setEmail(data.email);
         }
@@ -549,6 +628,8 @@ function CheckoutContent() {
               >
                 <PaymentForm
                   session={session}
+                  analyticsSource={display.source}
+                  analyticsTitle={display.title}
                   customerName={handoff?.customerName}
                   onSuccess={setOrderId}
                 />
