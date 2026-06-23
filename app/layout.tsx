@@ -4,8 +4,6 @@ import Script from "next/script";
 import "./globals.css";
 import { CartProvider } from "./context/CartContext";
 
-const META_PIXEL_ID = "893806716354017";
-
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
@@ -21,6 +19,9 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Satielle",
   description: "Satielle storefront and shared Medusa checkout.",
+  other: {
+    "p:domain_verify": "de79e8c1bc4f1d9a23b1f2fee83764d7",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -42,30 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body>
-        <Script id="meta-pixel" strategy="afterInteractive">
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${META_PIXEL_ID}');
-            fbq('track', 'PageView');
-          `}
-        </Script>
-        <noscript>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-            alt=""
-          />
-        </noscript>
         <CartProvider>
           {children}
         </CartProvider>
