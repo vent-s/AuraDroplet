@@ -27,19 +27,31 @@ type CheckoutSession = {
   currency: string;
 };
 
+type HandoffLineItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  lineTotal: number; // integer cents
+};
+
 type CheckoutDisplay = {
-  source: CheckoutSource;
+  source: CheckoutSource | string;
   title: string;
   lineItemLabel: string;
   image: string;
+  items?: HandoffLineItem[];
+  currency?: string;
   returnUrl?: string;
 };
 
 type ResolvedHandoff = {
-  source: 'velluracare';
+  source: string;
   title: string;
   lineItemLabel: string;
-  email: string;
+  items?: HandoffLineItem[];
+  currency?: string;
+  cartTotal?: number;
+  email?: string;
   customerName?: string;
   posthogDistinctId?: string;
   returnUrl?: string;
@@ -62,8 +74,13 @@ function formatAmount(amount: number, currency: string) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency.toUpperCase(),
-    maximumFractionDigits: 0,
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
   }).format(amount);
+}
+
+function formatCents(cents: number, currency: string) {
+  return formatAmount(cents / 100, currency);
 }
 
 function getDisplay(
@@ -76,6 +93,8 @@ function getDisplay(
       title: handoff.title,
       lineItemLabel: handoff.lineItemLabel,
       image: '/sema-product.png',
+      items: handoff.items,
+      currency: handoff.currency,
       returnUrl: handoff.returnUrl,
     };
   }
@@ -106,7 +125,7 @@ function PaymentForm({
   onSuccess,
 }: {
   session: CheckoutSession;
-  analyticsSource: CheckoutSource;
+  analyticsSource: CheckoutSource | string;
   analyticsTitle: string;
   customerName?: string;
   onSuccess: (orderId: string) => void;
@@ -384,7 +403,7 @@ function CheckoutContent() {
           error?: string;
         };
 
-        if (!response.ok || !data.email) {
+        if (!response.ok || data.error || (!data.email && !data.items?.length)) {
           throw new Error(data.error || 'Checkout handoff expired.');
         }
 
@@ -396,7 +415,7 @@ function CheckoutContent() {
             handoff_present: true,
           });
           setHandoff(data);
-          setEmail(data.email);
+          setEmail(data.email ?? '');
         }
       } catch (err) {
         if (!cancelled) {
@@ -421,7 +440,7 @@ function CheckoutContent() {
       return;
     }
     startedFromHandoff.current = true;
-    void startCheckout(handoff.email);
+    void startCheckout(handoff.email ?? '');
     // startCheckout intentionally reads the resolved handoff state once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handoffToken, handoff, session]);
@@ -519,14 +538,31 @@ function CheckoutContent() {
             </div>
 
             <div className="space-y-2 border-t border-line pt-3">
-              <div className="flex items-center justify-between">
-                <span className="text-muted">{display.lineItemLabel}</span>
-                <span className="font-semibold text-ink">
-                  {session
-                    ? formatAmount(session.amount, session.currency)
-                    : 'Review'}
-                </span>
-              </div>
+              {display.items?.length ? (
+                display.items.map((item, index) => (
+                  <div
+                    key={`${item.id}-${index}`}
+                    className="flex items-center justify-between gap-3"
+                  >
+                    <span className="text-muted">
+                      {item.name}
+                      {item.quantity > 1 ? ` × ${item.quantity}` : ''}
+                    </span>
+                    <span className="font-semibold text-ink">
+                      {formatCents(item.lineTotal, display.currency ?? 'usd')}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">{display.lineItemLabel}</span>
+                  <span className="font-semibold text-ink">
+                    {session
+                      ? formatAmount(session.amount, session.currency)
+                      : 'Review'}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between border-t border-line pt-2 text-base">
                 <span className="font-semibold text-ink">Due today</span>
                 <span className="font-bold text-brand-700">

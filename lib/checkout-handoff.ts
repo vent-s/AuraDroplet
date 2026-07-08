@@ -5,11 +5,29 @@ export type VelluraProductHandle =
   | "semaglutide-injection"
   | "tirzepatide-injection";
 
+/** One line of a cart-style handoff. Amounts are integer cents. */
+export interface HandoffItem {
+  id: string;
+  sku?: string;
+  name: string;
+  quantity: number;
+  unitAmount: number;
+  lineTotal: number;
+}
+
 export interface CheckoutHandoff {
-  source: "velluracare";
-  productHandle: VelluraProductHandle;
+  source: string;
+  // Single-product (velluracare) handoffs:
+  productHandle?: VelluraProductHandle;
   variantId?: string;
-  email: string;
+  // Cart handoffs (novalife.science and other storefronts). When `items` is
+  // present the checkout charges `cartTotal` directly through Stripe instead
+  // of building a Medusa cart.
+  items?: HandoffItem[];
+  currency?: string;
+  cartTotal?: number;
+  cancelUrl?: string;
+  email?: string;
   customerName?: string;
   posthogDistinctId?: string;
   returnUrl?: string;
@@ -132,8 +150,58 @@ function normalizeProductHandle(value: unknown): VelluraProductHandle {
   return "retatrutide-injection";
 }
 
+function normalizeCents(value: unknown): number {
+  const cents = Math.round(Number(value));
+  return Number.isFinite(cents) && cents > 0 ? cents : 0;
+}
+
+function normalizeItems(value: unknown): HandoffItem[] {
+  if (!Array.isArray(value)) return [];
+
+  const items: HandoffItem[] = [];
+  for (const raw of value.slice(0, 50)) {
+    if (typeof raw !== "object" || raw === null) continue;
+    const item = raw as Record<string, unknown>;
+    const name = normalizeText(item.name);
+    const quantity = Math.min(Math.max(Math.round(Number(item.quantity)) || 0, 0), 99);
+    const unitAmount = normalizeCents(item.unitAmount);
+    const lineTotal = normalizeCents(item.lineTotal) || unitAmount * quantity;
+    if (!name || quantity < 1 || lineTotal < 1) continue;
+    items.push({
+      id: normalizeText(item.id) ?? "",
+      sku: normalizeText(item.sku),
+      name,
+      quantity,
+      unitAmount: unitAmount || Math.round(lineTotal / quantity),
+      lineTotal,
+    });
+  }
+  return items;
+}
+
+function normalizeCurrency(value: unknown): string {
+  const currency = normalizeText(value)?.toLowerCase();
+  return currency && /^[a-z]{3}$/.test(currency) ? currency : "usd";
+}
+
+function normalizeSource(value: unknown): string {
+  const source = normalizeText(value)?.toLowerCase();
+  return source && /^[a-z0-9.-]{1,64}$/.test(source) ? source : "velluracare";
+}
+
 export function handoffProductTitle(handle: VelluraProductHandle): string {
   return PRODUCT_TITLES[handle];
+}
+
+export function handoffTitle(handoff: CheckoutHandoff): string {
+  if (handoff.items?.length) {
+    const count = handoff.items.reduce((sum, item) => sum + item.quantity, 0);
+    const label = count === 1 ? "item" : "items";
+    return handoff.source === "novalife.science"
+      ? `NovaLife Science order (${count} ${label})`
+      : `${handoff.source} order (${count} ${label})`;
+  }
+  return PRODUCT_TITLES[handoff.productHandle ?? "retatrutide-injection"];
 }
 
 export function isAuthorizedHandoffRequest(request: Request): boolean {
@@ -149,32 +217,57 @@ export function isAuthorizedHandoffRequest(request: Request): boolean {
 }
 
 export async function createCheckoutHandoff(input: {
+  source?: unknown;
   productHandle?: unknown;
   variantId?: unknown;
+  items?: unknown;
+  currency?: unknown;
+  cartTotal?: unknown;
+  cancelUrl?: unknown;
   email?: unknown;
   customerName?: unknown;
   posthogDistinctId?: unknown;
   returnUrl?: unknown;
 }): Promise<{ token: string; handoff: CheckoutHandoff }> {
   const email = normalizeEmail(input.email);
-  if (!email || !email.includes("@")) {
+  const items = normalizeItems(input.items);
+
+  // Cart handoffs carry their own line items and totals; single-product
+  // (velluracare) handoffs still require an email and a known product.
+  if (!items.length && (!email || !email.includes("@"))) {
     throw new Error("A valid email is required.");
   }
 
   const now = Date.now();
   const ttl = ttlSeconds();
   const token = `ho_${randomBytes(24).toString("base64url")}`;
-  const handoff: CheckoutHandoff = {
-    source: "velluracare",
-    productHandle: normalizeProductHandle(input.productHandle),
-    variantId: normalizeText(input.variantId),
-    email,
+
+  const base = {
+    email: email && email.includes("@") ? email : undefined,
     customerName: normalizeText(input.customerName),
     posthogDistinctId: normalizeText(input.posthogDistinctId),
     returnUrl: normalizeReturnUrl(input.returnUrl),
     createdAt: now,
     expiresAt: now + ttl * 1000,
   };
+
+  const handoff: CheckoutHandoff = items.length
+    ? {
+        source: normalizeSource(input.source),
+        items,
+        currency: normalizeCurrency(input.currency),
+        cartTotal:
+          normalizeCents(input.cartTotal) ||
+          items.reduce((sum, item) => sum + item.lineTotal, 0),
+        cancelUrl: normalizeReturnUrl(input.cancelUrl),
+        ...base,
+      }
+    : {
+        source: "velluracare",
+        productHandle: normalizeProductHandle(input.productHandle),
+        variantId: normalizeText(input.variantId),
+        ...base,
+      };
 
   await setStoredValue(`${HANDOFF_PREFIX}${token}`, JSON.stringify(handoff), ttl);
   return { token, handoff };

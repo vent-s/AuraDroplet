@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { completeCheckout } from "@/lib/medusa-checkout";
+import {
+  confirmDirectPaymentSucceeded,
+  isDirectPaymentId,
+} from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +13,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing cartId." }, { status: 400 });
     }
 
-    const order = await completeCheckout(cartId);
+    // Direct cart payments have no Medusa cart to complete; verify the
+    // PaymentIntent succeeded and use it as the order reference.
+    const order = isDirectPaymentId(cartId)
+      ? await confirmDirectPaymentSucceeded(cartId)
+      : await completeCheckout(cartId);
     return NextResponse.json(order);
   } catch (err) {
     const message =

@@ -3,6 +3,10 @@ import {
   setShippingAddress,
   type ShippingAddressInput,
 } from "@/lib/medusa-checkout";
+import {
+  isDirectPaymentId,
+  setDirectPaymentShipping,
+} from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +22,11 @@ export async function POST(request: Request) {
       );
     }
 
-    await setShippingAddress(cartId, address);
+    if (isDirectPaymentId(cartId)) {
+      await setDirectPaymentShipping(cartId, address);
+    } else {
+      await setShippingAddress(cartId, address);
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message =

@@ -14,8 +14,13 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as {
+      source?: string;
       productHandle?: string;
       variantId?: string;
+      items?: unknown;
+      currency?: string;
+      cartTotal?: number;
+      cancelUrl?: string;
       email?: string;
       customerName?: string;
       posthogDistinctId?: string;

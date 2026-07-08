@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  handoffProductTitle,
-  readCheckoutHandoff,
-} from "@/lib/checkout-handoff";
+import { handoffTitle, readCheckoutHandoff } from "@/lib/checkout-handoff";
 
 export async function POST(request: Request) {
   try {
@@ -16,11 +13,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const title = handoffProductTitle(data.productHandle);
+    const title = handoffTitle(data);
     return NextResponse.json({
       source: data.source,
       title,
-      lineItemLabel: `${title} - first month`,
+      lineItemLabel: data.items?.length ? title : `${title} - first month`,
+      items: data.items,
+      currency: data.currency,
+      cartTotal: data.cartTotal,
       email: data.email,
       customerName: data.customerName,
       posthogDistinctId: data.posthogDistinctId,

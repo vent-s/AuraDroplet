@@ -4,6 +4,7 @@ import {
   readCheckoutHandoff,
 } from "@/lib/checkout-handoff";
 import { createCheckout } from "@/lib/medusa-checkout";
+import { createDirectPayment } from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
@@ -23,11 +24,25 @@ export async function POST(request: Request) {
         );
       }
 
+      // Cart handoffs (novalife.science etc.) have no Medusa products; the
+      // amount is charged directly through Stripe.
+      if (data.items?.length) {
+        const direct = await createDirectPayment(data);
+        await consumeCheckoutHandoff(handoff);
+
+        return NextResponse.json({
+          cartId: direct.paymentIntentId,
+          clientSecret: direct.clientSecret,
+          amount: direct.amount / 100,
+          currency: direct.currency,
+        });
+      }
+
       const session = await createCheckout({
         productKey: "velluracare",
         productHandle: data.productHandle,
         variantId: data.variantId,
-        email: data.email,
+        email: data.email ?? "",
       });
       await consumeCheckoutHandoff(handoff);
 
