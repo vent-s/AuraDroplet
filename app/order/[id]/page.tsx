@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CARRIERS, getAdminOrder, trackingUrl, type AdminOrder } from "@/lib/orders";
+import {
+  CARRIERS,
+  getOrderWithLiveTracking,
+  trackingUrl,
+  type AdminOrder,
+} from "@/lib/orders";
 
 export const metadata: Metadata = {
   title: "Your order · Satielle",
@@ -64,35 +69,59 @@ function Connector({ done }: { done: boolean }) {
 }
 
 function StatusCard({ order }: { order: AdminOrder }) {
-  const shipped = Boolean(order.tracking);
-  const trackUrl = order.tracking
-    ? trackingUrl(order.tracking.carrier, order.tracking.number)
+  const tracking = order.tracking;
+  const shipped = Boolean(tracking);
+  const stage = tracking?.stage;
+  const delivered = stage === "delivered";
+  const outForDelivery = stage === "out_for_delivery";
+  const exception = stage === "exception";
+  const trackUrl = tracking
+    ? trackingUrl(tracking.carrier, tracking.number)
     : undefined;
   const shipTo = [order.shipping?.city, order.shipping?.state]
     .filter(Boolean)
     .join(", ");
+
+  const headline = delivered
+    ? "Your order has been delivered"
+    : outForDelivery
+      ? "Your order is out for delivery"
+      : shipped
+        ? "Your order is on its way"
+        : "We are processing your order";
+  const badge = delivered
+    ? "Delivered"
+    : outForDelivery
+      ? "Out for delivery"
+      : shipped
+        ? "Shipped"
+        : "Processing";
+  const copy = delivered
+    ? "It has arrived — we hope you love it. The final scan from the carrier is below."
+    : outForDelivery
+      ? "It's on the truck and should arrive today. Follow the last mile with the tracking details below."
+      : shipped
+        ? "It has left our fulfillment team and is with the carrier now. Follow it with the tracking details below."
+        : "Your payment is confirmed and our team is preparing your order for shipment. This page updates as soon as it ships.";
+  const goldBadge = !shipped || outForDelivery;
 
   return (
     <div className="rounded-2xl border border-nova-border bg-white p-8 shadow-[0_24px_60px_rgba(10,47,107,0.09)] sm:p-10">
       <div className="flex flex-col items-center text-center">
         <span
           className={
-            shipped
-              ? "rounded-full bg-nova-navy px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-nova-goldLight"
-              : "rounded-full bg-nova-gold px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-nova-navyDeep"
+            goldBadge
+              ? "rounded-full bg-nova-gold px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-nova-navyDeep"
+              : "rounded-full bg-nova-navy px-4 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-nova-goldLight"
           }
         >
-          {shipped ? "Shipped" : "Processing"}
+          {badge}
         </span>
         <h1 className="mt-5 text-3xl font-extrabold leading-tight text-nova-navy sm:text-4xl">
-          {shipped
-            ? "Your order is on its way"
-            : "We are processing your order"}
+          {headline}
         </h1>
         <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-nova-inkSoft">
-          {shipped
-            ? "It has left our fulfillment team and is with the carrier now. Follow it with the tracking details below."
-            : "Your payment is confirmed and our team is preparing your order for shipment. This page updates as soon as it ships."}
+          {copy}
         </p>
       </div>
 
@@ -101,8 +130,37 @@ function StatusCard({ order }: { order: AdminOrder }) {
         <Connector done />
         <Step label="Processing" state={shipped ? "done" : "current"} />
         <Connector done={shipped} />
-        <Step label="Shipped" state={shipped ? "current" : "upcoming"} />
+        <Step
+          label="Shipped"
+          state={
+            delivered || outForDelivery
+              ? "done"
+              : shipped
+                ? "current"
+                : "upcoming"
+          }
+        />
+        <Connector done={delivered || outForDelivery} />
+        <Step
+          label="Delivered"
+          state={
+            delivered ? "done" : outForDelivery ? "current" : "upcoming"
+          }
+        />
       </div>
+
+      {tracking?.stageSummary && (
+        <p
+          className={`mx-auto mt-6 max-w-md rounded-xl px-4 py-3 text-center text-sm leading-relaxed ${
+            exception
+              ? "bg-amber-50 text-amber-800"
+              : "bg-nova-off text-nova-navySoft"
+          }`}
+        >
+          Latest from {CARRIERS[tracking.carrier].label}:{" "}
+          {tracking.stageSummary}
+        </p>
+      )}
 
       {order.tracking && (
         <div className="mt-9 rounded-xl bg-nova-navy p-6 text-center shadow-[0_18px_40px_rgba(10,47,107,0.25)]">
@@ -202,7 +260,7 @@ export default async function OrderStatusPage({
 
   if (params.id.startsWith("pi_")) {
     try {
-      order = await getAdminOrder(params.id);
+      order = await getOrderWithLiveTracking(params.id);
     } catch {
       unavailable = true;
     }

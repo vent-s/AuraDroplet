@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAdminSession } from "@/lib/admin-auth";
+import {
+  fetchLiveTracking,
+  isLiveTrackingConfigured,
+} from "@/lib/carrier-tracking";
 import { sendTrackingEmail } from "@/lib/order-email";
 import {
   CARRIERS,
@@ -8,6 +12,7 @@ import {
   isCarrierId,
   markTrackingEmailed,
   saveOrderTracking,
+  saveTrackingStage,
   trackingUrl,
   type CarrierId,
 } from "@/lib/orders";
@@ -54,6 +59,21 @@ export async function POST(
 
     await saveOrderTracking(orderId, trackingNumber, carrier);
 
+    // Validate the number against the carrier's live API when configured, and
+    // seed the status cache the customer /order page reads.
+    let trackingWarning: string | undefined;
+    if (isLiveTrackingConfigured(carrier)) {
+      try {
+        const live = await fetchLiveTracking(carrier, trackingNumber);
+        await saveTrackingStage(orderId, live, new Date().toISOString());
+        if (!live) {
+          trackingWarning = `${CARRIERS[carrier].label} doesn't recognize this number yet. That's normal within a few hours of creating a label — but double-check it for typos.`;
+        }
+      } catch (err) {
+        console.error("Carrier validation failed.", err);
+      }
+    }
+
     let emailedAt: string | undefined;
     let emailError: string | undefined;
     if (order.email) {
@@ -91,6 +111,7 @@ export async function POST(
       },
       emailSent: Boolean(emailedAt),
       emailError,
+      trackingWarning,
     });
   } catch (err) {
     const message =

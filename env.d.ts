@@ -18,6 +18,11 @@ declare namespace NodeJS {
     ORDER_NOTIFICATION_EMAIL?: string;
     ORDER_EMAIL_TEST_SECRET?: string;
     ADMIN_PASSWORD?: string;
+    UPS_CLIENT_ID?: string;
+    UPS_CLIENT_SECRET?: string;
+    USPS_CLIENT_ID?: string;
+    USPS_CLIENT_SECRET?: string;
+    NEXT_PUBLIC_SITE_URL?: string;
     SATIELLE_MEDUSA_VARIANT_ID?: string;
     RETATRUTIDE_MEDUSA_VARIANT_ID?: string;
     SEMAGLUTIDE_MEDUSA_VARIANT_ID?: string;

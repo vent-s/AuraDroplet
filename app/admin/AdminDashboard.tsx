@@ -34,6 +34,8 @@ interface OrderTracking {
   number: string;
   carrier: CarrierId;
   emailedAt?: string;
+  stage?: string;
+  stageSummary?: string;
 }
 
 interface AdminOrder {
@@ -109,6 +111,7 @@ function TrackingForm({
       order?: AdminOrder;
       emailSent?: boolean;
       emailError?: string;
+      trackingWarning?: string;
       error?: string;
     };
     setSaving(false);
@@ -118,16 +121,17 @@ function TrackingForm({
       return;
     }
 
+    const warning = data.trackingWarning ? ` ${data.trackingWarning}` : "";
     if (data.emailSent) {
       onSaved(
         data.order,
-        `Tracking saved — email sent to ${order.email}.`,
-        false,
+        `Tracking saved — email sent to ${order.email}.${warning}`,
+        Boolean(warning),
       );
     } else {
       onSaved(
         data.order,
-        `Tracking saved, but no email went out: ${data.emailError ?? "unknown reason"}`,
+        `Tracking saved, but no email went out: ${data.emailError ?? "unknown reason"}${warning}`,
         true,
       );
     }
@@ -313,6 +317,11 @@ function OrderRow({
                   {order.tracking.emailedAt
                     ? ` · customer emailed ${formatDate(Date.parse(order.tracking.emailedAt) / 1000)}`
                     : ""}
+                </p>
+              )}
+              {order.tracking?.stageSummary && (
+                <p className="mt-1 text-sm text-nova-navySoft">
+                  Carrier status: {order.tracking.stageSummary}
                 </p>
               )}
             </div>

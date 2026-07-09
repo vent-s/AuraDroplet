@@ -3,6 +3,12 @@
 // shipping address, and item metadata, and the fulfillment tracking number is
 // stored back onto the PaymentIntent's metadata so no separate store exists.
 
+import {
+  fetchLiveTracking,
+  isLiveTrackingConfigured,
+  type LiveTrackingStatus,
+  type TrackingStage,
+} from "./carrier-tracking";
 import type { CompletedOrderItem } from "./stripe-direct";
 
 export type CarrierId = "usps" | "ups" | "fedex" | "dhl" | "other";
@@ -62,6 +68,10 @@ export interface AdminOrderTracking {
   number: string;
   carrier: CarrierId;
   emailedAt?: string;
+  stage?: TrackingStage;
+  stageSummary?: string;
+  stageAt?: string;
+  checkedAt?: string;
 }
 
 export interface AdminOrder {
@@ -192,6 +202,15 @@ function toAdminOrder(intent: StripePaymentIntent): AdminOrder | null {
         }
       : undefined;
 
+  const STAGES: TrackingStage[] = [
+    "label_created",
+    "in_transit",
+    "out_for_delivery",
+    "delivered",
+    "exception",
+  ];
+  const cachedStage = STAGES.find((s) => s === metadata.tracking_stage);
+
   const trackingNumber = metadata.tracking_number?.trim();
   const tracking = trackingNumber
     ? {
@@ -200,6 +219,10 @@ function toAdminOrder(intent: StripePaymentIntent): AdminOrder | null {
           ? metadata.tracking_carrier
           : detectCarrier(trackingNumber),
         emailedAt: metadata.tracking_emailed_at || undefined,
+        stage: cachedStage,
+        stageSummary: metadata.tracking_stage_summary || undefined,
+        stageAt: metadata.tracking_stage_at || undefined,
+        checkedAt: metadata.tracking_checked_at || undefined,
       }
     : undefined;
 
@@ -244,6 +267,12 @@ export async function saveOrderTracking(
     body: {
       "metadata[tracking_number]": trackingNumber,
       "metadata[tracking_carrier]": carrier,
+      // An empty value deletes the key, clearing any stale live-status cache
+      // from a previously saved tracking number.
+      "metadata[tracking_stage]": "",
+      "metadata[tracking_stage_summary]": "",
+      "metadata[tracking_stage_at]": "",
+      "metadata[tracking_checked_at]": "",
     },
   });
 }
@@ -255,4 +284,66 @@ export async function markTrackingEmailed(
   await stripe(`/payment_intents/${encodeURIComponent(id)}`, {
     body: { "metadata[tracking_emailed_at]": emailedAt },
   });
+}
+
+export async function saveTrackingStage(
+  id: string,
+  status: LiveTrackingStatus | null,
+  checkedAt: string,
+): Promise<void> {
+  await stripe(`/payment_intents/${encodeURIComponent(id)}`, {
+    body: {
+      "metadata[tracking_checked_at]": checkedAt,
+      ...(status
+        ? {
+            "metadata[tracking_stage]": status.stage,
+            "metadata[tracking_stage_summary]": status.summary.slice(0, 480),
+            "metadata[tracking_stage_at]": status.eventAt ?? "",
+          }
+        : {}),
+    },
+  });
+}
+
+const LIVE_REFRESH_MS = 15 * 60 * 1000;
+
+/**
+ * Loads an order and, at most once per 15 minutes, refreshes its live carrier
+ * status into the PaymentIntent's metadata. Carrier failures fall back to the
+ * cached stage so the customer page never breaks because a carrier is down.
+ */
+export async function getOrderWithLiveTracking(
+  id: string,
+): Promise<AdminOrder | null> {
+  const order = await getAdminOrder(id);
+  const tracking = order?.tracking;
+  if (!order || !tracking) return order;
+  if (tracking.stage === "delivered") return order;
+  if (!isLiveTrackingConfigured(tracking.carrier)) return order;
+  if (
+    tracking.checkedAt &&
+    Date.now() - Date.parse(tracking.checkedAt) < LIVE_REFRESH_MS
+  ) {
+    return order;
+  }
+
+  const checkedAt = new Date().toISOString();
+  try {
+    const live = await fetchLiveTracking(tracking.carrier, tracking.number);
+    await saveTrackingStage(id, live, checkedAt);
+    if (live) {
+      order.tracking = {
+        ...tracking,
+        stage: live.stage,
+        stageSummary: live.summary,
+        stageAt: live.eventAt,
+        checkedAt,
+      };
+    } else {
+      order.tracking = { ...tracking, checkedAt };
+    }
+  } catch (err) {
+    console.error("Live tracking refresh failed.", err);
+  }
+  return order;
 }
