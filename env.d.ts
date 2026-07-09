@@ -12,6 +12,12 @@ declare namespace NodeJS {
     KV_REST_API_TOKEN?: string;
     UPSTASH_REDIS_REST_URL?: string;
     UPSTASH_REDIS_REST_TOKEN?: string;
+    STRIPE_SECRET_KEY?: string;
+    RESEND_API_KEY?: string;
+    ORDER_EMAIL_FROM?: string;
+    ORDER_NOTIFICATION_EMAIL?: string;
+    ORDER_EMAIL_TEST_SECRET?: string;
+    ADMIN_PASSWORD?: string;
     SATIELLE_MEDUSA_VARIANT_ID?: string;
     RETATRUTIDE_MEDUSA_VARIANT_ID?: string;
     SEMAGLUTIDE_MEDUSA_VARIANT_ID?: string;

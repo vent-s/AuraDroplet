@@ -6,13 +6,15 @@ import {
 import {
   isDirectPaymentId,
   setDirectPaymentShipping,
+  setShippingForClientSecret,
 } from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
-    const { cartId, address } = (await request.json()) as {
+    const { cartId, address, clientSecret } = (await request.json()) as {
       cartId?: string;
       address?: ShippingAddressInput;
+      clientSecret?: string;
     };
 
     if (
@@ -35,6 +37,15 @@ export async function POST(request: Request) {
       await setDirectPaymentShipping(cartId, address);
     } else {
       await setShippingAddress(cartId, address);
+      // Mirror the address onto the Stripe PaymentIntent so the admin order
+      // page can read it from Stripe. A mirror failure must not block checkout.
+      if (clientSecret) {
+        try {
+          await setShippingForClientSecret(clientSecret, address);
+        } catch (err) {
+          console.error("Could not mirror shipping to Stripe.", err);
+        }
+      }
     }
     return NextResponse.json({ ok: true });
   } catch (err) {

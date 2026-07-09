@@ -166,6 +166,21 @@ export async function setDirectPaymentShipping(
   await stripe(`/payment_intents/${paymentIntentId}`, params);
 }
 
+/**
+ * Mirrors a Medusa cart's shipping address onto its Stripe PaymentIntent so
+ * the admin order list can read every address from Stripe alone.
+ */
+export async function setShippingForClientSecret(
+  clientSecret: string,
+  address: Parameters<typeof setDirectPaymentShipping>[1],
+): Promise<void> {
+  const paymentIntentId = paymentIntentIdFromClientSecret(clientSecret);
+  if (!paymentIntentId) {
+    throw new Error("Stripe did not return a valid PaymentIntent client secret.");
+  }
+  await setDirectPaymentShipping(paymentIntentId, address);
+}
+
 export async function confirmDirectPaymentSucceeded(
   paymentIntentId: string,
 ): Promise<CompletedOrder> {

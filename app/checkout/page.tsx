@@ -340,7 +340,11 @@ function PaymentForm({
     const addressResponse = await fetch('/api/medusa-checkout/address', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ cartId: session.cartId, address }),
+      body: JSON.stringify({
+        cartId: session.cartId,
+        address,
+        clientSecret: session.clientSecret,
+      }),
     });
 
     if (!addressResponse.ok) {
