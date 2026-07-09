@@ -69,6 +69,8 @@ const primaryButtonClass =
   'inline-flex items-center justify-center gap-2 rounded-full bg-ink px-8 py-3.5 text-base font-semibold text-white transition active:scale-[0.98] hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
 const secondaryButtonClass =
   'inline-flex items-center justify-center gap-2 rounded-full border border-ink/20 bg-transparent px-8 py-3.5 text-base font-semibold text-ink transition active:scale-[0.98] hover:border-ink/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700';
+const novaButtonClass =
+  'inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-nova-goldLight to-nova-gold px-8 py-4 text-sm font-extrabold uppercase tracking-wide text-nova-navyDeep shadow-[0_14px_30px_rgba(212,167,44,0.34)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(212,167,44,0.42)] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:shadow-none';
 
 function formatAmount(amount: number, currency: string) {
   return new Intl.NumberFormat('en-US', {
@@ -122,12 +124,14 @@ function PaymentForm({
   analyticsSource,
   analyticsTitle,
   customerName,
+  isNovaLife,
   onSuccess,
 }: {
   session: CheckoutSession;
   analyticsSource: CheckoutSource | string;
   analyticsTitle: string;
   customerName?: string;
+  isNovaLife: boolean;
   onSuccess: (orderId: string) => void;
 }) {
   const stripe = useStripe();
@@ -269,7 +273,7 @@ function PaymentForm({
       )}
       <button
         type="submit"
-        className={`${primaryButtonClass} w-full`}
+        className={`${isNovaLife ? novaButtonClass : primaryButtonClass} w-full`}
         disabled={!stripe || submitting}
       >
         {submitting
@@ -277,7 +281,10 @@ function PaymentForm({
           : `Pay ${formatAmount(session.amount, session.currency)}`}
       </button>
       <p className="flex items-start gap-2 text-sm text-muted">
-        <Lock size={15} className="mt-0.5 shrink-0 text-brand-500" />
+        <Lock
+          size={15}
+          className={`mt-0.5 shrink-0 ${isNovaLife ? 'text-nova-gold' : 'text-brand-500'}`}
+        />
         Card details are encrypted and handled by Stripe. They never touch our
         servers.
       </p>
@@ -293,6 +300,7 @@ function CheckoutContent() {
     () => getDisplay(new URLSearchParams(searchParams.toString()), handoff),
     [searchParams, handoff],
   );
+  const isNovaLife = display.source === 'novalife.science';
   const startedFromHandoff = useRef(false);
 
   const [email, setEmail] = useState('');
@@ -447,36 +455,73 @@ function CheckoutContent() {
 
   if (orderId) {
     return (
-      <main className={`min-h-screen bg-cream py-12 sm:py-16 ${shellClass}`}>
+      <main
+        className={`min-h-screen ${isNovaLife ? 'bg-nova-off' : 'bg-cream'} py-12 sm:py-16 ${shellClass}`}
+      >
         <div className="mx-auto w-full max-w-xl px-5 sm:px-6">
-          <div className="rounded-lg border border-brand-200 bg-white p-8 text-center sm:p-10">
-            <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-50 text-brand-600">
+          <div
+            className={
+              isNovaLife
+                ? 'rounded-2xl border border-nova-border bg-white p-8 text-center shadow-[0_24px_60px_rgba(10,47,107,0.09)] sm:p-10'
+                : 'rounded-lg border border-brand-200 bg-white p-8 text-center sm:p-10'
+            }
+          >
+            <span
+              className={
+                isNovaLife
+                  ? 'mx-auto grid h-16 w-16 place-items-center rounded-full bg-nova-navy text-white shadow-[0_14px_26px_rgba(10,47,107,0.22)]'
+                  : 'mx-auto grid h-16 w-16 place-items-center rounded-full bg-brand-50 text-brand-600'
+              }
+            >
               <CheckCircle2 size={32} />
             </span>
             <h1
-              className={`mt-5 text-3xl font-medium text-ink ${serifClass}`}
+              className={
+                isNovaLife
+                  ? `mt-5 text-3xl font-extrabold text-nova-navy ${shellClass}`
+                  : `mt-5 text-3xl font-medium text-ink ${serifClass}`
+              }
             >
               You&apos;re all set.
             </h1>
-            <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-muted">
+            <p
+              className={`mx-auto mt-3 max-w-md text-base leading-relaxed ${isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}`}
+            >
               Your order is in. We&apos;ll follow up with next steps.
             </p>
-            <ol className="mx-auto mt-6 max-w-sm space-y-3 text-left text-base text-ink">
+            <ol
+              className={`mx-auto mt-6 max-w-sm space-y-3 text-left text-base ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
+            >
               <li className="flex gap-3">
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
+                <span
+                  className={
+                    isNovaLife
+                      ? 'grid h-6 w-6 shrink-0 place-items-center rounded-full bg-nova-gold text-sm font-bold text-nova-navyDeep'
+                      : 'grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white'
+                  }
+                >
                   1
                 </span>
                 Your payment was confirmed.
               </li>
               <li className="flex gap-3">
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white">
+                <span
+                  className={
+                    isNovaLife
+                      ? 'grid h-6 w-6 shrink-0 place-items-center rounded-full bg-nova-gold text-sm font-bold text-nova-navyDeep'
+                      : 'grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white'
+                  }
+                >
                   2
                 </span>
                 Medusa created order {orderId}.
               </li>
             </ol>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link href="/" className={primaryButtonClass}>
+              <Link
+                href="/"
+                className={isNovaLife ? novaButtonClass : primaryButtonClass}
+              >
                 Continue
               </Link>
               {display.returnUrl && (
@@ -492,25 +537,71 @@ function CheckoutContent() {
   }
 
   return (
-    <main className={`min-h-screen bg-cream py-12 sm:py-16 ${shellClass}`}>
+    <main
+      className={`min-h-screen ${isNovaLife ? 'bg-nova-off' : 'bg-cream'} py-12 sm:py-16 ${shellClass}`}
+    >
       <div className="mx-auto w-full max-w-xl px-5 sm:px-6">
         <div className="text-center">
+          {isNovaLife && (
+            <span className="mb-4 inline-flex items-center gap-2.5 text-xs font-extrabold uppercase tracking-[0.3em] text-nova-gold">
+              <span className="inline-block h-px w-6 bg-nova-gold" />
+              Secure Payment
+            </span>
+          )}
           <h1
-            className={`text-4xl font-medium tracking-tight text-ink sm:text-5xl ${serifClass}`}
+            className={
+              isNovaLife
+                ? `text-4xl font-extrabold tracking-tight text-nova-navy sm:text-5xl ${shellClass}`
+                : `text-4xl font-medium tracking-tight text-ink sm:text-5xl ${serifClass}`
+            }
           >
             Secure checkout
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-muted">
+          <p
+            className={`mt-4 text-lg leading-relaxed ${isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}`}
+          >
             Complete your order.
           </p>
         </div>
 
-        <div className="mt-10 rounded-lg border border-line bg-white p-6 shadow-sm sm:p-10">
-          <h2 className={`text-2xl font-medium text-ink ${serifClass}`}>
-            Complete your order
-          </h2>
+        <div
+          className={
+            isNovaLife
+              ? 'relative mt-10 overflow-hidden rounded-2xl border border-nova-border bg-white p-6 shadow-[0_24px_60px_rgba(10,47,107,0.09)] sm:p-10'
+              : 'mt-10 rounded-lg border border-line bg-white p-6 shadow-sm sm:p-10'
+          }
+        >
+          {isNovaLife && (
+            <span className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-nova-goldLight to-nova-gold" />
+          )}
 
-          <div className="mt-5 space-y-4 rounded-lg bg-cream p-4 text-sm">
+          {isNovaLife ? (
+            <div className="flex items-start gap-4">
+              <span className="grid h-[54px] w-[54px] shrink-0 place-items-center rounded-full bg-nova-navy text-white shadow-[0_14px_26px_rgba(10,47,107,0.22)]">
+                <Lock size={18} />
+              </span>
+              <div>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-nova-gold">
+                  Encrypted checkout
+                </p>
+                <h2 className="text-[22px] font-extrabold text-nova-navy">
+                  Review your order
+                </h2>
+              </div>
+            </div>
+          ) : (
+            <h2 className={`text-2xl font-medium text-ink ${serifClass}`}>
+              Complete your order
+            </h2>
+          )}
+
+          <div
+            className={
+              isNovaLife
+                ? 'mt-5 space-y-4 rounded-lg bg-nova-off p-4 text-sm'
+                : 'mt-5 space-y-4 rounded-lg bg-cream p-4 text-sm'
+            }
+          >
             <div className="flex items-center gap-4 text-left">
               <span className="relative block h-20 w-16 shrink-0 overflow-hidden rounded-md shadow-sm">
                 <Image
@@ -523,13 +614,19 @@ function CheckoutContent() {
                 />
               </span>
               <span>
-                <span className="block text-xs font-bold uppercase tracking-wider text-brand-600">
+                <span
+                  className={`block text-xs font-bold uppercase tracking-wider ${isNovaLife ? 'text-nova-gold' : 'text-brand-600'}`}
+                >
                   Matched to your order
                 </span>
-                <span className="mt-1 block text-lg font-semibold text-ink">
+                <span
+                  className={`mt-1 block text-lg font-semibold ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
+                >
                   {display.title}
                 </span>
-                <span className="block text-sm text-muted">
+                <span
+                  className={`block text-sm ${isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}`}
+                >
                   {session
                     ? formatAmount(session.amount, session.currency)
                     : 'Final total from Medusa'}
@@ -537,35 +634,51 @@ function CheckoutContent() {
               </span>
             </div>
 
-            <div className="space-y-2 border-t border-line pt-3">
+            <div
+              className={`space-y-2 border-t pt-3 ${isNovaLife ? 'border-nova-border' : 'border-line'}`}
+            >
               {display.items?.length ? (
                 display.items.map((item, index) => (
                   <div
                     key={`${item.id}-${index}`}
                     className="flex items-center justify-between gap-3"
                   >
-                    <span className="text-muted">
+                    <span className={isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}>
                       {item.name}
                       {item.quantity > 1 ? ` × ${item.quantity}` : ''}
                     </span>
-                    <span className="font-semibold text-ink">
+                    <span
+                      className={`font-semibold ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
+                    >
                       {formatCents(item.lineTotal, display.currency ?? 'usd')}
                     </span>
                   </div>
                 ))
               ) : (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">{display.lineItemLabel}</span>
-                  <span className="font-semibold text-ink">
+                  <span className={isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}>
+                    {display.lineItemLabel}
+                  </span>
+                  <span
+                    className={`font-semibold ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
+                  >
                     {session
                       ? formatAmount(session.amount, session.currency)
                       : 'Review'}
                   </span>
                 </div>
               )}
-              <div className="flex items-center justify-between border-t border-line pt-2 text-base">
-                <span className="font-semibold text-ink">Due today</span>
-                <span className="font-bold text-brand-700">
+              <div
+                className={`flex items-center justify-between border-t pt-2 text-base ${isNovaLife ? 'border-nova-border' : 'border-line'}`}
+              >
+                <span
+                  className={`font-semibold ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
+                >
+                  Due today
+                </span>
+                <span
+                  className={`font-bold ${isNovaLife ? 'text-nova-gold' : 'text-brand-700'}`}
+                >
                   {session
                     ? formatAmount(session.amount, session.currency)
                     : 'After setup'}
@@ -586,7 +699,13 @@ function CheckoutContent() {
           {!session && handoffToken && (
             <div className="mt-6 space-y-4">
               {(handoffLoading || loading) && (
-                <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800">
+                <p
+                  className={
+                    isNovaLife
+                      ? 'rounded-lg bg-nova-off px-4 py-3 text-sm font-semibold text-nova-navy'
+                      : 'rounded-lg bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-800'
+                  }
+                >
                   Setting up checkout...
                 </p>
               )}
@@ -612,7 +731,7 @@ function CheckoutContent() {
               <div>
                 <label
                   htmlFor="checkoutEmail"
-                  className="mb-1.5 block text-base font-semibold text-ink"
+                  className={`mb-1.5 block text-base font-semibold ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
                 >
                   Email
                 </label>
@@ -622,7 +741,11 @@ function CheckoutContent() {
                   autoComplete="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  className={inputClass}
+                  className={
+                    isNovaLife
+                      ? 'w-full rounded-lg border border-nova-border bg-white px-4 py-3.5 text-base text-nova-navy placeholder:text-nova-inkSoft/70 focus-visible:outline-2 focus-visible:outline-nova-gold'
+                      : inputClass
+                  }
                   placeholder="you@example.com"
                 />
               </div>
@@ -636,7 +759,7 @@ function CheckoutContent() {
               )}
               <button
                 type="submit"
-                className={`${primaryButtonClass} w-full`}
+                className={`${isNovaLife ? novaButtonClass : primaryButtonClass} w-full`}
                 disabled={loading}
                 >
                 {loading
@@ -667,14 +790,20 @@ function CheckoutContent() {
                   analyticsSource={display.source}
                   analyticsTitle={display.title}
                   customerName={handoff?.customerName}
+                  isNovaLife={isNovaLife}
                   onSuccess={setOrderId}
                 />
               </Elements>
             </div>
           )}
 
-          <p className="mt-5 flex items-start gap-2 text-sm text-muted">
-            <ShieldCheck size={15} className="mt-0.5 shrink-0 text-brand-500" />
+          <p
+            className={`mt-5 flex items-start gap-2 text-sm ${isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}`}
+          >
+            <ShieldCheck
+              size={15}
+              className={`mt-0.5 shrink-0 ${isNovaLife ? 'text-nova-gold' : 'text-brand-500'}`}
+            />
             Your payment is processed through Stripe&apos;s encrypted form.
           </p>
         </div>
