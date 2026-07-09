@@ -28,7 +28,9 @@ STRIPE_SECRET_KEY=sk_...
 # ORDER_EMAIL_FROM must be a verified Resend sender/domain.
 RESEND_API_KEY=re_...
 ORDER_EMAIL_FROM=orders@your-verified-domain.com
-ORDER_NOTIFICATION_EMAIL=taladiggy05@gmail.com
+ORDER_NOTIFICATION_EMAIL=talaliggy15@gmail.com
+# Required to run the protected Resend-only test endpoint.
+ORDER_EMAIL_TEST_SECRET=generate-a-long-random-value
 CHECKOUT_HANDOFF_SECRET=use-the-same-random-secret-as-velluracare
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
@@ -56,3 +58,14 @@ The backend seed creates `satielle-diffuser-kit` at `$200` and the VelluraCare
 weight-management products. If the Railway database already exists, create those
 products in Medusa Admin or run the seed/migration against the production
 database before turning on the Satielle checkout.
+
+## Resend Test
+
+After setting `RESEND_API_KEY`, `ORDER_EMAIL_FROM`,
+`ORDER_NOTIFICATION_EMAIL`, and `ORDER_EMAIL_TEST_SECRET` in the deployment,
+send a test order notification without creating a payment:
+
+```bash
+curl -X POST https://your-domain.com/api/order-email-test \
+  -H "Authorization: Bearer $ORDER_EMAIL_TEST_SECRET"
+```

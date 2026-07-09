@@ -1,6 +1,6 @@
 import type { CompletedOrder, CompletedOrderItem } from "./stripe-direct";
 
-const DEFAULT_NOTIFICATION_EMAIL = "taladiggy05@gmail.com";
+const DEFAULT_NOTIFICATION_EMAIL = "talaliggy15@gmail.com";
 
 function formatMoney(amount: number, currency: string): string {
   return new Intl.NumberFormat("en-US", {
@@ -45,10 +45,9 @@ async function sendEmail({
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.ORDER_EMAIL_FROM;
   if (!apiKey || !from) {
-    console.error(
-      "Order email was not sent: configure RESEND_API_KEY and ORDER_EMAIL_FROM.",
+    throw new Error(
+      "Order email is not configured. Set RESEND_API_KEY and ORDER_EMAIL_FROM.",
     );
-    return;
   }
 
   const response = await fetch("https://api.resend.com/emails", {
