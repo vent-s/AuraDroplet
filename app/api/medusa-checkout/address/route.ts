@@ -15,7 +15,16 @@ export async function POST(request: Request) {
       address?: ShippingAddressInput;
     };
 
-    if (!cartId || !address?.address_1 || !address?.postal_code) {
+    if (
+      !cartId ||
+      !address?.first_name ||
+      !address.last_name ||
+      !address.address_1 ||
+      !address.city ||
+      !address.province ||
+      !address.postal_code ||
+      address.country_code?.toLowerCase() !== "us"
+    ) {
       return NextResponse.json(
         { error: "Missing cartId or a complete shipping address." },
         { status: 400 },

@@ -6,7 +6,6 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import {
-  AddressElement,
   Elements,
   PaymentElement,
   useElements,
@@ -119,6 +118,152 @@ function getDisplay(
   };
 }
 
+function ShippingAddressFields({
+  customerName,
+  isNovaLife,
+}: {
+  customerName?: string;
+  isNovaLife: boolean;
+}) {
+  const labelClass = `mb-1.5 block text-sm font-semibold ${
+    isNovaLife ? 'text-nova-navy' : 'text-ink'
+  }`;
+  const fieldClass = isNovaLife
+    ? 'w-full rounded-lg border border-nova-border bg-white px-4 py-3.5 text-base text-nova-navy focus-visible:outline-2 focus-visible:outline-nova-gold'
+    : inputClass;
+
+  return (
+    <fieldset className="space-y-4">
+      <legend
+        className={`text-base font-semibold ${
+          isNovaLife ? 'text-nova-navy' : 'text-ink'
+        }`}
+      >
+        Shipping address
+      </legend>
+
+      <div>
+        <label htmlFor="shippingName" className={labelClass}>
+          Full name
+        </label>
+        <input
+          id="shippingName"
+          name="shippingName"
+          type="text"
+          autoComplete="name"
+          defaultValue={customerName}
+          className={fieldClass}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="shippingAddress1" className={labelClass}>
+          Address
+        </label>
+        <input
+          id="shippingAddress1"
+          name="shippingAddress1"
+          type="text"
+          autoComplete="shipping address-line1"
+          className={fieldClass}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="shippingAddress2" className={labelClass}>
+          Apartment, suite, etc. <span className="font-normal">(optional)</span>
+        </label>
+        <input
+          id="shippingAddress2"
+          name="shippingAddress2"
+          type="text"
+          autoComplete="shipping address-line2"
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="shippingCity" className={labelClass}>
+          City
+        </label>
+        <input
+          id="shippingCity"
+          name="shippingCity"
+          type="text"
+          autoComplete="shipping address-level2"
+          className={fieldClass}
+          required
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="shippingState" className={labelClass}>
+            State
+          </label>
+          <input
+            id="shippingState"
+            name="shippingState"
+            type="text"
+            autoComplete="shipping address-level1"
+            maxLength={2}
+            pattern="[A-Za-z]{2}"
+            title="Enter a two-letter US state code."
+            className={`${fieldClass} uppercase`}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="shippingPostalCode" className={labelClass}>
+            ZIP code
+          </label>
+          <input
+            id="shippingPostalCode"
+            name="shippingPostalCode"
+            type="text"
+            inputMode="numeric"
+            autoComplete="shipping postal-code"
+            pattern="[0-9]{5}(-[0-9]{4})?"
+            title="Enter a five-digit ZIP code, optionally followed by four digits."
+            className={fieldClass}
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="shippingPhone" className={labelClass}>
+          Phone <span className="font-normal">(optional)</span>
+        </label>
+        <input
+          id="shippingPhone"
+          name="shippingPhone"
+          type="tel"
+          autoComplete="shipping tel"
+          className={fieldClass}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="shippingCountry" className={labelClass}>
+          Country
+        </label>
+        <input
+          id="shippingCountry"
+          type="text"
+          value="United States"
+          className={`${fieldClass} ${
+            isNovaLife ? 'bg-nova-off text-nova-inkSoft' : 'bg-cream'
+          }`}
+          readOnly
+        />
+      </div>
+    </fieldset>
+  );
+}
+
 function PaymentForm({
   session,
   analyticsSource,
@@ -148,7 +293,7 @@ function PaymentForm({
     });
   }, [analyticsSource, analyticsTitle, session.amount, session.currency]);
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!stripe || !elements) return;
 
@@ -161,30 +306,22 @@ function PaymentForm({
       currency: session.currency,
     });
 
-    const addressElement = elements.getElement(AddressElement);
-    const addressResult = await addressElement?.getValue();
-    if (!addressResult?.complete) {
-      setError('Please enter a complete shipping address.');
-      captureAnalyticsEvent('satielle', 'payment_address_incomplete', {
-        checkout_source: analyticsSource,
-        product_title: analyticsTitle,
-      });
-      setSubmitting(false);
-      return;
-    }
-
-    const value = addressResult.value;
-    const [firstName, ...lastNameParts] = value.name.trim().split(/\s+/);
+    const formData = new FormData(event.currentTarget);
+    const fullName = String(formData.get('shippingName') || '').trim();
+    const [firstName, ...lastNameParts] = fullName.split(/\s+/);
     const address = {
-      first_name: firstName || value.name,
-      last_name: lastNameParts.join(' ') || firstName || value.name,
-      address_1: value.address.line1,
-      address_2: value.address.line2 || undefined,
-      city: value.address.city,
-      province: value.address.state,
-      postal_code: value.address.postal_code,
-      country_code: value.address.country.toLowerCase(),
-      phone: value.phone,
+      first_name: firstName,
+      last_name: lastNameParts.join(' ') || firstName,
+      address_1: String(formData.get('shippingAddress1') || '').trim(),
+      address_2:
+        String(formData.get('shippingAddress2') || '').trim() || undefined,
+      city: String(formData.get('shippingCity') || '').trim(),
+      province: String(formData.get('shippingState') || '')
+        .trim()
+        .toUpperCase(),
+      postal_code: String(formData.get('shippingPostalCode') || '').trim(),
+      country_code: 'us',
+      phone: String(formData.get('shippingPhone') || '').trim() || undefined,
     };
 
     const addressResponse = await fetch('/api/medusa-checkout/address', {
@@ -253,14 +390,9 @@ function PaymentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <AddressElement
-        options={{
-          mode: 'shipping',
-          allowedCountries: ['US'],
-          fields: { phone: 'always' },
-          validation: { phone: { required: 'auto' } },
-          defaultValues: customerName ? { name: customerName } : undefined,
-        }}
+      <ShippingAddressFields
+        customerName={customerName}
+        isNovaLife={isNovaLife}
       />
       <PaymentElement />
       {error && (
