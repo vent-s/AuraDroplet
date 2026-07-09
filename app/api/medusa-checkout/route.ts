@@ -4,7 +4,10 @@ import {
   readCheckoutHandoff,
 } from "@/lib/checkout-handoff";
 import { createCheckout } from "@/lib/medusa-checkout";
-import { createDirectPayment } from "@/lib/stripe-direct";
+import {
+  createDirectPayment,
+  setStripeReceiptEmail,
+} from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
@@ -46,6 +49,7 @@ export async function POST(request: Request) {
         variantId: data.variantId,
         email: data.email ?? "",
       });
+      await setStripeReceiptEmail(session.clientSecret, data.email ?? "");
       await consumeCheckoutHandoff(handoff);
 
       return NextResponse.json(session);
@@ -100,6 +104,7 @@ export async function POST(request: Request) {
       variantId,
       email,
     });
+    await setStripeReceiptEmail(session.clientSecret, email);
 
     return NextResponse.json(session);
   } catch (err) {

@@ -1,4 +1,5 @@
 import type { VelluraProductHandle } from "./checkout-handoff";
+import type { CompletedOrder, CompletedOrderItem } from "./stripe-direct";
 
 const BACKEND_URL = (
   process.env.MEDUSA_BACKEND_URL ?? "http://localhost:9000"
@@ -11,6 +12,15 @@ interface MedusaCart {
   id: string;
   total: number;
   currency_code: string;
+  email?: string | null;
+  items?: Array<{
+    title?: string | null;
+    product_title?: string | null;
+    variant_title?: string | null;
+    quantity?: number | null;
+    total?: number | null;
+    subtotal?: number | null;
+  }>;
 }
 
 interface MedusaProduct {
@@ -231,9 +241,12 @@ export async function setShippingAddress(
   });
 }
 
-export async function completeCheckout(
-  cartId: string,
-): Promise<{ orderId: string }> {
+export async function completeCheckout(cartId: string): Promise<CompletedOrder> {
+  // Read the cart while it is still available so the post-payment order email
+  // can use Medusa's server-side totals and line items.
+  const cartRequest = medusa<{ cart: MedusaCart }>(`/store/carts/${cartId}`).catch(
+    () => null,
+  );
   const result = await medusa<CompleteResponse>(
     `/store/carts/${cartId}/complete`,
     { method: "POST" },
@@ -241,5 +254,21 @@ export async function completeCheckout(
   if (result.type !== "order" || !result.order) {
     throw new Error(result.error?.message ?? "Could not complete the order.");
   }
-  return { orderId: result.order.id };
+
+  const cart = (await cartRequest)?.cart;
+  const items: CompletedOrderItem[] =
+    cart?.items?.map((item) => ({
+      name:
+        item.product_title ?? item.title ?? item.variant_title ?? "Order item",
+      quantity: item.quantity ?? 1,
+      lineTotal: item.total ?? item.subtotal ?? undefined,
+    })) ?? [];
+
+  return {
+    orderId: result.order.id,
+    customerEmail: cart?.email ?? undefined,
+    amount: cart?.total ?? 0,
+    currency: cart?.currency_code ?? "usd",
+    items,
+  };
 }

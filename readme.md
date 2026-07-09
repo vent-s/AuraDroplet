@@ -22,6 +22,13 @@ third-party pages, raw card fields, or PII checkout query strings are used.
 MEDUSA_BACKEND_URL=https://your-medusa-backend.up.railway.app
 MEDUSA_PUBLISHABLE_KEY=pk_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_...
+
+# Stripe sends the customer receipt. Resend sends the completed-order summary.
+# ORDER_EMAIL_FROM must be a verified Resend sender/domain.
+RESEND_API_KEY=re_...
+ORDER_EMAIL_FROM=orders@your-verified-domain.com
+ORDER_NOTIFICATION_EMAIL=taladiggy05@gmail.com
 CHECKOUT_HANDOFF_SECRET=use-the-same-random-secret-as-velluracare
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
 NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com

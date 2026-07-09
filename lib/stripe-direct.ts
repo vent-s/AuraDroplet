@@ -12,6 +12,21 @@ export interface DirectPaymentSession {
   currency: string;
 }
 
+export interface CompletedOrderItem {
+  name: string;
+  quantity: number;
+  lineTotal?: number; // integer cents
+}
+
+export interface CompletedOrder {
+  orderId: string;
+  customerEmail?: string;
+  amount: number; // integer cents
+  currency: string;
+  source?: string;
+  items: CompletedOrderItem[];
+}
+
 export function isDirectPaymentId(cartId: string): boolean {
   return cartId.startsWith("pi_");
 }
@@ -22,6 +37,11 @@ function secretKey(): string {
     throw new Error("Missing STRIPE_SECRET_KEY for direct cart checkout.");
   }
   return key;
+}
+
+function paymentIntentIdFromClientSecret(clientSecret: string): string | null {
+  const match = /^(pi_[^_]+)_secret_/.exec(clientSecret);
+  return match?.[1] ?? null;
 }
 
 async function stripe<T>(
@@ -105,6 +125,19 @@ export async function createDirectPayment(
   };
 }
 
+/** Ensures Stripe sends its native receipt after a Medusa payment succeeds. */
+export async function setStripeReceiptEmail(
+  clientSecret: string,
+  email: string,
+): Promise<void> {
+  const paymentIntentId = paymentIntentIdFromClientSecret(clientSecret);
+  if (!paymentIntentId) {
+    throw new Error("Stripe did not return a valid PaymentIntent client secret.");
+  }
+
+  await stripe(`/payment_intents/${paymentIntentId}`, { receipt_email: email });
+}
+
 export async function setDirectPaymentShipping(
   paymentIntentId: string,
   address: {
@@ -135,12 +168,47 @@ export async function setDirectPaymentShipping(
 
 export async function confirmDirectPaymentSucceeded(
   paymentIntentId: string,
-): Promise<{ orderId: string }> {
-  const intent = await stripe<{ id: string; status: string }>(
+): Promise<CompletedOrder> {
+  const intent = await stripe<{
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+    receipt_email?: string | null;
+    metadata?: Record<string, string>;
+  }>(
     `/payment_intents/${paymentIntentId}`,
   );
   if (intent.status !== "succeeded" && intent.status !== "processing") {
     throw new Error(`Payment is not complete (status: ${intent.status}).`);
   }
-  return { orderId: intent.id };
+
+  let items: CompletedOrderItem[] = [];
+  try {
+    const rawItems = JSON.parse(intent.metadata?.items ?? "[]") as Array<{
+      name?: unknown;
+      quantity?: unknown;
+      lineTotal?: unknown;
+    }>;
+    items = rawItems
+      .filter((item) => typeof item.name === "string")
+      .map((item) => ({
+        name: item.name as string,
+        quantity: Number(item.quantity) || 1,
+        lineTotal: Number.isFinite(Number(item.lineTotal))
+          ? Number(item.lineTotal)
+          : undefined,
+      }));
+  } catch {
+    // An order can still be completed if older PaymentIntent metadata is absent.
+  }
+
+  return {
+    orderId: intent.id,
+    customerEmail: intent.receipt_email ?? undefined,
+    amount: intent.amount,
+    currency: intent.currency,
+    source: intent.metadata?.source,
+    items,
+  };
 }
