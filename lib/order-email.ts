@@ -66,6 +66,138 @@ async function sendEmail({
   }
 }
 
+// Customer emails share the navy/gold look of the /order status page.
+const NAVY = "#0a2f6b";
+const NAVY_DEEP = "#082554";
+const GOLD = "#d4a72c";
+const GOLD_LIGHT = "#e7c667";
+const INK_SOFT = "#5b6b85";
+const PAGE_BG = "#f6f8fb";
+
+function greetingFor(customerName?: string): string {
+  const firstName = customerName?.trim().split(/\s+/)[0];
+  return firstName ? `Hi ${firstName},` : "Hi there,";
+}
+
+function itemLinesFor(items: CompletedOrderItem[]): string[] {
+  return items.map(
+    (item) => `${Math.max(1, Math.round(item.quantity))} x ${item.name}`,
+  );
+}
+
+function itemsSectionMarkup(itemLines: string[]): string {
+  if (!itemLines.length) return "";
+  return `<tr><td style="padding:0 40px 8px;">
+      <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:${INK_SOFT};font-weight:bold;">Your order</p>
+      ${itemLines
+        .map(
+          (line) =>
+            `<p style="margin:0 0 4px;font-size:15px;color:${NAVY};">${escapeHtml(line)}</p>`,
+        )
+        .join("")}
+    </td></tr>`;
+}
+
+function goldButtonMarkup(href: string, label: string): string {
+  return `<tr><td align="center" style="padding:8px 40px 32px;">
+      <a href="${escapeHtml(href)}"
+         style="display:inline-block;background:${GOLD};color:${NAVY_DEEP};text-decoration:none;font-size:15px;font-weight:bold;letter-spacing:0.04em;padding:14px 40px;border-radius:999px;">
+        ${escapeHtml(label)}
+      </a>
+    </td></tr>`;
+}
+
+function customerEmailShell(badge: string, innerRows: string): string {
+  return `
+  <div style="margin:0;padding:32px 16px;background:${PAGE_BG};font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
+      <tr><td align="center" style="padding:0 0 24px;">
+        <p style="margin:0;font-size:20px;letter-spacing:0.3em;color:${NAVY};text-transform:uppercase;font-weight:bold;">Satielle</p>
+      </td></tr>
+      <tr><td style="background:#ffffff;border-radius:16px;border:1px solid rgba(10,47,107,0.08);box-shadow:0 24px 60px rgba(10,47,107,0.09);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr><td align="center" style="padding:36px 40px 0;">
+            <span style="display:inline-block;background:${GOLD};color:${NAVY_DEEP};font-size:11px;font-weight:bold;letter-spacing:0.16em;text-transform:uppercase;padding:6px 16px;border-radius:999px;">${escapeHtml(badge)}</span>
+          </td></tr>
+          ${innerRows}
+        </table>
+      </td></tr>
+      <tr><td align="center" style="padding:24px 0 0;">
+        <p style="margin:0;font-size:12px;color:${INK_SOFT};">Thank you for choosing Satielle.</p>
+      </td></tr>
+    </table>
+  </div>`;
+}
+
+function footerRowMarkup(orderId: string, statusUrl?: string): string {
+  const statusLink = statusUrl
+    ? `<a href="${escapeHtml(statusUrl)}" style="color:${NAVY};font-weight:bold;text-decoration:underline;">Check your order status</a> any time.<br />`
+    : "";
+  return `<tr><td style="padding:8px 40px 36px;">
+      <p style="margin:0;font-size:13px;line-height:1.8;color:${INK_SOFT};">${statusLink}Order reference ${escapeHtml(orderId)}<br />Questions? Just reply to this email &mdash; we're happy to help.</p>
+    </td></tr>`;
+}
+
+export interface ConfirmationEmailInput {
+  to: string;
+  orderId: string;
+  statusUrl: string;
+  customerName?: string;
+  amount: number; // integer cents
+  currency: string;
+  items: CompletedOrderItem[];
+}
+
+/** Tells the customer their order is being processed, with a status link. */
+export async function sendOrderConfirmationEmail(
+  input: ConfirmationEmailInput,
+): Promise<void> {
+  const greeting = greetingFor(input.customerName);
+  const itemLines = itemLinesFor(input.items);
+  const total = formatMoney(input.amount, input.currency);
+
+  const text = [
+    greeting,
+    "",
+    "We are processing your order. Your payment is confirmed and our team is preparing everything for shipment.",
+    "",
+    `Check your order status any time: ${input.statusUrl}`,
+    ...(itemLines.length
+      ? ["", "Your order:", ...itemLines.map((l) => `- ${l}`)]
+      : []),
+    `Total: ${total}`,
+    "",
+    `Order reference: ${input.orderId}`,
+    "",
+    "You'll get another email with a tracking number as soon as it ships.",
+    "Questions? Just reply to this email.",
+  ].join("\n");
+
+  const html = customerEmailShell(
+    "Processing",
+    `<tr><td align="center" style="padding:18px 40px 8px;">
+        <h1 style="margin:0;font-size:26px;font-weight:800;color:${NAVY};">We are processing your order</h1>
+      </td></tr>
+      <tr><td style="padding:12px 40px 24px;">
+        <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:${INK_SOFT};">${escapeHtml(greeting)}</p>
+        <p style="margin:0;font-size:15px;line-height:1.7;color:${INK_SOFT};">Your payment is confirmed and our team is preparing your order for shipment. You'll get another email with a tracking number the moment it ships.</p>
+      </td></tr>
+      ${goldButtonMarkup(input.statusUrl, "Check your order status")}
+      ${itemsSectionMarkup(itemLines)}
+      <tr><td style="padding:4px 40px 20px;">
+        <p style="margin:0;font-size:15px;color:${NAVY};font-weight:bold;">Total: ${escapeHtml(total)}</p>
+      </td></tr>
+      ${footerRowMarkup(input.orderId)}`,
+  );
+
+  await sendEmail({
+    to: input.to,
+    subject: "We are processing your order",
+    text,
+    html,
+  });
+}
+
 export interface TrackingEmailInput {
   to: string;
   orderId: string;
@@ -73,18 +205,14 @@ export interface TrackingEmailInput {
   trackingNumber: string;
   carrierLabel: string;
   trackingUrl?: string;
+  statusUrl?: string;
   items: CompletedOrderItem[];
 }
 
 /** Tells the customer their order shipped, with the tracking number. */
 export async function sendTrackingEmail(input: TrackingEmailInput): Promise<void> {
-  const firstName = input.customerName?.trim().split(/\s+/)[0];
-  const greeting = firstName ? `Hi ${firstName},` : "Hi there,";
-  const itemLines = input.items.length
-    ? input.items.map(
-        (item) => `${Math.max(1, Math.round(item.quantity))} x ${item.name}`,
-      )
-    : [];
+  const greeting = greetingFor(input.customerName);
+  const itemLines = itemLinesFor(input.items);
 
   const text = [
     greeting,
@@ -94,6 +222,7 @@ export async function sendTrackingEmail(input: TrackingEmailInput): Promise<void
     `Carrier: ${input.carrierLabel}`,
     `Tracking number: ${input.trackingNumber}`,
     ...(input.trackingUrl ? ["", `Track your package: ${input.trackingUrl}`] : []),
+    ...(input.statusUrl ? [`Check your order status: ${input.statusUrl}`] : []),
     ...(itemLines.length ? ["", "Your order:", ...itemLines.map((l) => `- ${l}`)] : []),
     "",
     `Order reference: ${input.orderId}`,
@@ -101,62 +230,27 @@ export async function sendTrackingEmail(input: TrackingEmailInput): Promise<void
     "Questions? Just reply to this email.",
   ].join("\n");
 
-  const itemsMarkup = itemLines.length
-    ? `<tr><td style="padding:0 40px 8px;">
-        <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#b08968;">Your order</p>
-        ${itemLines
-          .map(
-            (line) =>
-              `<p style="margin:0 0 4px;font-size:15px;color:#5d4a3a;">${escapeHtml(line)}</p>`,
-          )
-          .join("")}
-      </td></tr>`
-    : "";
-
-  const buttonMarkup = input.trackingUrl
-    ? `<tr><td align="center" style="padding:8px 40px 32px;">
-        <a href="${escapeHtml(input.trackingUrl)}"
-           style="display:inline-block;background:#7f5539;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;letter-spacing:0.04em;padding:14px 36px;border-radius:999px;">
-          Track your package
-        </a>
-      </td></tr>`
-    : "";
-
-  const html = `
-  <div style="margin:0;padding:32px 16px;background:#ede0d4;font-family:Georgia,'Times New Roman',serif;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;">
-      <tr><td align="center" style="padding:0 0 24px;">
-        <p style="margin:0;font-size:22px;letter-spacing:0.3em;color:#7f5539;text-transform:uppercase;">Satielle</p>
+  const html = customerEmailShell(
+    "Shipped",
+    `<tr><td align="center" style="padding:18px 40px 8px;">
+        <h1 style="margin:0;font-size:26px;font-weight:800;color:${NAVY};">Your order is on its way</h1>
       </td></tr>
-      <tr><td style="background:#fffdfa;border-radius:16px;box-shadow:0 14px 40px rgba(127,85,57,0.10);">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          <tr><td align="center" style="padding:40px 40px 8px;">
-            <h1 style="margin:0;font-size:26px;font-weight:normal;color:#7f5539;">Your order is on its way</h1>
-          </td></tr>
-          <tr><td style="padding:16px 40px 24px;">
-            <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:#5d4a3a;">${escapeHtml(greeting)}</p>
-            <p style="margin:0;font-size:15px;line-height:1.7;color:#5d4a3a;">Good news &mdash; your order has shipped. You can follow it with the tracking details below.</p>
-          </td></tr>
-          <tr><td style="padding:0 40px 28px;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf4ec;border:1px dashed #ddb892;border-radius:12px;">
-              <tr><td align="center" style="padding:22px 16px;">
-                <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#b08968;">${escapeHtml(input.carrierLabel)} tracking number</p>
-                <p style="margin:0;font-size:20px;letter-spacing:0.06em;color:#7f5539;font-weight:bold;">${escapeHtml(input.trackingNumber)}</p>
-              </td></tr>
-            </table>
-          </td></tr>
-          ${buttonMarkup}
-          ${itemsMarkup}
-          <tr><td style="padding:8px 40px 36px;">
-            <p style="margin:0;font-size:13px;line-height:1.7;color:#9c8570;">Order reference ${escapeHtml(input.orderId)}<br />Questions? Just reply to this email &mdash; we're happy to help.</p>
+      <tr><td style="padding:12px 40px 24px;">
+        <p style="margin:0 0 12px;font-size:15px;line-height:1.7;color:${INK_SOFT};">${escapeHtml(greeting)}</p>
+        <p style="margin:0;font-size:15px;line-height:1.7;color:${INK_SOFT};">Good news &mdash; your order has shipped. You can follow it with the tracking details below.</p>
+      </td></tr>
+      <tr><td style="padding:0 40px 28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${NAVY};border-radius:12px;">
+          <tr><td align="center" style="padding:22px 16px;">
+            <p style="margin:0 0 6px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:${GOLD_LIGHT};font-weight:bold;">${escapeHtml(input.carrierLabel)} tracking number</p>
+            <p style="margin:0;font-size:20px;letter-spacing:0.06em;color:#ffffff;font-weight:bold;word-break:break-all;">${escapeHtml(input.trackingNumber)}</p>
           </td></tr>
         </table>
       </td></tr>
-      <tr><td align="center" style="padding:24px 0 0;">
-        <p style="margin:0;font-size:12px;color:#b08968;">Thank you for choosing Satielle.</p>
-      </td></tr>
-    </table>
-  </div>`;
+      ${input.trackingUrl ? goldButtonMarkup(input.trackingUrl, "Track your package") : ""}
+      ${itemsSectionMarkup(itemLines)}
+      ${footerRowMarkup(input.orderId, input.statusUrl)}`,
+  );
 
   await sendEmail({
     to: input.to,

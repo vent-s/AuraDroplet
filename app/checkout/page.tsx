@@ -377,7 +377,10 @@ function PaymentForm({
     const completeResponse = await fetch('/api/medusa-checkout/complete', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ cartId: session.cartId }),
+      body: JSON.stringify({
+        cartId: session.cartId,
+        clientSecret: session.clientSecret,
+      }),
     });
     const completeData = (await completeResponse.json()) as {
       orderId?: string;
@@ -609,6 +612,12 @@ function CheckoutContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handoffToken, handoff, session]);
 
+  const statusOrderId = session
+    ? session.cartId.startsWith('pi_')
+      ? session.cartId
+      : (/^(pi_[^_]+)_secret_/.exec(session.clientSecret)?.[1] ?? null)
+    : null;
+
   if (orderId) {
     return (
       <main
@@ -678,6 +687,14 @@ function CheckoutContent() {
               </li>
             </ol>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+              {statusOrderId && !isTestCheckout && (
+                <Link
+                  href={`/order/${statusOrderId}`}
+                  className={isNovaLife ? novaButtonClass : primaryButtonClass}
+                >
+                  Track your order
+                </Link>
+              )}
               <Link
                 href="/"
                 className={isNovaLife ? novaButtonClass : primaryButtonClass}

@@ -58,6 +58,9 @@ export async function POST(
     let emailError: string | undefined;
     if (order.email) {
       try {
+        const origin =
+          process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
+          new URL(request.url).origin;
         await sendTrackingEmail({
           to: order.email,
           orderId: order.id,
@@ -65,6 +68,7 @@ export async function POST(
           trackingNumber,
           carrierLabel: CARRIERS[carrier].label,
           trackingUrl: trackingUrl(carrier, trackingNumber),
+          statusUrl: `${origin}/order/${order.id}`,
           items: order.items,
         });
         emailedAt = new Date().toISOString();

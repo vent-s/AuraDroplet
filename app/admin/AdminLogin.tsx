@@ -33,22 +33,19 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#ede0d4] px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-[#fffdfa] p-8 shadow-[0_14px_40px_rgba(127,85,57,0.12)]">
-        <p className="text-center text-xs uppercase tracking-[0.3em] text-[#b08968]">
+    <main className="flex min-h-screen items-center justify-center bg-nova-off px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-nova-border bg-white p-8 shadow-[0_24px_60px_rgba(10,47,107,0.09)]">
+        <p className="text-center text-xs font-bold uppercase tracking-[0.3em] text-nova-navy">
           Satielle
         </p>
-        <h1
-          className="mt-2 text-center text-2xl text-[#7f5539]"
-          style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
-        >
+        <h1 className="mt-2 text-center text-2xl font-extrabold text-nova-navy">
           Order admin
         </h1>
 
         {configured ? (
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.14em] text-[#b08968]">
+              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
                 Password
               </span>
               <input
@@ -57,7 +54,7 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
                 onChange={(event) => setPassword(event.target.value)}
                 autoFocus
                 required
-                className="w-full rounded-xl border border-[#e6ccb2] bg-white px-4 py-3 text-[#7f5539] outline-none transition focus:border-[#b08968] focus:ring-2 focus:ring-[#ddb892]/40"
+                className="w-full rounded-xl border border-nova-border bg-white px-4 py-3 text-nova-navy outline-none transition focus:border-nova-gold focus:ring-2 focus:ring-nova-gold/30"
                 placeholder="Enter the admin password"
               />
             </label>
@@ -69,13 +66,13 @@ export default function AdminLogin({ configured }: { configured: boolean }) {
             <button
               type="submit"
               disabled={submitting || !password}
-              className="w-full rounded-full bg-[#7f5539] py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-[#6b4429] disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full bg-nova-navy py-3 text-sm font-bold tracking-wide text-white transition hover:bg-nova-navyDeep disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? "Signing in…" : "Sign in"}
             </button>
           </form>
         ) : (
-          <p className="mt-8 rounded-xl bg-[#faf4ec] px-4 py-3 text-sm leading-relaxed text-[#9c6644]">
+          <p className="mt-8 rounded-xl bg-nova-off px-4 py-3 text-sm leading-relaxed text-nova-navySoft">
             Admin access is not configured yet. Set the{" "}
             <code className="font-mono text-xs">ADMIN_PASSWORD</code>{" "}
             environment variable and redeploy.

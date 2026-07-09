@@ -68,16 +68,11 @@ function formatDate(unixSeconds: number): string {
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-[#fffdfa] px-5 py-4 shadow-[0_8px_24px_rgba(127,85,57,0.08)]">
-      <p className="text-xs uppercase tracking-[0.14em] text-[#b08968]">
+    <div className="rounded-2xl border border-nova-border bg-white px-5 py-4 shadow-[0_12px_28px_rgba(10,47,107,0.06)]">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
         {label}
       </p>
-      <p
-        className="mt-1 text-2xl text-[#7f5539]"
-        style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
-      >
-        {value}
-      </p>
+      <p className="mt-1 text-2xl font-extrabold text-nova-navy">{value}</p>
     </div>
   );
 }
@@ -141,8 +136,8 @@ function TrackingForm({
   const isUpdate = Boolean(order.tracking);
 
   return (
-    <div className="rounded-xl border border-[#e6ccb2] bg-[#faf4ec] p-4">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#b08968]">
+    <div className="rounded-xl border border-nova-border bg-nova-off p-4">
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
         {isUpdate ? "Update tracking" : "Add tracking"}
       </p>
       <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -150,14 +145,14 @@ function TrackingForm({
           value={trackingNumber}
           onChange={(event) => setTrackingNumber(event.target.value)}
           placeholder="Tracking number"
-          className="min-w-0 flex-1 rounded-lg border border-[#e6ccb2] bg-white px-3 py-2.5 text-sm text-[#7f5539] outline-none transition focus:border-[#b08968]"
+          className="min-w-0 flex-1 rounded-lg border border-nova-border bg-white px-3 py-2.5 text-sm text-nova-navy outline-none transition focus:border-nova-gold"
         />
         <select
           value={carrier}
           onChange={(event) =>
             setCarrier(event.target.value as CarrierId | "auto")
           }
-          className="rounded-lg border border-[#e6ccb2] bg-white px-3 py-2.5 text-sm text-[#7f5539] outline-none transition focus:border-[#b08968]"
+          className="rounded-lg border border-nova-border bg-white px-3 py-2.5 text-sm text-nova-navy outline-none transition focus:border-nova-gold"
         >
           <option value="auto">Auto-detect carrier</option>
           {Object.entries(CARRIER_LABELS).map(([id, label]) => (
@@ -169,12 +164,12 @@ function TrackingForm({
         <button
           onClick={handleSave}
           disabled={saving || trackingNumber.trim().length < 4}
-          className="rounded-full bg-[#7f5539] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#6b4429] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-nova-gold px-5 py-2.5 text-sm font-bold text-nova-navyDeep transition hover:bg-nova-goldLight disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save & email customer"}
         </button>
       </div>
-      <p className="mt-2 text-xs text-[#9c8570]">
+      <p className="mt-2 text-xs text-nova-inkSoft">
         Saving emails the customer their tracking number
         {order.email ? ` (${order.email})` : " — no email on this order"}.
       </p>
@@ -207,16 +202,16 @@ function OrderRow({
     : [];
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-[#fffdfa] shadow-[0_8px_24px_rgba(127,85,57,0.08)] transition hover:shadow-[0_12px_32px_rgba(127,85,57,0.12)]">
+    <div className="overflow-hidden rounded-2xl border border-nova-border bg-white shadow-[0_12px_28px_rgba(10,47,107,0.06)] transition hover:shadow-[0_18px_40px_rgba(10,47,107,0.1)]">
       <button
         onClick={onToggle}
         className="flex w-full items-center gap-4 px-5 py-4 text-left"
       >
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-[#7f5539]">
+          <p className="truncate text-sm font-bold text-nova-navy">
             {shipping?.name || order.email || order.id}
           </p>
-          <p className="mt-0.5 truncate text-xs text-[#9c8570]">
+          <p className="mt-0.5 truncate text-xs text-nova-inkSoft">
             {formatDate(order.created)}
             {order.source ? ` · ${order.source}` : ""}
             {order.items.length
@@ -227,59 +222,59 @@ function OrderRow({
           </p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+          className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] ${
             order.tracking
-              ? "bg-[#e2f5ea] text-[#296853]"
-              : "bg-[#faf0dc] text-[#9c6644]"
+              ? "bg-nova-navy text-nova-goldLight"
+              : "bg-nova-gold text-nova-navyDeep"
           }`}
         >
           {order.tracking ? "Shipped" : "To ship"}
         </span>
-        <span className="shrink-0 text-sm font-semibold text-[#7f5539]">
+        <span className="shrink-0 text-sm font-bold text-nova-navy">
           {formatMoney(order.amount, order.currency)}
         </span>
         <span
-          className={`shrink-0 text-[#b08968] transition-transform ${expanded ? "rotate-180" : ""}`}
+          className={`shrink-0 text-nova-gold transition-transform ${expanded ? "rotate-180" : ""}`}
         >
           ▾
         </span>
       </button>
 
       {expanded && (
-        <div className="space-y-4 border-t border-[#f0e4d6] px-5 py-4">
+        <div className="space-y-4 border-t border-nova-border px-5 py-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#b08968]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
                 Customer
               </p>
-              <p className="mt-1 text-sm text-[#5d4a3a]">
+              <p className="mt-1 text-sm text-nova-navySoft">
                 {order.email || "No email on file"}
               </p>
               {shipping?.phone && (
-                <p className="text-sm text-[#5d4a3a]">{shipping.phone}</p>
+                <p className="text-sm text-nova-navySoft">{shipping.phone}</p>
               )}
-              <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-[#b08968]">
+              <p className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
                 Ship to
               </p>
               {addressLines.length ? (
                 addressLines.map((line, index) => (
-                  <p key={index} className="text-sm text-[#5d4a3a]">
+                  <p key={index} className="text-sm text-nova-navySoft">
                     {line}
                   </p>
                 ))
               ) : (
-                <p className="text-sm italic text-[#9c8570]">
+                <p className="text-sm italic text-nova-inkSoft">
                   No shipping address on the payment.
                 </p>
               )}
             </div>
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#b08968]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
                 Items
               </p>
               {order.items.length ? (
                 order.items.map((item, index) => (
-                  <p key={index} className="mt-1 text-sm text-[#5d4a3a]">
+                  <p key={index} className="mt-1 text-sm text-nova-navySoft">
                     {item.quantity}× {item.name}
                     {typeof item.lineTotal === "number"
                       ? ` — ${formatMoney(item.lineTotal, order.currency)}`
@@ -287,23 +282,32 @@ function OrderRow({
                   </p>
                 ))
               ) : (
-                <p className="mt-1 text-sm italic text-[#9c8570]">
+                <p className="mt-1 text-sm italic text-nova-inkSoft">
                   Line items not recorded — see Stripe.
                 </p>
               )}
-              <p className="mt-3 text-xs text-[#9c8570]">
+              <p className="mt-3 text-xs text-nova-inkSoft">
                 {order.id} ·{" "}
                 <a
                   href={`https://dashboard.stripe.com/payments/${order.id}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="underline decoration-[#ddb892] underline-offset-2 hover:text-[#7f5539]"
+                  className="underline decoration-nova-gold underline-offset-2 hover:text-nova-navy"
                 >
                   View in Stripe
+                </a>{" "}
+                ·{" "}
+                <a
+                  href={`/order/${order.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline decoration-nova-gold underline-offset-2 hover:text-nova-navy"
+                >
+                  Customer status page
                 </a>
               </p>
               {order.tracking && (
-                <p className="mt-2 text-sm text-[#296853]">
+                <p className="mt-2 text-sm font-semibold text-nova-navy">
                   {CARRIER_LABELS[order.tracking.carrier]} ·{" "}
                   {order.tracking.number}
                   {order.tracking.emailedAt
@@ -411,17 +415,14 @@ export default function AdminDashboard() {
   }, [orders]);
 
   return (
-    <main className="min-h-screen bg-[#ede0d4] px-4 py-8 sm:px-8">
+    <main className="min-h-screen bg-nova-off px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-4xl">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[#b08968]">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-nova-navy">
               Satielle
             </p>
-            <h1
-              className="mt-1 text-3xl text-[#7f5539]"
-              style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
-            >
+            <h1 className="mt-1 text-3xl font-extrabold text-nova-navy">
               Orders
             </h1>
           </div>
@@ -429,13 +430,13 @@ export default function AdminDashboard() {
             <button
               onClick={() => void loadOrders()}
               disabled={refreshing}
-              className="rounded-full border border-[#b08968] px-4 py-2 text-sm font-medium text-[#7f5539] transition hover:bg-[#fffdfa] disabled:opacity-50"
+              className="rounded-full border border-nova-navy px-4 py-2 text-sm font-semibold text-nova-navy transition hover:bg-white disabled:opacity-50"
             >
               {refreshing ? "Refreshing…" : "Refresh"}
             </button>
             <button
               onClick={() => void handleLogout()}
-              className="rounded-full px-4 py-2 text-sm font-medium text-[#9c8570] transition hover:text-[#7f5539]"
+              className="rounded-full px-4 py-2 text-sm font-semibold text-nova-inkSoft transition hover:text-nova-navy"
             >
               Sign out
             </button>
@@ -456,7 +457,7 @@ export default function AdminDashboard() {
             className={`mt-4 rounded-xl px-4 py-3 text-sm ${
               notice.isError
                 ? "bg-red-50 text-red-700"
-                : "bg-[#e2f5ea] text-[#296853]"
+                : "bg-nova-navy text-nova-goldLight"
             }`}
           >
             {notice.message}
@@ -467,7 +468,7 @@ export default function AdminDashboard() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search by name, email, product, city, or tracking number"
-          className="mt-6 w-full rounded-xl border border-[#e6ccb2] bg-[#fffdfa] px-4 py-3 text-sm text-[#7f5539] outline-none transition placeholder:text-[#c4a889] focus:border-[#b08968] focus:ring-2 focus:ring-[#ddb892]/40"
+          className="mt-6 w-full rounded-xl border border-nova-border bg-white px-4 py-3 text-sm text-nova-navy outline-none transition placeholder:text-nova-inkSoft focus:border-nova-gold focus:ring-2 focus:ring-nova-gold/30"
         />
 
         <div className="mt-4 space-y-3 pb-16">
@@ -477,12 +478,12 @@ export default function AdminDashboard() {
             </p>
           )}
           {!orders && !loadError && (
-            <p className="py-12 text-center text-sm text-[#9c8570]">
+            <p className="py-12 text-center text-sm text-nova-inkSoft">
               Loading orders…
             </p>
           )}
           {filtered && filtered.length === 0 && (
-            <p className="py-12 text-center text-sm text-[#9c8570]">
+            <p className="py-12 text-center text-sm text-nova-inkSoft">
               {query
                 ? "No orders match that search."
                 : "No paid orders yet — they appear here the moment a checkout completes."}

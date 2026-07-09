@@ -39,7 +39,9 @@ function secretKey(): string {
   return key;
 }
 
-function paymentIntentIdFromClientSecret(clientSecret: string): string | null {
+export function paymentIntentIdFromClientSecret(
+  clientSecret: string,
+): string | null {
   const match = /^(pi_[^_]+)_secret_/.exec(clientSecret);
   return match?.[1] ?? null;
 }
