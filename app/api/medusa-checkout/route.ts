@@ -8,12 +8,14 @@ import { createDirectPayment } from "@/lib/stripe-direct";
 
 export async function POST(request: Request) {
   try {
-    const { handoff, source, variantId, email } = (await request.json()) as {
-      handoff?: string;
-      source?: string;
-      variantId?: string;
-      email?: string;
-    };
+    const { handoff, source, variantId, email, test } =
+      (await request.json()) as {
+        handoff?: string;
+        source?: string;
+        variantId?: string;
+        email?: string;
+        test?: boolean;
+      };
 
     if (handoff) {
       const data = await readCheckoutHandoff(handoff);
@@ -54,6 +56,35 @@ export async function POST(request: Request) {
         { error: "A valid email is required." },
         { status: 400 },
       );
+    }
+
+    if (test === true && source === "checkout-test") {
+      const now = Date.now();
+      const direct = await createDirectPayment({
+        source: "checkout-test",
+        items: [
+          {
+            id: "checkout-test",
+            sku: "CHECKOUT-TEST",
+            name: "Checkout test payment",
+            quantity: 1,
+            unitAmount: 50,
+            lineTotal: 50,
+          },
+        ],
+        currency: "usd",
+        cartTotal: 50,
+        email,
+        createdAt: now,
+        expiresAt: now + 15 * 60 * 1000,
+      });
+
+      return NextResponse.json({
+        cartId: direct.paymentIntentId,
+        clientSecret: direct.clientSecret,
+        amount: direct.amount / 100,
+        currency: direct.currency,
+      });
     }
 
     if (source === "velluracare") {

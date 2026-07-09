@@ -38,6 +38,7 @@ type CheckoutDisplay = {
   title: string;
   lineItemLabel: string;
   image: string;
+  previewAmount?: number;
   items?: HandoffLineItem[];
   currency?: string;
   returnUrl?: string;
@@ -97,6 +98,18 @@ function getDisplay(
       items: handoff.items,
       currency: handoff.currency,
       returnUrl: handoff.returnUrl,
+    };
+  }
+
+  if (searchParams.get('test') === '1') {
+    return {
+      source: 'checkout-test',
+      title: 'Checkout test payment',
+      lineItemLabel: 'Stripe checkout test',
+      image: '/SatielleProduct.jpg',
+      previewAmount: 0.5,
+      currency: 'usd',
+      returnUrl: searchParams.get('return_url') || undefined,
     };
   }
 
@@ -433,6 +446,7 @@ function CheckoutContent() {
     [searchParams, handoff],
   );
   const isNovaLife = display.source === 'novalife.science';
+  const isTestCheckout = display.source === 'checkout-test';
   const startedFromHandoff = useRef(false);
 
   const [email, setEmail] = useState('');
@@ -485,6 +499,12 @@ function CheckoutContent() {
         body: JSON.stringify(
           handoffToken
             ? { handoff: handoffToken }
+            : isTestCheckout
+              ? {
+                  source: 'checkout-test',
+                  email: nextEmail,
+                  test: true,
+                }
             : {
                 source: display.source,
                 email: nextEmail,
@@ -619,7 +639,9 @@ function CheckoutContent() {
             <p
               className={`mx-auto mt-3 max-w-md text-base leading-relaxed ${isNovaLife ? 'text-nova-inkSoft' : 'text-muted'}`}
             >
-              Your order is in. We&apos;ll follow up with next steps.
+              {isTestCheckout
+                ? 'Your 50-cent checkout test completed successfully.'
+                : 'Your order is in. We’ll follow up with next steps.'}
             </p>
             <ol
               className={`mx-auto mt-6 max-w-sm space-y-3 text-left text-base ${isNovaLife ? 'text-nova-navy' : 'text-ink'}`}
@@ -646,7 +668,9 @@ function CheckoutContent() {
                 >
                   2
                 </span>
-                Medusa created order {orderId}.
+                {isTestCheckout
+                  ? `Stripe recorded test payment ${orderId}.`
+                  : `Order reference ${orderId} was created.`}
               </li>
             </ol>
             <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
@@ -761,7 +785,12 @@ function CheckoutContent() {
                 >
                   {session
                     ? formatAmount(session.amount, session.currency)
-                    : 'Final total from Medusa'}
+                    : display.previewAmount !== undefined
+                      ? formatAmount(
+                          display.previewAmount,
+                          display.currency ?? 'usd',
+                        )
+                      : 'Final total from Medusa'}
                 </span>
               </span>
             </div>
@@ -813,7 +842,12 @@ function CheckoutContent() {
                 >
                   {session
                     ? formatAmount(session.amount, session.currency)
-                    : 'After setup'}
+                    : display.previewAmount !== undefined
+                      ? formatAmount(
+                          display.previewAmount,
+                          display.currency ?? 'usd',
+                        )
+                      : 'After setup'}
                 </span>
               </div>
             </div>
