@@ -390,6 +390,33 @@ export default function AdminDashboard() {
     isError: boolean;
   } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
+
+  async function sendTestEmails() {
+    setSendingTest(true);
+    const response = await fetch("/api/admin/test-email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ to: testEmail.trim() }),
+    });
+    const data = (await response.json().catch(() => ({}))) as {
+      error?: string;
+    };
+    setSendingTest(false);
+    setNotice(
+      response.ok
+        ? {
+            message: `Sample confirmation + tracking emails sent to ${testEmail.trim()}.`,
+            isError: false,
+          }
+        : {
+            message: data.error || "Could not send the sample emails.",
+            isError: true,
+          },
+    );
+    window.setTimeout(() => setNotice(null), 8000);
+  }
 
   const loadOrders = useCallback(async () => {
     setRefreshing(true);
@@ -556,6 +583,33 @@ export default function AdminDashboard() {
               onSaved={handleSaved}
             />
           ))}
+
+          <div className="mt-8 rounded-2xl border border-nova-border bg-white p-5 shadow-[0_12px_28px_rgba(10,47,107,0.06)]">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-nova-inkSoft">
+              Email previews
+            </p>
+            <p className="mt-1 text-sm text-nova-navySoft">
+              Send yourself sample copies of the customer emails — the
+              &quot;processing your order&quot; confirmation and the tracking
+              email.
+            </p>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                value={testEmail}
+                onChange={(event) => setTestEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="min-w-0 flex-1 rounded-lg border border-nova-border bg-white px-3 py-2.5 text-sm text-nova-navy outline-none transition focus:border-nova-gold"
+              />
+              <button
+                onClick={() => void sendTestEmails()}
+                disabled={sendingTest || !testEmail.includes("@")}
+                className="rounded-full bg-nova-navy px-5 py-2.5 text-sm font-bold text-white transition hover:bg-nova-navyDeep disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {sendingTest ? "Sending…" : "Send samples"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
