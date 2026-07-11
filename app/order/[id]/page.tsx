@@ -29,6 +29,21 @@ function formatDate(unixSeconds: number): string {
   });
 }
 
+function formatEtaDate(isoDate: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!match) return isoDate;
+  // Construct in local time so the date never shifts across timezones.
+  return new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+  ).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 function Step({
   label,
   state,
@@ -149,6 +164,17 @@ function StatusCard({ order }: { order: AdminOrder }) {
         />
       </div>
 
+      {tracking?.etaDate && !delivered && (
+        <div className="mx-auto mt-7 max-w-md rounded-xl border-2 border-nova-gold bg-white px-4 py-3 text-center shadow-[0_10px_24px_rgba(212,167,44,0.18)]">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-nova-inkSoft">
+            Estimated delivery
+          </p>
+          <p className="mt-0.5 text-xl font-extrabold text-nova-navy">
+            {formatEtaDate(tracking.etaDate)}
+          </p>
+        </div>
+      )}
+
       {tracking?.stageSummary && (
         <p
           className={`mx-auto mt-6 max-w-md rounded-xl px-4 py-3 text-center text-sm leading-relaxed ${
@@ -159,6 +185,11 @@ function StatusCard({ order }: { order: AdminOrder }) {
         >
           Latest from {CARRIERS[tracking.carrier].label}:{" "}
           {tracking.stageSummary}
+          {tracking.location ? (
+            <span className="mt-1 block font-semibold text-nova-navy">
+              📍 {tracking.location}
+            </span>
+          ) : null}
         </p>
       )}
 

@@ -15,6 +15,8 @@ export interface LiveTrackingStatus {
   stage: TrackingStage;
   summary: string;
   eventAt?: string; // ISO timestamp of the carrier's latest scan
+  location?: string; // "City, ST" of the latest scan
+  etaDate?: string; // carrier's expected delivery date, YYYY-MM-DD
 }
 
 export function isLiveTrackingConfigured(carrier: CarrierId): boolean {
@@ -145,21 +147,41 @@ async function trackUps(
             status?: { type?: string; description?: string };
             date?: string;
             time?: string;
+            location?: {
+              address?: { city?: string; stateProvince?: string };
+            };
           }>;
+          deliveryDate?: Array<{ type?: string; date?: string }>;
         }>;
         warnings?: Array<{ message?: string }>;
       }>;
     };
   };
-  const activity =
-    data.trackResponse?.shipment?.[0]?.package?.[0]?.activity?.[0];
+  const pkg = data.trackResponse?.shipment?.[0]?.package?.[0];
+  const activity = pkg?.activity?.[0];
   const description = activity?.status?.description?.trim();
   if (!activity || !description) return null;
+
+  const address = activity.location?.address;
+  const location = [address?.city, address?.stateProvince]
+    .filter(Boolean)
+    .join(", ");
+
+  // Prefer the (re)scheduled delivery date; UPS formats dates as YYYYMMDD.
+  const eta =
+    pkg?.deliveryDate?.find((d) => d.type === "RDD")?.date ??
+    pkg?.deliveryDate?.find((d) => d.type === "SDD")?.date ??
+    pkg?.deliveryDate?.[0]?.date;
+  const etaMatch = /^(\d{4})(\d{2})(\d{2})$/.exec(eta ?? "");
 
   return {
     stage: upsStage(activity.status?.type ?? "", description),
     summary: description,
     eventAt: upsEventDate(activity.date, activity.time),
+    location: location || undefined,
+    etaDate: etaMatch
+      ? `${etaMatch[1]}-${etaMatch[2]}-${etaMatch[3]}`
+      : undefined,
   };
 }
 
@@ -180,7 +202,7 @@ async function trackUsps(
 ): Promise<LiveTrackingStatus | null> {
   const token = await uspsAccessToken();
   const response = await fetch(
-    `https://apis.usps.com/tracking/v3/tracking/${encodeURIComponent(trackingNumber)}?expand=SUMMARY`,
+    `https://apis.usps.com/tracking/v3/tracking/${encodeURIComponent(trackingNumber)}?expand=DETAIL`,
     {
       headers: { authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -196,16 +218,35 @@ async function trackUsps(
     status?: string;
     statusSummary?: string;
     eventSummaries?: string[];
+    expectedDeliveryDate?: string;
+    expectedDeliveryTimeStamp?: string;
+    trackingEvents?: Array<{
+      eventType?: string;
+      eventTimestamp?: string;
+      eventCity?: string;
+      eventState?: string;
+    }>;
   };
   const category = data.statusCategory ?? data.status;
   if (!category) return null;
+
+  const event = data.trackingEvents?.[0];
+  const location = [event?.eventCity, event?.eventState]
+    .filter(Boolean)
+    .join(", ");
+  const eta = (data.expectedDeliveryDate ?? data.expectedDeliveryTimeStamp)
+    ?.slice(0, 10);
 
   return {
     stage: uspsStage(category),
     summary:
       data.statusSummary?.trim() ||
       data.eventSummaries?.[0]?.trim() ||
+      event?.eventType?.trim() ||
       category,
+    eventAt: event?.eventTimestamp,
+    location: location || undefined,
+    etaDate: /^\d{4}-\d{2}-\d{2}$/.test(eta ?? "") ? eta : undefined,
   };
 }
 

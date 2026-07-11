@@ -72,6 +72,8 @@ export interface AdminOrderTracking {
   stageSummary?: string;
   stageAt?: string;
   checkedAt?: string;
+  location?: string;
+  etaDate?: string;
 }
 
 export interface AdminOrder {
@@ -223,6 +225,8 @@ function toAdminOrder(intent: StripePaymentIntent): AdminOrder | null {
         stageSummary: metadata.tracking_stage_summary || undefined,
         stageAt: metadata.tracking_stage_at || undefined,
         checkedAt: metadata.tracking_checked_at || undefined,
+        location: metadata.tracking_location || undefined,
+        etaDate: metadata.tracking_eta || undefined,
       }
     : undefined;
 
@@ -273,6 +277,8 @@ export async function saveOrderTracking(
       "metadata[tracking_stage_summary]": "",
       "metadata[tracking_stage_at]": "",
       "metadata[tracking_checked_at]": "",
+      "metadata[tracking_location]": "",
+      "metadata[tracking_eta]": "",
     },
   });
 }
@@ -299,6 +305,8 @@ export async function saveTrackingStage(
             "metadata[tracking_stage]": status.stage,
             "metadata[tracking_stage_summary]": status.summary.slice(0, 480),
             "metadata[tracking_stage_at]": status.eventAt ?? "",
+            "metadata[tracking_location]": status.location?.slice(0, 480) ?? "",
+            "metadata[tracking_eta]": status.etaDate ?? "",
           }
         : {}),
     },
@@ -337,6 +345,8 @@ export async function getOrderWithLiveTracking(
         stage: live.stage,
         stageSummary: live.summary,
         stageAt: live.eventAt,
+        location: live.location,
+        etaDate: live.etaDate,
         checkedAt,
       };
     } else {

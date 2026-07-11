@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { extractTrackingFromScan } from "@/lib/barcode";
+import BarcodeScanner from "./BarcodeScanner";
 
 type CarrierId = "usps" | "ups" | "fedex" | "dhl" | "other";
 
@@ -36,6 +38,8 @@ interface OrderTracking {
   emailedAt?: string;
   stage?: string;
   stageSummary?: string;
+  location?: string;
+  etaDate?: string;
 }
 
 interface AdminOrder {
@@ -93,6 +97,22 @@ function TrackingForm({
     order.tracking?.carrier ?? "auto",
   );
   const [saving, setSaving] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanNote, setScanNote] = useState<string | null>(null);
+
+  function handleScan(rawText: string) {
+    setScanning(false);
+    const parsed = extractTrackingFromScan(rawText);
+    if (!parsed) {
+      setScanNote(
+        "Couldn't read a tracking number from that barcode — try again or type it in.",
+      );
+      return;
+    }
+    setTrackingNumber(parsed.number);
+    setCarrier(parsed.carrier === "other" ? "auto" : parsed.carrier);
+    setScanNote(`Scanned ${parsed.number}. Review it, then save.`);
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -145,6 +165,16 @@ function TrackingForm({
         {isUpdate ? "Update tracking" : "Add tracking"}
       </p>
       <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+        <button
+          onClick={() => {
+            setScanNote(null);
+            setScanning(true);
+          }}
+          type="button"
+          className="shrink-0 rounded-full border border-nova-navy px-4 py-2.5 text-sm font-semibold text-nova-navy transition hover:bg-white"
+        >
+          📷 Scan label
+        </button>
         <input
           value={trackingNumber}
           onChange={(event) => setTrackingNumber(event.target.value)}
@@ -173,10 +203,19 @@ function TrackingForm({
           {saving ? "Saving…" : "Save & email customer"}
         </button>
       </div>
+      {scanNote && (
+        <p className="mt-2 text-xs font-semibold text-nova-navy">{scanNote}</p>
+      )}
       <p className="mt-2 text-xs text-nova-inkSoft">
         Saving emails the customer their tracking number
         {order.email ? ` (${order.email})` : " — no email on this order"}.
       </p>
+      {scanning && (
+        <BarcodeScanner
+          onDetected={handleScan}
+          onClose={() => setScanning(false)}
+        />
+      )}
     </div>
   );
 }
@@ -322,6 +361,12 @@ function OrderRow({
               {order.tracking?.stageSummary && (
                 <p className="mt-1 text-sm text-nova-navySoft">
                   Carrier status: {order.tracking.stageSummary}
+                  {order.tracking.location
+                    ? ` · Last seen ${order.tracking.location}`
+                    : ""}
+                  {order.tracking.etaDate
+                    ? ` · Est. delivery ${order.tracking.etaDate}`
+                    : ""}
                 </p>
               )}
             </div>
