@@ -31,6 +31,8 @@ export interface CheckoutHandoff {
   customerName?: string;
   posthogDistinctId?: string;
   returnUrl?: string;
+  /** Affiliate code attributed to this visitor (e.g. "tom"). */
+  affiliate?: string;
   createdAt: number;
   expiresAt: number;
 }
@@ -184,6 +186,11 @@ function normalizeCurrency(value: unknown): string {
   return currency && /^[a-z]{3}$/.test(currency) ? currency : "usd";
 }
 
+function normalizeAffiliate(value: unknown): string | undefined {
+  const code = normalizeText(value)?.toLowerCase();
+  return code && /^[a-z0-9][a-z0-9-]{1,31}$/.test(code) ? code : undefined;
+}
+
 function normalizeSource(value: unknown): string {
   const source = normalizeText(value)?.toLowerCase();
   return source && /^[a-z0-9.-]{1,64}$/.test(source) ? source : "velluracare";
@@ -228,6 +235,7 @@ export async function createCheckoutHandoff(input: {
   customerName?: unknown;
   posthogDistinctId?: unknown;
   returnUrl?: unknown;
+  affiliate?: unknown;
 }): Promise<{ token: string; handoff: CheckoutHandoff }> {
   const email = normalizeEmail(input.email);
   const items = normalizeItems(input.items);
@@ -247,6 +255,7 @@ export async function createCheckoutHandoff(input: {
     customerName: normalizeText(input.customerName),
     posthogDistinctId: normalizeText(input.posthogDistinctId),
     returnUrl: normalizeReturnUrl(input.returnUrl),
+    affiliate: normalizeAffiliate(input.affiliate),
     createdAt: now,
     expiresAt: now + ttl * 1000,
   };

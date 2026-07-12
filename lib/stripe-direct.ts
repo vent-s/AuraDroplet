@@ -107,6 +107,9 @@ export async function createDirectPayment(
   if (handoff.email) {
     params.receipt_email = handoff.email;
   }
+  if (handoff.affiliate) {
+    params["metadata[affiliate]"] = handoff.affiliate;
+  }
 
   const intent = await stripe<{
     id: string;

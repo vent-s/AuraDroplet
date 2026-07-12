@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       customerName?: string;
       posthogDistinctId?: string;
       returnUrl?: string;
+      affiliate?: string;
     };
     const { token } = await createCheckoutHandoff(body);
     const checkoutUrl = new URL("/checkout", request.url);

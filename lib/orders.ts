@@ -84,6 +84,7 @@ export interface AdminOrder {
   status: "succeeded" | "processing";
   email?: string;
   source?: string;
+  affiliate?: string;
   items: CompletedOrderItem[];
   shipping?: AdminOrderShipping;
   tracking?: AdminOrderTracking;
@@ -238,6 +239,7 @@ function toAdminOrder(intent: StripePaymentIntent): AdminOrder | null {
     status: intent.status,
     email: intent.receipt_email ?? undefined,
     source: metadata.source || undefined,
+    affiliate: metadata.affiliate || undefined,
     items: parseItems(metadata),
     shipping,
     tracking,

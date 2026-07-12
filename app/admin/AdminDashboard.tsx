@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { extractTrackingFromScan } from "@/lib/barcode";
 import BarcodeScanner from "./BarcodeScanner";
+import AffiliatesView from "./AffiliatesView";
 
 type CarrierId = "usps" | "ups" | "fedex" | "dhl" | "other";
 
@@ -50,6 +51,7 @@ interface AdminOrder {
   status: "succeeded" | "processing";
   email?: string;
   source?: string;
+  affiliate?: string;
   items: OrderItem[];
   shipping?: OrderShipping;
   tracking?: OrderTracking;
@@ -257,6 +259,7 @@ function OrderRow({
           <p className="mt-0.5 truncate text-xs text-nova-inkSoft">
             {formatDate(order.created)}
             {order.source ? ` · ${order.source}` : ""}
+            {order.affiliate ? ` · via ${order.affiliate}` : ""}
             {order.items.length
               ? ` · ${order.items
                   .map((item) => `${item.quantity}× ${item.name}`)
@@ -392,6 +395,7 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [sendingTest, setSendingTest] = useState(false);
+  const [view, setView] = useState<"orders" | "affiliates">("orders");
 
   async function sendTestEmails() {
     setSendingTest(true);
@@ -472,6 +476,7 @@ export default function AdminDashboard() {
         order.id,
         order.email,
         order.source,
+        order.affiliate,
         order.shipping?.name,
         order.shipping?.city,
         order.tracking?.number,
@@ -504,7 +509,7 @@ export default function AdminDashboard() {
               Satielle
             </p>
             <h1 className="mt-1 text-3xl font-extrabold text-nova-navy">
-              Orders
+              {view === "orders" ? "Orders" : "Affiliates"}
             </h1>
           </div>
           <div className="flex gap-2">
@@ -524,7 +529,25 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {stats && (
+        <div className="mt-6 inline-flex rounded-full border border-nova-border bg-white p-1 shadow-[0_12px_28px_rgba(10,47,107,0.06)]">
+          {(["orders", "affiliates"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setView(tab)}
+              className={`rounded-full px-5 py-2 text-sm font-bold capitalize transition ${
+                view === tab
+                  ? "bg-nova-navy text-nova-goldLight"
+                  : "text-nova-inkSoft hover:text-nova-navy"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {view === "affiliates" && <AffiliatesView orders={orders} />}
+
+        {view === "orders" && stats && (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatTile label="Orders" value={stats.count} />
             <StatTile label="Revenue" value={stats.revenue} />
@@ -545,6 +568,8 @@ export default function AdminDashboard() {
           </p>
         )}
 
+        {view === "orders" && (
+        <>
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
@@ -611,6 +636,8 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </main>
   );
