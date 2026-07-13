@@ -8,6 +8,8 @@ export interface AffiliateClickStats {
   name: string;
   created: string;
   link: string;
+  /** Customer-facing percent discount tied to the code (0 = tracking only). */
+  discount?: number;
   clicks_total: number;
   clicks_30d: number;
   last_click: string | null;

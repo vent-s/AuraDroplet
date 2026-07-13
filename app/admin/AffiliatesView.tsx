@@ -7,6 +7,7 @@ interface AffiliateClickStats {
   name: string;
   created: string;
   link: string;
+  discount?: number;
   clicks_total: number;
   clicks_30d: number;
   last_click: string | null;
@@ -280,7 +281,14 @@ export default function AffiliatesView({ orders }: { orders: OrderLike[] | null 
               {rows.map((row) => (
                 <tr key={row.code} className="border-b border-nova-border/60 last:border-0">
                   <td className="px-5 py-3">
-                    <p className="font-bold text-nova-navy">{row.name || row.code}</p>
+                    <p className="font-bold text-nova-navy">
+                      {row.name || row.code}
+                      {row.discount ? (
+                        <span className="ml-2 rounded-full bg-nova-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-nova-navyDeep">
+                          {row.discount}% off
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-xs text-nova-inkSoft">
                       /{row.code}
                       {row.last_click
